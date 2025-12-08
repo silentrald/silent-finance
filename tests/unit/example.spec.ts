@@ -1,4 +1,5 @@
 import { mount } from "@vue/test-utils";
+// @ts-ignore
 import HomePage from "@/views/HomePage.vue";
 import { describe, expect, test } from "vitest";
 

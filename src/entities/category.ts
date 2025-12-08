@@ -1,7 +1,7 @@
 import { compileValidator } from "../shared/ajv";
 
 export interface Category {
-  id: number;
+  id?: number;
   name: string;
   // icon: string;
 }
@@ -9,7 +9,7 @@ export interface Category {
 const validate = compileValidator<Category>({
   type: "object",
   properties: {
-    id: { type: "integer" },
+    id: { type: "integer", nullable: true },
     name: { type: "string" },
   },
   required: ["name"],
