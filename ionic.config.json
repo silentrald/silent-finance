@@ -1,0 +1,7 @@
+{
+  "name": "silent-finance",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue-vite"
+}
