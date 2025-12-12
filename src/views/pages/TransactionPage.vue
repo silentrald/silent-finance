@@ -22,9 +22,9 @@
         </div>
 
         <div>
-          <input type="text" v-model="wallet.name" placeholder="name" />
-          <input type="text" v-model="wallet.amount" placeholder="amount" />
-          <input type="text" v-model="wallet.color" placeholder="color" />
+          <input type="text" v-model="newWallet.name" placeholder="name" />
+          <input type="text" v-model="newWallet.amount" placeholder="amount" />
+          <input type="text" v-model="newWallet.color" placeholder="color" />
           <button @click="createWallet">
             Create Wallet
           </button>
@@ -44,7 +44,7 @@ import type { WalletRepo } from "@/repos/wallet/type";
 
 const walletRepo: WalletRepo | undefined = inject(Repos.WALLET);
 const wallets = ref([] as Wallet[]);
-const wallet = ref({
+const newWallet = ref({
   name: "",
   amount: "",
   color: "",
@@ -63,12 +63,11 @@ async function createWallet() {
     return;
   }
 
-  const newWallet: Wallet = {
-    name: wallet.value.name,
-    amount: +wallet.value.amount,
-    color: wallet.value.color,
-  };
-  await walletRepo.create(newWallet);
+  await walletRepo.create({
+    name: newWallet.value.name,
+    amount: +newWallet.value.amount,
+    color: newWallet.value.color,
+  });
 
   wallets.value = (await walletRepo.getAll()).getValue();
 }

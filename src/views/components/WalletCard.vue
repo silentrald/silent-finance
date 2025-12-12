@@ -1,5 +1,3 @@
-<!-- TODO -->
-
 <template>
   <div class="wallet-card"
     :style="{
@@ -30,7 +28,7 @@ const { wallet: walletProps, } = defineProps<{
 const wallet = ref(walletProps);
 </script>
 
-<style>
+<style scoped>
 .wallet-card {
   /* custom sizing? */
   position: relative;
