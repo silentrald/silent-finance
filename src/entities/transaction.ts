@@ -1,5 +1,5 @@
 import { TransactionType } from "@/enums/transaction";
-import { compileValidator } from "@/shared/ajv";
+import { compileValidator } from "@/modules/ajv";
 
 export interface Transaction {
   id?: number;
@@ -14,15 +14,15 @@ export interface Transaction {
 const validate = compileValidator<Transaction>({
   type: "object",
   properties: {
-    id: { type: "integer", nullable: true },
-    type: { type: "string", minLength: 1, maxLength: 1 },
-    amount: { type: "integer" },
-    description: { type: "string", nullable: true, maxLength: 100 },
-    categoryId: { type: "integer" },
-    walletSourceId: { type: "integer" },
-    walletDestinationId: { type: "integer", nullable: true },
+    id: { type: "integer", nullable: true, },
+    type: { type: "string", minLength: 1, maxLength: 1, },
+    amount: { type: "integer", },
+    description: { type: "string", nullable: true, maxLength: 100, },
+    categoryId: { type: "integer", },
+    walletSourceId: { type: "integer", },
+    walletDestinationId: { type: "integer", nullable: true, },
   },
-  required: ["type", "amount", "categoryId", "walletSourceId"],
+  required: [ "type", "amount", "categoryId", "walletSourceId" ],
   additionalProperties: false,
 });
 

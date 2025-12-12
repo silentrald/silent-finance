@@ -1,19 +1,21 @@
-import { compileValidator } from "../shared/ajv";
+import { compileValidator } from "../modules/ajv";
 
 export interface Wallet {
-  id: number;
+  id?: number;
   name: string;
-  color: string;
+  amount: number;
+  color: string; // TODO: Create type for this
 }
 
 const validate = compileValidator<Wallet>({
   type: "object",
   properties: {
-    id: { type: "integer" },
-    name: { type: "string" },
-    color: { type: "string", color: true },
+    id: { type: "integer", nullable: true, },
+    name: { type: "string", },
+    amount: { type: "integer", },
+    color: { type: "string", color: true, },
   },
-  required: ["name"],
+  required: [ "name" ],
   additionalProperties: false,
 });
 

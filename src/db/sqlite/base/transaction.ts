@@ -1,11 +1,7 @@
-import { DatabaseInfo } from "../types";
+import { Tables } from "@/db/consts";
 
-const TABLE_NAME = "transactions";
-
-const transactionSQLite: DatabaseInfo = {
-  table: TABLE_NAME,
-  createQuery: `
-CREATE TABLE ${TABLE_NAME} (
+const transactionQuery = `
+CREATE TABLE ${Tables.TRANSACTION} (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   type CHAR(1) NOT NULL,
   amount INTEGER NOT NULL,
@@ -17,7 +13,6 @@ CREATE TABLE ${TABLE_NAME} (
   FOREIGN KEY (wallet_src_id) REFERENCES wallets(id),
   FOREIGN KEY (wallet_dst_id) REFERENCES wallets(id)
 );
-`.trim(),
-};
+`.trim();
 
-export default transactionSQLite;
+export default transactionQuery;

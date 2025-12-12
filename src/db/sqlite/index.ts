@@ -1,3 +1,3 @@
-export const TYPES = {
+export const Datatypes = {
   COLOR: "VARCHAR(9)",
 };

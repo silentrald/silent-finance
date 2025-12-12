@@ -1,5 +1,12 @@
 import _1_init from "./1_init";
+import { capSQLiteVersionUpgrade } from "@capacitor-community/sqlite";
 
-export default [
-  _1_init,
-]
+const upgrades: capSQLiteVersionUpgrade[] = [
+  {
+    toVersion: 1,
+    statements: _1_init,
+  }
+];
+
+export default upgrades;
+

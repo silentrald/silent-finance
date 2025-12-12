@@ -1,17 +1,14 @@
-import { TYPES } from "..";
-import { DatabaseInfo } from "../types";
+import { Datatypes } from "..";
+import { Tables } from "@/db/consts";
 
-const TABLE_NAME = "wallets";
 
-const walletSQLite: DatabaseInfo = {
-  table: TABLE_NAME,
-  createQuery: `
-CREATE TABLE ${TABLE_NAME} (
+const walletQuery = `
+CREATE TABLE ${Tables.WALLET} (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name VARCHAR(50) NOT NULL,
-  color ${TYPES.COLOR}
+  amount INTEGER NOT NULL DEFAULT 0,
+  color ${Datatypes.COLOR} NOT NULL
 );
-`.trim(),
-};
+`.trim();
 
-export default walletSQLite;
+export default walletQuery;

@@ -1,17 +1,34 @@
 import { createRouter, createWebHistory } from "@ionic/vue-router";
 import { RouteRecordRaw } from "vue-router";
-import HomePage from "../views/HomePage.vue";
+import TabPage from "../views/pages/TabPage.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
-    redirect: "/home",
+    redirect: "/transaction",
   },
   {
-    path: "/home",
-    name: "Home",
-    component: HomePage,
-  },
+    path: "/",
+    component: TabPage,
+    children: [
+      {
+        path: "",
+        redirect: "/transaction",
+      },
+      {
+        path: "transaction",
+        component: () => import("../views/pages/TransactionPage.vue"),
+      },
+      {
+        path: "category",
+        component: () => import("../views/pages/CategoryPage.vue"),
+      },
+      {
+        path: "settings",
+        component: () => import("../views/pages/SettingsPage.vue"),
+      }
+    ],
+  }
 ];
 
 const router = createRouter({

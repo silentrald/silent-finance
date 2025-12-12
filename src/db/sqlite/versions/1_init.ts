@@ -1,24 +1,24 @@
-import { TYPES } from "..";
-import categorySQLite from "../base/category";
-import transactionSQLite from "../base/transaction";
-import walletSQLite from "../base/wallet";
+import { Datatypes } from "..";
+import { Tables } from "@/db/consts";
 
 export default [
   `
-CREATE TABLE ${walletSQLite.table} (
+CREATE TABLE ${Tables.WALLET} (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name VARCHAR(50) NOT NULL,
-  color ${TYPES.COLOR}
+  amount INTEGER NOT NULL DEFAULT 0,
+  color ${Datatypes.COLOR} NOT NULL
 );
 `.trim(),
   `
-CREATE TABLE ${categorySQLite.table} (
+CREATE TABLE ${Tables.CATEGORY} (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  name VARCHAR(50) NOT NULL
+  name VARCHAR(50) NOT NULL,
+  color ${Datatypes.COLOR} NOT NULL
 );
 `.trim(),
 `
-CREATE TABLE ${transactionSQLite.table} (
+CREATE TABLE ${Tables.TRANSACTION} (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   type CHAR(1) NOT NULL,
   amount INTEGER NOT NULL,
@@ -30,5 +30,5 @@ CREATE TABLE ${transactionSQLite.table} (
   FOREIGN KEY (wallet_src_id) REFERENCES wallets(id),
   FOREIGN KEY (wallet_dst_id) REFERENCES wallets(id)
 );
-`.trim(),
+`.trim()
 ];

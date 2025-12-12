@@ -1,15 +1,12 @@
-import { DatabaseInfo } from "../types";
+import { Datatypes } from "..";
+import { Tables } from "@/db/consts";
 
-export const TABLE_NAME = "categories";
-
-const categorySQLite: DatabaseInfo = {
-  table: TABLE_NAME,
-  createQuery: `
-CREATE TABLE ${TABLE_NAME} (
+const categoryQuery = `
+CREATE TABLE ${Tables.CATEGORY} (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  name VARCHAR(50) NOT NULL
+  name VARCHAR(50) NOT NULL,
+  color ${Datatypes.COLOR} NOT NULL
 );
-`.trim(),
-};
+`.trim();
 
-export default categorySQLite;
+export default categoryQuery;

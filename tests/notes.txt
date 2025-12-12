@@ -1,1 +1,0 @@
-- Erroring in vim lsp, that why @ts-ignore was added
