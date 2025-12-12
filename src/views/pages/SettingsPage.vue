@@ -1,3 +1,7 @@
+<script setup lang="ts">
+import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
+</script>
+
 <template>
   <ion-page>
     <ion-header :translucent="true">
@@ -19,7 +23,3 @@
     </ion-content>
   </ion-page>
 </template>
-
-<script setup lang="ts">
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
-</script>

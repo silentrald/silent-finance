@@ -1,10 +1,10 @@
-import { DatabaseService } from "@/types/database";
-import { TransactionRepo } from "./type";
 import { PromiseResult, Result } from "@/types/result";
+import { DatabaseService } from "@/types/database";
 import { Transaction } from "@/entities/transaction";
+import { TransactionRepo } from "./type";
 
 export default function createSQLite3TransactionRepo({
-  databaseService
+  databaseService,
 }: {
   databaseService: DatabaseService
 }): TransactionRepo {
@@ -59,7 +59,7 @@ export default function createSQLite3TransactionRepo({
       } finally {
         await client.close();
       }
-    }
+    },
   }
 }
 

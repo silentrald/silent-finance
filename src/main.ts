@@ -32,6 +32,7 @@ import App from "./App.vue";
 import { IonicVue } from "@ionic/vue";
 import { createApp } from "vue";
 import createSQLite3DatabaseService from "./modules/database/sqlite3";
+import locale from "./modules/locale";
 import logger from "./modules/logger";
 import router from "./router";
 import { setupRepos } from "./repos";
@@ -49,6 +50,8 @@ window.addEventListener("DOMContentLoaded", async () => {
   const app = createApp(App)
     .use(IonicVue)
     .use(router);
+
+  await locale.init(app, "jp");
   setupRepos({ app, databaseService, });
 
   await router.isReady();

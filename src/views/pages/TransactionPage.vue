@@ -1,39 +1,3 @@
-<template>
-  <ion-page>
-    <ion-header :translucent="true">
-      <ion-toolbar>
-        <ion-title>Transactions</ion-title>
-      </ion-toolbar>
-    </ion-header>
-
-    <ion-content :fullscreen="true">
-      <ion-header collapse="condense">
-        <ion-toolbar>
-          <ion-title size="large">Transactions</ion-title>
-        </ion-toolbar>
-      </ion-header>
-
-      <div id="container">
-        <div v-for="wallet in wallets" :key="wallet.id">
-          <wallet-card :wallet="wallet"
-            @update="updateWallet"
-            @remove="removeWallet"
-          />
-        </div>
-
-        <div>
-          <input type="text" v-model="newWallet.name" placeholder="name" />
-          <input type="text" v-model="newWallet.amount" placeholder="amount" />
-          <input type="text" v-model="newWallet.color" placeholder="color" />
-          <button @click="createWallet">
-            Create Wallet
-          </button>
-        </div>
-      </div>
-    </ion-content>
-  </ion-page>
-</template>
-
 <script setup lang="ts">
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
 import { inject, onMounted, ref } from "vue";
@@ -41,6 +5,9 @@ import { Repos } from '@/repos/consts';
 import { Wallet } from "@/entities/wallet";
 import WalletCard from '../components/WalletCard.vue';
 import type { WalletRepo } from "@/repos/wallet/type";
+import useLocale from '@/composables/locale';
+
+const { t, } = useLocale();
 
 const walletRepo: WalletRepo | undefined = inject(Repos.WALLET);
 const wallets = ref([] as Wallet[]);
@@ -89,8 +56,43 @@ async function removeWallet(walletId: number) {
   await walletRepo.removeById(walletId);
   wallets.value = (await walletRepo.getAll()).getValue();
 }
-
 </script>
+
+<template>
+  <ion-page>
+    <ion-header :translucent="true">
+      <ion-toolbar>
+        <ion-title>{{ t("transaction.title") }}</ion-title>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content :fullscreen="true">
+      <ion-header collapse="condense">
+        <ion-toolbar>
+          <ion-title size="large">{{ t("transaction.title") }}</ion-title>
+        </ion-toolbar>
+      </ion-header>
+
+      <div id="container">
+        <div v-for="wallet in wallets" :key="wallet.id">
+          <wallet-card :wallet="wallet"
+            @update="updateWallet"
+            @remove="removeWallet"
+          />
+        </div>
+
+        <div>
+          <input type="text" v-model="newWallet.name" placeholder="name" />
+          <input type="text" v-model="newWallet.amount" placeholder="amount" />
+          <input type="text" v-model="newWallet.color" placeholder="color" />
+          <button @click="createWallet">
+            {{ t("transaction.createTransaction") }}
+          </button>
+        </div>
+      </div>
+    </ion-content>
+  </ion-page>
+</template>
 
 <style scoped>
 #container {

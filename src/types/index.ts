@@ -1,5 +1,5 @@
 
 export type Platform = "web" | "android";
 
-export type AppLocale = "en";
+export type AppLocale = "en" | "jp";
 
