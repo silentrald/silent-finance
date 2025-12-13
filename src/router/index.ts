@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from "@ionic/vue-router";
 import { RouteRecordRaw } from "vue-router";
-import TabPage from "../views/pages/TabPage.vue";
+import TabPage from "../views/pages/tab-page.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -17,15 +17,15 @@ const routes: Array<RouteRecordRaw> = [
       },
       {
         path: "transaction",
-        component: () => import("../views/pages/TransactionPage.vue"),
+        component: () => import("../views/pages/transaction-page.vue"),
       },
       {
         path: "category",
-        component: () => import("../views/pages/CategoryPage.vue"),
+        component: () => import("../views/pages/category-page.vue"),
       },
       {
         path: "settings",
-        component: () => import("../views/pages/SettingsPage.vue"),
+        component: () => import("../views/pages/settings-page.vue"),
       },
     ],
   },

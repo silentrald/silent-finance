@@ -3,7 +3,7 @@ import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/vue
 import { inject, onMounted, ref } from "vue";
 import { Repos } from '@/repos/consts';
 import { Wallet } from "@/entities/wallet";
-import WalletCard from '../components/WalletCard.vue';
+import WalletCard from '../components/wallet-card.vue';
 import type { WalletRepo } from "@/repos/wallet/type";
 import useLocale from '@/composables/locale';
 

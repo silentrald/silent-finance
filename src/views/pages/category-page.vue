@@ -2,7 +2,7 @@
 import { IonButton, IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
 import { inject, onMounted, ref } from 'vue';
 import { Category } from '@/entities/category';
-import CategoryCard from '../components/CategoryCard.vue';
+import CategoryCard from '../components/category/category-card.vue';
 import { CategoryRepo } from '@/repos/category/type';
 import { Repos } from '@/repos/consts';
 import logger from '@/modules/logger';
