@@ -47,6 +47,10 @@ export class Result<T> {
     return this.error as Error;
   }
 
+  orElse(handler: (error: Error) => T): T {
+    return this.isOk() ? this.value as T : handler(this.error as Error);
+  }
+
   toError<T2 = void>(): Result<T2> {
     return this as any;
   }

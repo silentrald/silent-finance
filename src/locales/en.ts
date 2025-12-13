@@ -1,6 +1,10 @@
 import LocaleSchema from "./types";
 
 const en: LocaleSchema = {
+  general: {
+    ok: "Ok",
+    cancel: "Cancel",
+  },
   transaction: {
     title: "Transactions",
     createTransaction: "Create Transaction",
@@ -11,6 +15,7 @@ const en: LocaleSchema = {
   },
   settings: {
     title: "Settings",
+    language: "Language",
   },
 };
 

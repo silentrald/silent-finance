@@ -29,11 +29,13 @@ import "@ionic/vue/css/palettes/dark.system.css";
 import "./theme/variables.css";
 
 import App from "./App.vue";
+import { AppLocale } from "./types";
 import { IonicVue } from "@ionic/vue";
 import { createApp } from "vue";
 import createSQLite3DatabaseService from "./modules/database/sqlite3";
 import locale from "./modules/locale";
 import logger from "./modules/logger";
+import preferences from "./modules/preferences";
 import router from "./router";
 import { setupRepos } from "./repos";
 
@@ -51,8 +53,17 @@ window.addEventListener("DOMContentLoaded", async () => {
     .use(IonicVue)
     .use(router);
 
-  await locale.init(app, "jp");
   setupRepos({ app, databaseService, });
+
+  const localePrefs: AppLocale = (await preferences.get("locale"))
+    .orElse(error => {
+      logger.error("Could not get locale preferences value", error);
+      return "en";
+    });
+  const result = await locale.init(app, localePrefs);
+  if (result.isError()) {
+    logger.error("Could not initialize locales", result.getError());
+  }
 
   await router.isReady();
   app.mount("#app");

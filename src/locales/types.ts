@@ -1,4 +1,8 @@
 export default interface LocaleSchema {
+  general: {
+    ok: string;
+    cancel: string;
+  },
   transaction: {
     title: string;
     createTransaction: string;
@@ -9,5 +13,6 @@ export default interface LocaleSchema {
   };
   settings: {
     title: string;
+    language: string;
   };
 }
