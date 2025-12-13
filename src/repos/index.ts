@@ -11,8 +11,8 @@ export function setupRepos({
   app: App<Element>;
   databaseService: DatabaseService
 }) {
-  app.provide(Repos.CATEGORY, createSQLite3CategoryRepo({ databaseService, }));
-  app.provide(Repos.TRANSACTION, createSQLite3TransactionRepo({ databaseService, }));
-  app.provide(Repos.WALLET, createSQLite3WalletRepo({ databaseService, }));
+  app.provide(Repos.CATEGORY, createSQLite3CategoryRepo({ databaseService }));
+  app.provide(Repos.TRANSACTION, createSQLite3TransactionRepo({ databaseService }));
+  app.provide(Repos.WALLET, createSQLite3WalletRepo({ databaseService }));
 }
 

@@ -10,10 +10,10 @@ export interface Wallet {
 const validate = compileValidator<Wallet>({
   type: "object",
   properties: {
-    id: { type: "integer", nullable: true, },
-    name: { type: "string", },
-    amount: { type: "integer", },
-    color: { type: "string", color: true, },
+    id: { type: "integer", nullable: true },
+    name: { type: "string" },
+    amount: { type: "integer" },
+    color: { type: "string", color: true },
   },
   required: [ "name" ],
   additionalProperties: false,

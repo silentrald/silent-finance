@@ -34,11 +34,11 @@ export default function createSQLite3CategoryRepo({
 
       try {
         const queryResult = await client.query<Category>(`
-INSERT INTO ${Tables.CATEGORY} (name, color)
-VALUES (?, ?)
+INSERT INTO ${Tables.CATEGORY}(name, color, icon)
+VALUES (?, ?, ?)
 RETURNING id;
           `.trim(),
-          [ category.name, category.color ]
+          [ category.name, category.color, category.icon || null ]
         );
         if (queryResult.isError()) return queryResult.toError();
 
@@ -62,10 +62,11 @@ RETURNING id;
         const runResult = await client.run(`
 UPDATE ${Tables.CATEGORY} SET
   name = ?,
-  color = ?
+  color = ?,
+  icon = ?
 WHERE id = ?;
           `.trim(),
-          [ category.name, category.color, category.id ]
+          [ category.name, category.color, category.icon, category.id ]
         )
         if (runResult.isError()) return runResult.toError();
 

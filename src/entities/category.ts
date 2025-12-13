@@ -4,17 +4,18 @@ export interface Category {
   id?: number;
   name: string;
   color: string; // TODO: Create a type for this
-  // icon: string;
+  icon?: string;
 }
 
 const validate = compileValidator<Category>({
   type: "object",
   properties: {
-    id: { type: "integer", nullable: true, },
-    name: { type: "string", },
-    color: { type: "string", color: true, },
+    id: { type: "integer", nullable: true },
+    name: { type: "string", maxLength: 50 },
+    color: { type: "string", color: true },
+    icon: { type: "string", nullable: true },
   },
-  required: [ "name" ],
+  required: [ "name", "color" ],
   additionalProperties: false,
 });
 

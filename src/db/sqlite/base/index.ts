@@ -5,9 +5,13 @@ import wallet from "./wallet";
 
 // Should be ordered
 const statements: string[] = [
+  // Create Statements
   wallet,
-  category,
-  transaction
+  category.create,
+  transaction,
+
+  // Initial Data
+  category.insert,
 ];
 
 export default {

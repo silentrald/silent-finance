@@ -53,7 +53,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     .use(IonicVue)
     .use(router);
 
-  setupRepos({ app, databaseService, });
+  setupRepos({ app, databaseService });
 
   const localePrefs: AppLocale = (await preferences.get("locale"))
     .orElse(error => {

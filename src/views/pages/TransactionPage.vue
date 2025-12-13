@@ -7,7 +7,7 @@ import WalletCard from '../components/WalletCard.vue';
 import type { WalletRepo } from "@/repos/wallet/type";
 import useLocale from '@/composables/locale';
 
-const { t, } = useLocale();
+const { t } = useLocale();
 
 const walletRepo: WalletRepo | undefined = inject(Repos.WALLET);
 const wallets = ref([] as Wallet[]);

@@ -6,7 +6,7 @@ module.exports = {
   extends: [
     "plugin:vue/vue3-essential",
     "eslint:recommended",
-    "@vue/typescript/recommended"
+    "@vue/typescript/recommended",
   ],
   parserOptions: {
     ecmaVersion: 2020,
@@ -19,9 +19,9 @@ module.exports = {
     "@typescript-eslint/ban-ts-comment": "off",
     "sort-imports": "error",
     "comma-dangle": [ "error", {
-        "arrays": "never",
-        "objects": "always",
-        "imports": "never",
+        "arrays": "always-multiline",
+        "objects": "always-multiline",
+        "imports": "always-multiline",
         "exports": "never",
         "functions": "never",
     } ],

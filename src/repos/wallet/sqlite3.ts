@@ -85,7 +85,7 @@ WHERE id = ?;
           `.trim(),
           [
             wallet.name, wallet.amount,
-            wallet.color, wallet.id
+            wallet.color, wallet.id,
           ]
         );
         if (runResult.isError()) return runResult.toError();

@@ -2,7 +2,7 @@
 import { Wallet } from "@/entities/wallet";
 import { ref } from "vue";
 
-const { wallet: walletProps, } = defineProps<{
+const { wallet: walletProps } = defineProps<{
   wallet: Wallet;
 }>();
 // const emit = defineEmits<{

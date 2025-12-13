@@ -5,7 +5,7 @@ const upgrades: capSQLiteVersionUpgrade[] = [
   {
     toVersion: 1,
     statements: _1_init,
-  }
+  },
 ];
 
 export default upgrades;

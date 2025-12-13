@@ -2,6 +2,7 @@ import { Datatypes } from "..";
 import { Tables } from "@/db/consts";
 
 export default [
+// Create Tables
   `
 CREATE TABLE ${Tables.WALLET} (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -14,7 +15,8 @@ CREATE TABLE ${Tables.WALLET} (
 CREATE TABLE ${Tables.CATEGORY} (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name VARCHAR(50) NOT NULL,
-  color ${Datatypes.COLOR} NOT NULL
+  color ${Datatypes.COLOR} NOT NULL,
+  icon TEXT
 );
 `.trim(),
 `
@@ -30,5 +32,13 @@ CREATE TABLE ${Tables.TRANSACTION} (
   FOREIGN KEY (wallet_src_id) REFERENCES wallets(id),
   FOREIGN KEY (wallet_dst_id) REFERENCES wallets(id)
 );
-`.trim()
+`.trim(),
+
+// Inserts
+`
+INSERT INTO ${Tables.CATEGORY}(name, color, icon) VALUES
+  ('Food', '#FA6868', '/images/restaurant.png'),
+  ('Transportation', '#5A9CB5', '/images/car.png'),
+  ('Bills', '#FACE68', '/images/receipt.png');
+`.trim(),
 ];

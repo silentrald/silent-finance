@@ -1,7 +1,7 @@
 import {
   CapacitorSQLite,
   SQLiteConnection,
-  SQLiteDBConnection
+  SQLiteDBConnection,
 } from "@capacitor-community/sqlite";
 import { DatabaseClient, DatabaseService } from "@/types/database";
 import { PromiseResult, Result } from "@/types/result";
@@ -106,7 +106,7 @@ export default function createSQLite3DatabaseService({
           await sqlite.initWebStore();
         }
 
-        const { result: existing, } = await sqlite.isDatabase(databaseName);
+        const { result: existing } = await sqlite.isDatabase(databaseName);
         await sqlite.addUpgradeStatement(
           databaseName,
           existing ? versions : [ base ]
