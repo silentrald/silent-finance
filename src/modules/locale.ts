@@ -34,6 +34,7 @@ export default {
   async init(app: App, locale: AppLocale): PromiseResult<void> {
     try {
       i18n = createI18n({
+        legacy: false,
         locale,
         fallbackLocale: "en",
       });
