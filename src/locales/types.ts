@@ -2,6 +2,8 @@ export default interface LocaleSchema {
   general: {
     ok: string;
     cancel: string;
+    confirm: string;
+    close: string;
   },
   transaction: {
     title: string;
@@ -9,7 +11,11 @@ export default interface LocaleSchema {
   };
   category: {
     title: string;
-    createCategory: string;
+    modal: {
+      addCategory: string;
+      name: string;
+      color: string;
+    };
   };
   settings: {
     title: string;

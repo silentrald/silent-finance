@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { IonButton, IonIcon } from '@ionic/vue';
-import { Category } from '@/entities/category';
-import { closeOutline } from 'ionicons/icons';
-import { ref } from 'vue';
+import { IonButton, IonIcon } from "@ionic/vue";
+import { Category } from "@/entities/category";
+import { closeOutline } from "ionicons/icons";
+import { ref } from "vue";
 
 const { category: categoryProps } = defineProps<{
   category: Category;

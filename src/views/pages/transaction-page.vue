@@ -1,15 +1,14 @@
 <script setup lang="ts">
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
-import { inject, onMounted, ref } from "vue";
-import { Repos } from '@/repos/consts';
+import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from "@ionic/vue";
+import { onMounted, ref } from "vue";
 import { Wallet } from "@/entities/wallet";
-import WalletCard from '../components/wallet-card.vue';
-import type { WalletRepo } from "@/repos/wallet/type";
-import useLocale from '@/composables/locale';
+import WalletCard from "../components/wallet-card.vue";
+// import type { WalletRepo } from "@/repos/wallet/type";
+import useLocale from "@/composables/locale";
 
 const { t } = useLocale();
 
-const walletRepo: WalletRepo | undefined = inject(Repos.WALLET);
+// const walletRepo: WalletRepo | undefined = inject(Repos.WALLET);
 const wallets = ref([] as Wallet[]);
 const newWallet = ref({
   name: "",
@@ -18,43 +17,27 @@ const newWallet = ref({
 });
 
 onMounted(async () => {
-  if (!walletRepo) {
-    return;
-  }
-
-  wallets.value = (await walletRepo.getAll()).getValue();
+  // wallets.value = (await walletRepo.getAll()).getValue();
 });
 
 async function createWallet() {
-  if (!walletRepo) {
-    return;
-  }
-
-  await walletRepo.create({
-    name: newWallet.value.name,
-    amount: +newWallet.value.amount,
-    color: newWallet.value.color,
-  });
-
-  wallets.value = (await walletRepo.getAll()).getValue();
+  // await walletRepo.create({
+  //   name: newWallet.value.name,
+  //   amount: +newWallet.value.amount,
+  //   color: newWallet.value.color,
+  // });
+  //
+  // wallets.value = (await walletRepo.getAll()).getValue();
 }
 
 async function updateWallet(newWallet: Wallet) {
-  if (!walletRepo) {
-    return;
-  }
-
-  await walletRepo.update(newWallet);
-  wallets.value = (await walletRepo.getAll()).getValue();
+  // await walletRepo.update(newWallet);
+  // wallets.value = (await walletRepo.getAll()).getValue();
 }
 
 async function removeWallet(walletId: number) {
-  if (!walletRepo) {
-    return;
-  }
-
-  await walletRepo.removeById(walletId);
-  wallets.value = (await walletRepo.getAll()).getValue();
+  // await walletRepo.removeById(walletId);
+  // wallets.value = (await walletRepo.getAll()).getValue();
 }
 </script>
 

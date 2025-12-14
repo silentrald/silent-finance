@@ -38,7 +38,7 @@ INSERT INTO ${Tables.CATEGORY}(name, color, icon)
 VALUES (?, ?, ?)
 RETURNING id;
           `.trim(),
-          [ category.name, category.color, category.icon || null ]
+          [ category.name, category.color, category.icon ?? null ]
         );
         if (queryResult.isError()) return queryResult.toError();
 

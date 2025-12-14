@@ -1,6 +1,11 @@
 import Ajv, { JSONSchemaType } from "ajv";
+import { Result } from "@/types/result";
+import { ValidatorError } from "@/types";
 
-const ajv = new Ajv();
+const ajv = new Ajv({
+  allErrors: true,
+});
+
 ajv.addKeyword({
   keyword: "color",
   type: "string",
@@ -10,5 +15,17 @@ ajv.addKeyword({
 });
 
 export function compileValidator<T>(schema: JSONSchemaType<T>) {
-  return ajv.compile(schema);
+  const validate = ajv.compile(schema);
+
+  return (entity: T): Result<void> => {
+    if (validate(entity)) {
+      return Result.Ok();
+    }
+
+    return Result.Error(validate.errors!.map(e => ({
+      property: e.instancePath.substring(1),
+      code: e.keyword,
+      message: e.message,
+    } as ValidatorError)));
+  }
 }

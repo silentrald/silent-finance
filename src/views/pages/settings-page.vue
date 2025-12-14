@@ -6,16 +6,16 @@ import {
   IonSelect,
   IonSelectOption,
   IonTitle,
-  IonToolbar
-} from '@ionic/vue';
+  IonToolbar,
+} from "@ionic/vue";
 import { onMounted, ref } from "vue";
-import { AppLocale } from '@/types';
+import { AppLocale } from "@/types";
 import locale from "@/modules/locale";
-import logger from '@/modules/logger';
-import preferences from '@/modules/preferences';
+import logger from "@/modules/logger";
+import preferences from "@/modules/preferences";
 import useLocale from "@/composables/locale";
 
-const { t, } = useLocale();
+const { t } = useLocale();
 const language = ref("" as AppLocale);
 
 onMounted(async () => {

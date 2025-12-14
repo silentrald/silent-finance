@@ -1,3 +1,5 @@
+// TODO: Use composition api for this, check out logs
+
 import { I18n, createI18n } from "vue-i18n";
 import { PromiseResult, Result } from "@/types/result";
 import { App } from "vue";

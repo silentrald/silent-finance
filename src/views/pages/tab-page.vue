@@ -6,16 +6,16 @@ import {
   IonRouterOutlet,
   IonTabBar,
   IonTabButton,
-  IonTabs
-} from '@ionic/vue';
+  IonTabs,
+} from "@ionic/vue";
 import {
   pricetag,
   settings,
-  wallet
-} from 'ionicons/icons';
-import useLocale from '@/composables/locale';
+  wallet,
+} from "ionicons/icons";
+import useLocale from "@/composables/locale";
 
-const { t, } = useLocale();
+const { t } = useLocale();
 </script>
 
 <template>

@@ -27,6 +27,7 @@ import "@ionic/vue/css/palettes/dark.system.css";
 
 /* Theme variables */
 import "./theme/variables.css";
+import "vue-color/style.css";
 
 import App from "./App.vue";
 import { AppLocale } from "./types";
@@ -37,7 +38,7 @@ import locale from "./modules/locale";
 import logger from "./modules/logger";
 import preferences from "./modules/preferences";
 import router from "./router";
-import { setupRepos } from "./repos";
+import { setupUseCases } from "./use-cases";
 
 window.addEventListener("DOMContentLoaded", async () => {
   logger.info("Starting");
@@ -53,7 +54,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     .use(IonicVue)
     .use(router);
 
-  setupRepos({ app, databaseService });
+  setupUseCases({ app, databaseService });
 
   const localePrefs: AppLocale = (await preferences.get("locale"))
     .orElse(error => {

@@ -1,6 +1,7 @@
 export class Result<T> {
   private value?: T;
-  private error?: Error;
+  // TODO: Check what is the best return for this
+  private error?: any;
 
   static Ok<T2 = void>(value?: T2): Result<T2> {
     return new Result<T2>(value, undefined);
@@ -37,18 +38,18 @@ export class Result<T> {
     return this.isError() ? val : this.value as T;
   }
 
-  getError(): Error {
+  getError() {
     if (process.env.NODE_ENV === "development") {
       if (this.isOk()) {
         throw new Error("Dev Error: isOk when getError() called");
       }
     }
 
-    return this.error as Error;
+    return this.error;
   }
 
-  orElse(handler: (error: Error) => T): T {
-    return this.isOk() ? this.value as T : handler(this.error as Error);
+  orElse(handler: (error: any) => T): T {
+    return this.isOk() ? this.value as T : handler(this.error);
   }
 
   toError<T2 = void>(): Result<T2> {

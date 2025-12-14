@@ -4,6 +4,8 @@ const en: LocaleSchema = {
   general: {
     ok: "Ok",
     cancel: "Cancel",
+    confirm: "Confirm",
+    close: "Close",
   },
   transaction: {
     title: "Transactions",
@@ -11,7 +13,11 @@ const en: LocaleSchema = {
   },
   category: {
     title: "Categories",
-    createCategory: "Create Category",
+    modal: {
+      addCategory: "Add Category",
+      name: "Name",
+      color: "Color",
+    },
   },
   settings: {
     title: "Settings",

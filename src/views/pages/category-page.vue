@@ -1,47 +1,69 @@
 <script setup lang="ts">
-import { IonButton, IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
-import { inject, onMounted, ref } from 'vue';
-import { Category } from '@/entities/category';
-import CategoryCard from '../components/category/category-card.vue';
-import { CategoryRepo } from '@/repos/category/type';
-import { Repos } from '@/repos/consts';
-import logger from '@/modules/logger';
-import useLocale from '@/composables/locale';
+import {
+  IonButton,
+  IonContent,
+  IonHeader,
+  IonPage,
+  IonTitle,
+  IonToolbar,
+} from "@ionic/vue";
+import { ModalAction, showModal } from "@/modules/modal";
+import { inject, onMounted, ref } from "vue";
+import { Category } from "@/entities/category";
+import CategoryCard from "../components/category/category-card.vue";
+import CategoryModal from "../components/category/category-modal.vue";
+import CategoryUseCase from "@/use-cases/category/types";
+import { UseCases } from "@/use-cases/consts";
+import logger from "@/modules/logger";
+import useLocale from "@/composables/locale";
 
 const { t } = useLocale();
 
-const categoryRepo: CategoryRepo | undefined = inject(Repos.CATEGORY);
+const categoryUseCase = inject(UseCases.CATEGORY) as CategoryUseCase;
 const categories = ref([] as Category[]);
-const newCategory = ref({
-  name: "",
-  color: "",
-  icon: "",
-});
 
 onMounted(async () => {
-  if (!categoryRepo) {
+  const categoriesResult = await categoryUseCase.getAllCategories();
+  if (categoriesResult.isError()) {
+    logger.error("Could not get categories", categoriesResult.getError());
     return;
   }
 
-  categories.value = (await categoryRepo.getAll()).getValue();
+  categories.value = categoriesResult.getValue();
 });
 
-async function createCategory() {
-  if (!categoryRepo) {
-    return;
-  }
-
-  const result = await categoryRepo.create({
-    name: newCategory.value.name,
-    color: newCategory.value.color,
-    icon: newCategory.value.icon,
-  });
+const removeCategory = async (categoryId: number): Promise<void> => {
+  const result = await categoryUseCase.removeCategory(categoryId);
   if (result.isError()) {
-    logger.error("Could not add category", result.getError());
+    logger.error("Could not delete category", result.getError());
     return;
   }
 
-  categories.value = (await categoryRepo.getAll()).getValue();
+  const index = categories.value.findIndex(c => c.id === categoryId);
+  if (index > -1) {
+    categories.value.splice(index, 1);
+  }
+} 
+
+const openCreateModal = async () => {
+  const modalResult = await showModal<Category>(CategoryModal);
+  if (modalResult.isError()) {
+    logger.error("Could not open modal", modalResult.getError());
+    return;
+  }
+
+  const { action, data } = modalResult.getValue();
+  if (action !== ModalAction.CONFIRM) {
+    return;
+  }
+
+  const result = await categoryUseCase.createCategory(data);
+  if (result.isError()) {
+    logger.error("Could not create category", result.getError());
+    return;
+  }
+
+  categories.value.push(result.getValue());
 }
 </script>
 
@@ -60,20 +82,23 @@ async function createCategory() {
         </ion-toolbar>
       </ion-header>
 
+
       <div id="container">
         <div id="category-container">
-        <div v-for="category in categories" :key="category.id">
-          <category-card :category="category"
-            @remove="console.debug('UwU')"
-          />
-        </div>
+          <div v-for="category in categories" :key="category.id">
+            <category-card :category="category"
+              @remove="() => removeCategory(category.id!)"
+            />
+          </div>
         </div>
 
-        <div>
-          <input type="text" v-model="newCategory.name" placeholder="name" />
-          <input type="text" v-model="newCategory.color" placeholder="color" />
-          <ion-button @click="createCategory">
-            {{ t("category.createCategory") }}
+        <div id="category-buttons">
+          <ion-button id="add-button"
+            expand="full"
+            fill="clear"
+            @click="openCreateModal"
+          >
+            +
           </ion-button>
         </div>
       </div>
@@ -88,5 +113,23 @@ async function createCategory() {
   row-gap: 8px;
 
   padding: 8px 16px;
+}
+
+#category-buttons {
+  padding: 0 16px;
+
+  #add-button {
+    font-weight: 700;
+    font-size: 24px;
+    color: white;
+    border: 2px dashed white;
+    border-radius: 4px;
+  }
+
+  #add-button:hover {
+    color: black;
+    background-color: white;
+    border: 2px dashed black;
+  }
 }
 </style>
