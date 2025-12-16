@@ -1,5 +1,5 @@
 import { PromiseResult, Result } from "@/types/result";
-import { DatabaseService } from "@/types/database";
+import { DatabaseService } from "@/modules/database/type";
 import { Transaction } from "@/entities/transaction";
 import { TransactionRepo } from "./type";
 
@@ -60,6 +60,6 @@ export default function createSQLite3TransactionRepo({
         await client.close();
       }
     },
-  }
+  };
 }
 

@@ -1,17 +1,31 @@
+import { ErrorCodes, ErrorData } from "./error";
+
+export type ResultError<E extends ErrorCodes> = (ErrorData<E> extends undefined ? {
+  code: E;
+  error?: Error;
+} : {
+  code: E;
+  error?: Error;
+  data: ErrorData<E>;
+});
+
 export class Result<T> {
   private value?: T;
-  // TODO: Check what is the best return for this
-  private error?: any;
+  private error?: ResultError<any>;
 
   static Ok<T2 = void>(value?: T2): Result<T2> {
     return new Result<T2>(value, undefined);
   }
 
-  static Error<T2>(error: any): Result<T2> {
+  static Error<T2, E extends ErrorCodes>(error: ResultError<E>): Result<T2> {
+    if (!error.error) {
+      error.error = new Error(error.code);
+    }
+
     return new Result<T2>(undefined, error);
   }
 
-  private constructor(value: T | undefined, error: any) {
+  private constructor(value: T | undefined, error: ResultError<any> | undefined) {
     this.value = value;
     this.error = error;
   }

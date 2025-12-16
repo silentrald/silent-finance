@@ -43,7 +43,7 @@ const removeCategory = async (categoryId: number): Promise<void> => {
   if (index > -1) {
     categories.value.splice(index, 1);
   }
-} 
+};
 
 const openCreateModal = async () => {
   const modalResult = await showModal<Category>(CategoryModal);
@@ -64,7 +64,7 @@ const openCreateModal = async () => {
   }
 
   categories.value.push(result.getValue());
-}
+};
 </script>
 
 <template>

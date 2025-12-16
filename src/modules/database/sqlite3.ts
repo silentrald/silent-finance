@@ -3,7 +3,7 @@ import {
   SQLiteConnection,
   SQLiteDBConnection,
 } from "@capacitor-community/sqlite";
-import { DatabaseClient, DatabaseService } from "@/types/database";
+import { DatabaseClient, DatabaseService } from "./type";
 import { PromiseResult, Result } from "@/types/result";
 import { Capacitor } from "@capacitor/core";
 import { JeepSqlite } from "jeep-sqlite/dist/components/jeep-sqlite";
@@ -23,8 +23,8 @@ class DatabaseClientImpl implements DatabaseClient {
     try {
       const result = await this.database.query(statement, values);
       return Result.Ok(result.values as T[]);
-    } catch (error) {
-      return Result.Error(error);
+    } catch (error: any) {
+      return Result.Error("DATABASE_QUERY", error);
     }
   }
 
@@ -32,8 +32,8 @@ class DatabaseClientImpl implements DatabaseClient {
     try {
       const result = await this.database.run(statement, values);
       return Result.Ok(result.changes); // TODO
-    } catch (error) {
-      return Result.Error(error);
+    } catch (error: any) {
+      return Result.Error("DATABASE_RUN", error);
     }
   }
 
@@ -41,8 +41,8 @@ class DatabaseClientImpl implements DatabaseClient {
     try {
       await this.database.beginTransaction();
       return Result.Ok();
-    } catch (error) {
-      return Result.Error(error);
+    } catch (error: any) {
+      return Result.Error("DATABASE_BEGIN_TRANSACTION", error);
     }
   }
 
@@ -50,8 +50,8 @@ class DatabaseClientImpl implements DatabaseClient {
     try {
       await this.database.commitTransaction();
       return Result.Ok();
-    } catch (error) {
-      return Result.Error(error);
+    } catch (error: any) {
+      return Result.Error("DATABASE_COMMIT_TRANSACTION", error);
     }
   }
 
@@ -59,8 +59,8 @@ class DatabaseClientImpl implements DatabaseClient {
     try {
       await this.database.rollbackTransaction();
       return Result.Ok();
-    } catch (error) {
-      return Result.Error(error);
+    } catch (error: any) {
+      return Result.Error("DATABASE_ROLLBACK_TRANSACTION", error);
     }
   }
 
@@ -68,8 +68,8 @@ class DatabaseClientImpl implements DatabaseClient {
     try {
       await this.database.close();
       return Result.Ok();
-    } catch (error) {
-      return Result.Error(error);
+    } catch (error: any) {
+      return Result.Error("DATABASE_CLOSE", error);
     }
   }
 }
@@ -113,12 +113,13 @@ export default function createSQLite3DatabaseService({
         );
 
         return Result.Ok();
-      } catch (error) {
-        return Result.Error(error);
+      } catch (error: any) {
+        return Result.Error({ code: "DATABASE_INIT", error });
       }
     },
 
     async getClient(): PromiseResult<DatabaseClient> {
+      try {
       const db: SQLiteDBConnection = (await shouldRetrieveConnection())
         ? await sqlite.retrieveConnection(databaseName, READONLY)
         : await sqlite.createConnection(
@@ -131,6 +132,9 @@ export default function createSQLite3DatabaseService({
       await db.open();
 
       return Result.Ok(new DatabaseClientImpl(db));
+      } catch (error: any) {
+        return Result.Error({ code: "DATABASE_GET_CLIENT", error });
+      }
     },
   };
 }

@@ -18,8 +18,12 @@ const preferences = {
     try {
       await Preferences.set({ key, value });
       return Result.Ok();
-    } catch (error) {
-      return Result.Error(error);
+    } catch (error: any) {
+      return Result.Error({
+        code: "PREFERENCE_SET",
+        data: { key, value },
+        error,
+      });
     }
   },
 
@@ -27,8 +31,12 @@ const preferences = {
     try {
       const { value } = await Preferences.get({ key });
       return Result.Ok((value || preferenceDefaults[key]) as PreferenceKey[Key]);
-    } catch (error) {
-      return Result.Error(error);
+    } catch (error: any) {
+      return Result.Error({
+        code: "PREFERENCE_GET",
+        data: { key },
+        error,
+      });
     }
   },
 };

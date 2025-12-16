@@ -1,5 +1,5 @@
 import { PromiseResult, Result } from "@/types/result";
-import { DatabaseService } from "@/types/database";
+import { DatabaseService } from "@/modules/database/type";
 import { Tables } from "@/db/consts";
 import { Wallet } from "@/entities/wallet";
 import { WalletRepo } from "./type";
@@ -68,7 +68,10 @@ RETURNING id;
 
     update: async (wallet: Wallet): PromiseResult<Wallet> => {
       if (wallet.id === undefined) {
-        return Result.Error("Missing wallet.id");
+        return Result.Error({
+          code: "REPO_MISSING_ID",
+          data: { table: Tables.WALLET },
+        });
       }
 
       const clientResult = await databaseService.getClient();
@@ -91,7 +94,10 @@ WHERE id = ?;
         if (runResult.isError()) return runResult.toError();
 
         if (runResult.getValue().changes === 0) {
-          return Result.Error("No wallet updated");
+          return Result.Error({
+            code: "REPO_NO_REMOVE",
+            data: { table: Tables.WALLET },
+          });
         }
 
         return Result.Ok(wallet);
@@ -113,7 +119,10 @@ WHERE id = ?;
         if (runResult.isError()) return runResult.toError();
 
         if (runResult.getValue().changes === 0) {
-          return Result.Error("No wallet deleted");
+          return Result.Error({
+            code: "REPO_NO_REMOVE",
+            data: { table: Tables.WALLET },
+          });
         }
 
         return Result.Ok();

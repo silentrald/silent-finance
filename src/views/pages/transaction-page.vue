@@ -80,7 +80,7 @@ async function removeWallet(walletId: number) {
 <style scoped>
 #container {
   text-align: center;
-  
+
   position: absolute;
   left: 0;
   right: 0;
@@ -96,9 +96,9 @@ async function removeWallet(walletId: number) {
 #container p {
   font-size: 16px;
   line-height: 22px;
-  
+
   color: #8c8c8c;
-  
+
   margin: 0;
 }
 

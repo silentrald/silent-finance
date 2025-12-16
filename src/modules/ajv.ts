@@ -22,10 +22,13 @@ export function compileValidator<T>(schema: JSONSchemaType<T>) {
       return Result.Ok();
     }
 
-    return Result.Error(validate.errors!.map(e => ({
-      property: e.instancePath.substring(1),
-      code: e.keyword,
-      message: e.message,
-    } as ValidatorError)));
-  }
+    return Result.Error({
+      code: "ENTITY_INVALID",
+      data: validate.errors!.map(e => ({
+        property: e.instancePath.substring(1),
+        code: e.keyword,
+        message: e.message,
+      } as ValidatorError)),
+    });
+  };
 }

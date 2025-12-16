@@ -25,7 +25,7 @@ export async function showModal<T>(
       action: role as ModalAction,
       data: data as T,
     });
-  } catch (error) {
-    return Result.Error(error);
+  } catch (error: any) {
+    return Result.Error({ code: "SHOW_MODAL", error });
   }
 }

@@ -44,7 +44,7 @@ export default {
     if (_level < Level.DEBUG) {
       return;
     }
-  
+
     console.log(TAG, "[debug]", ...args);
   },
 };

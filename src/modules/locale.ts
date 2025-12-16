@@ -1,5 +1,3 @@
-// TODO: Use composition api for this, check out logs
-
 import { I18n, createI18n } from "vue-i18n";
 import { PromiseResult, Result } from "@/types/result";
 import { App } from "vue";
@@ -22,11 +20,7 @@ async function loadLocale(locale: AppLocale) {
 }
 
 function setLocaleImpl(locale: AppLocale) {
-  if (i18n.mode === "legacy") {
-    i18n.global.locale = locale;
-  } else {
-    (i18n.global.locale as any).value = locale;
-  } 
+  (i18n.global.locale as any).value = locale;
   document.querySelector("html")?.setAttribute("lang", locale);
 }
 
@@ -47,15 +41,15 @@ export default {
 
       app.use(i18n);
       return Result.Ok();
-    } catch (error) {
-      return Result.Error(error);
+    } catch (error: any) {
+      return Result.Error({ code: "LOCALE_INIT", error });
     }
   },
 
   async set(locale: AppLocale): PromiseResult<void> {
     try {
       if (!i18n) {
-        return Result.Error("i18n not initialized");
+        return Result.Error({ code: "LOCALE_UNINITIALIZED" });
       }
 
       if (!i18n.global.availableLocales.includes(locale)) {
@@ -64,8 +58,8 @@ export default {
 
       setLocaleImpl(locale);
       return Result.Ok();
-    } catch (error) {
-      return Result.Error(error);
+    } catch (error: any) {
+      return Result.Error({ code: "LOCALE_SET", error });
     }
   },
 
@@ -74,12 +68,10 @@ export default {
       return "en";
     }
 
-    return i18n.mode === "legacy"
-      ? i18n.global.locale
-      : (i18n.global.locale as any).value;
+    return (i18n.global.locale as any).value;
   },
 
   availableLocales() {
     return LOCALES;
   },
-}
+};

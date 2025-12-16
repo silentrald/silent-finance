@@ -24,8 +24,8 @@ const confirm = () => {
   const category: Category = {
     name: name.value,
     color: color.value,
-  }
-  modalController.dismiss(category, "confirm")
+  };
+  modalController.dismiss(category, "confirm");
 };
 
 const close = () => modalController.dismiss(null, "close");
