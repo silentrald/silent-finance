@@ -24,7 +24,7 @@ class DatabaseClientImpl implements DatabaseClient {
       const result = await this.database.query(statement, values);
       return Result.Ok(result.values as T[]);
     } catch (error: any) {
-      return Result.Error("DATABASE_QUERY", error);
+      return Result.Error({ code: "DATABASE_QUERY", error });
     }
   }
 
@@ -33,7 +33,7 @@ class DatabaseClientImpl implements DatabaseClient {
       const result = await this.database.run(statement, values);
       return Result.Ok(result.changes); // TODO
     } catch (error: any) {
-      return Result.Error("DATABASE_RUN", error);
+      return Result.Error({ code: "DATABASE_RUN", error });
     }
   }
 
@@ -42,7 +42,7 @@ class DatabaseClientImpl implements DatabaseClient {
       await this.database.beginTransaction();
       return Result.Ok();
     } catch (error: any) {
-      return Result.Error("DATABASE_BEGIN_TRANSACTION", error);
+      return Result.Error({ code: "DATABASE_BEGIN_TRANSACTION", error });
     }
   }
 
@@ -51,7 +51,7 @@ class DatabaseClientImpl implements DatabaseClient {
       await this.database.commitTransaction();
       return Result.Ok();
     } catch (error: any) {
-      return Result.Error("DATABASE_COMMIT_TRANSACTION", error);
+      return Result.Error({ code: "DATABASE_COMMIT_TRANSACTION", error });
     }
   }
 
@@ -60,7 +60,7 @@ class DatabaseClientImpl implements DatabaseClient {
       await this.database.rollbackTransaction();
       return Result.Ok();
     } catch (error: any) {
-      return Result.Error("DATABASE_ROLLBACK_TRANSACTION", error);
+      return Result.Error({ code: "DATABASE_ROLLBACK_TRANSACTION", error });
     }
   }
 
@@ -69,7 +69,7 @@ class DatabaseClientImpl implements DatabaseClient {
       await this.database.close();
       return Result.Ok();
     } catch (error: any) {
-      return Result.Error("DATABASE_CLOSE", error);
+      return Result.Error({ code: "DATABASE_CLOSE", error });
     }
   }
 }

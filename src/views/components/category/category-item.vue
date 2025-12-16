@@ -15,7 +15,7 @@ const category = ref(categoryProps);
 </script>
 
 <template>
-  <div class="category-card"
+  <div class="category-item"
     :style="{
       backgroundColor: category.color,
     }"
@@ -39,7 +39,7 @@ const category = ref(categoryProps);
 </template>
 
 <style scoped>
-.category-card {
+.category-item {
   display: flex;
   align-items: center;
   column-gap: 8px;

@@ -9,7 +9,12 @@ const en: LocaleSchema = {
   },
   transaction: {
     title: "Transactions",
-    createTransaction: "Create Transaction",
+    walletModal: {
+      addWallet: "Add Wallet",
+      name: "Name",
+      amount: "Amount",
+      color: "Color",
+    },
   },
   category: {
     title: "Categories",

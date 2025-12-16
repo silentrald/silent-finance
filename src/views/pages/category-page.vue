@@ -10,7 +10,7 @@ import {
 import { ModalAction, showModal } from "@/modules/modal";
 import { inject, onMounted, ref } from "vue";
 import { Category } from "@/entities/category";
-import CategoryCard from "../components/category/category-card.vue";
+import CategoryItem from "../components/category/category-item.vue";
 import CategoryModal from "../components/category/category-modal.vue";
 import CategoryUseCase from "@/use-cases/category/types";
 import { UseCases } from "@/use-cases/consts";
@@ -45,7 +45,7 @@ const removeCategory = async (categoryId: number): Promise<void> => {
   }
 };
 
-const openCreateModal = async () => {
+const showCreateModal = async () => {
   const modalResult = await showModal<Category>(CategoryModal);
   if (modalResult.isError()) {
     logger.error("Could not open modal", modalResult.getError());
@@ -82,11 +82,10 @@ const openCreateModal = async () => {
         </ion-toolbar>
       </ion-header>
 
-
       <div id="container">
         <div id="category-container">
           <div v-for="category in categories" :key="category.id">
-            <category-card :category="category"
+            <category-item :category="category"
               @remove="() => removeCategory(category.id!)"
             />
           </div>
@@ -96,7 +95,7 @@ const openCreateModal = async () => {
           <ion-button id="add-button"
             expand="full"
             fill="clear"
-            @click="openCreateModal"
+            @click="showCreateModal"
           >
             +
           </ion-button>

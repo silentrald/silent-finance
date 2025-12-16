@@ -1,43 +1,52 @@
 <script setup lang="ts">
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from "@ionic/vue";
-import { onMounted, ref } from "vue";
+import { IonButton, IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from "@ionic/vue";
+import { ModalAction, showModal } from "@/modules/modal";
+import { inject, onMounted, ref } from "vue";
+import { UseCases } from "@/use-cases/consts";
 import { Wallet } from "@/entities/wallet";
-import WalletCard from "../components/wallet-card.vue";
-// import type { WalletRepo } from "@/repos/wallet/type";
+import WalletCard from "../components/wallet/wallet-card.vue";
+import WalletModal from "../components/wallet/wallet-modal.vue";
+import WalletUseCase from "@/use-cases/wallet/types";
 import useLocale from "@/composables/locale";
 
 const { t } = useLocale();
 
-// const walletRepo: WalletRepo | undefined = inject(Repos.WALLET);
+const walletUseCase = inject(UseCases.WALLET) as WalletUseCase;
 const wallets = ref([] as Wallet[]);
-const newWallet = ref({
-  name: "",
-  amount: "",
-  color: "",
+
+onMounted(() => {
+  loadWallets();
 });
 
-onMounted(async () => {
-  // wallets.value = (await walletRepo.getAll()).getValue();
-});
+const loadWallets = async () => {
+  const walletsResult = await walletUseCase.getAllWallets();
+  if (walletsResult.isError()) {
+    // TODO:
+    return;
+  }
 
-async function createWallet() {
-  // await walletRepo.create({
-  //   name: newWallet.value.name,
-  //   amount: +newWallet.value.amount,
-  //   color: newWallet.value.color,
-  // });
-  //
-  // wallets.value = (await walletRepo.getAll()).getValue();
-}
+  wallets.value = walletsResult.getValue();
+};
 
-async function updateWallet(newWallet: Wallet) {
-  // await walletRepo.update(newWallet);
-  // wallets.value = (await walletRepo.getAll()).getValue();
-}
+const showCreateWalletModal = async () => {
+  const modalResult = await showModal<Wallet>(WalletModal);
+  if (modalResult.isError()) {
+    // TODO:
+    return;
+  }
 
-async function removeWallet(walletId: number) {
-  // await walletRepo.removeById(walletId);
-  // wallets.value = (await walletRepo.getAll()).getValue();
+  const { action, data } = modalResult.getValue();
+  if (action !== ModalAction.CONFIRM) {
+    return;
+  }
+
+  const result = await walletUseCase.createWallet(data);
+  if (result.isError()) {
+    // TODO:
+    return;
+  }
+
+  wallets.value.push(result.getValue());
 }
 </script>
 
@@ -57,20 +66,18 @@ async function removeWallet(walletId: number) {
       </ion-header>
 
       <div id="container">
-        <div v-for="wallet in wallets" :key="wallet.id">
-          <wallet-card :wallet="wallet"
-            @update="updateWallet"
-            @remove="removeWallet"
-          />
+        <div id="wallet-container">
+          <div v-for="wallet in wallets" :key="wallet.id">
+            <wallet-card :wallet="wallet" />
+          </div>
+          <ion-button id="create-wallet-button"
+            fill="clear"
+            @click="showCreateWalletModal"
+          >+</ion-button>
         </div>
 
-        <div>
-          <input type="text" v-model="newWallet.name" placeholder="name" />
-          <input type="text" v-model="newWallet.amount" placeholder="amount" />
-          <input type="text" v-model="newWallet.color" placeholder="color" />
-          <button @click="createWallet">
-            {{ t("transaction.createTransaction") }}
-          </button>
+        <div id="transaction-container">
+          Transactions
         </div>
       </div>
     </ion-content>
@@ -78,31 +85,35 @@ async function removeWallet(walletId: number) {
 </template>
 
 <style scoped>
-#container {
-  text-align: center;
+#wallet-container {
+  display: flex;
+  column-gap: 16px;
+  padding: 8px 16px;
+  overflow-x: scroll;
 
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-}
+  #create-wallet-button {
+    aspect-ratio: 1.6;
+    min-width: 300px;
+    max-width: 600px;
+    width: 75%;
 
-#container strong {
-  font-size: 20px;
-  line-height: 26px;
-}
+    border: 2px dashed white;
+    border-radius: 4px;
 
-#container p {
-  font-size: 16px;
-  line-height: 22px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
-  color: #8c8c8c;
+    /* Plus sign */
+    color: white;
+    font-size: 48px;
+    font-weight: 700;
+  }
 
-  margin: 0;
-}
-
-#container a {
-  text-decoration: none;
+  #create-wallet-button:hover {
+    color: black;
+    background-color: white;
+    border-color: black;
+  }
 }
 </style>

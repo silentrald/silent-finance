@@ -7,7 +7,12 @@ export default interface LocaleSchema {
   },
   transaction: {
     title: string;
-    createTransaction: string;
+    walletModal: {
+      addWallet: string;
+      name: string;
+      amount: string;
+      color: string;
+    };
   };
   category: {
     title: string;

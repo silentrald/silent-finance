@@ -1,4 +1,4 @@
-import { PromiseResult } from "./result";
+import { PromiseResult } from "@/types/result";
 
 export interface DatabaseClient {
   query<Return>(sql: string, values?: any[]): PromiseResult<Return[]>;

@@ -3,7 +3,7 @@ import { CategoryRepo } from "@/repos/category/type";
 import CategoryUseCase from "./types";
 import { PromiseResult } from "@/types/result";
 
-export default function createCategoryUseCase({
+export default function createCategoryUseCaseV1({
   categoryRepo,
 }: {
   categoryRepo: CategoryRepo;

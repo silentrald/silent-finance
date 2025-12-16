@@ -1,8 +1,10 @@
 import { App } from "vue";
-import { DatabaseService } from "@/types/database";
+import { DatabaseService } from "@/modules/database/type";
 import { UseCases } from "./consts";
-import createCategoryUseCase from "./category/v1";
+import createCategoryUseCaseV1 from "./category/v1";
 import createSQLite3CategoryRepo from "@/repos/category/sqlite3";
+import createSQLite3WalletRepo from "@/repos/wallet/sqlite3";
+import createWalletUseCaseV1 from "./wallet/v1";
 
 export function setupUseCases({
   app, databaseService,
@@ -12,7 +14,9 @@ export function setupUseCases({
 }) {
   // Repositories
   const categoryRepo = createSQLite3CategoryRepo({ databaseService });
+  const walletRepo = createSQLite3WalletRepo({ databaseService });
 
-  app.provide(UseCases.CATEGORY, createCategoryUseCase({ categoryRepo }));
+  app.provide(UseCases.CATEGORY, createCategoryUseCaseV1({ categoryRepo }));
+  app.provide(UseCases.WALLET, createWalletUseCaseV1({ walletRepo }));
 }
 

@@ -10,7 +10,12 @@ const jp: LocaleSchema = {
   },
   transaction: {
     title: "取引",
-    createTransaction: "トランザクションを作成する",
+    walletModal: {
+      addWallet: "ウォレットを追加",
+      name: "名前",
+      amount: "額",
+      color: "色",
+    },
   },
   category: {
     title: "カテゴリ",
