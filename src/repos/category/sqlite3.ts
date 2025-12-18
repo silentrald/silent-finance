@@ -1,55 +1,34 @@
 import { PromiseResult, Result } from "@/types/result";
 import { Category } from "@/entities/category";
 import { CategoryRepo } from "./type";
-import { DatabaseService } from "@/modules/database/type";
 import { Tables } from "@/db/consts";
 
-export default function createSQLite3CategoryRepo({
-  databaseService,
-}: {
-  databaseService: DatabaseService
-}): CategoryRepo {
+export default function createSQLite3CategoryRepo(): CategoryRepo {
   return {
-    getAll: async (): PromiseResult<Category[]> => {
-      const clientResult = await databaseService.getClient();
-      if (clientResult.isError()) return clientResult.toError();
-      const client = clientResult.getValue();
+    getAll: async (client): PromiseResult<Category[]> => {
+      const queryResult = await client.query(
+        `SELECT * FROM ${Tables.CATEGORY};`
+      );
+      if (queryResult.isError()) return queryResult.toError();
 
-      try {
-        const queryResult = await client.query(
-          `SELECT * FROM ${Tables.CATEGORY};`
-        );
-        if (queryResult.isError()) return queryResult.toError();
-
-        return Result.Ok(queryResult.getValue() as Category[]);
-      } finally {
-        await client.close();
-      }
+      return Result.Ok(queryResult.getValue() as Category[]);
     },
 
-    create: async (category): PromiseResult<Category> => {
-      const clientResult = await databaseService.getClient();
-      if (clientResult.isError()) return clientResult.toError();
-      const client = clientResult.getValue();
-
-      try {
-        const queryResult = await client.query<Category>(`
+    create: async (client, category): PromiseResult<Category> => {
+      const queryResult = await client.query<Category>(`
 INSERT INTO ${Tables.CATEGORY}(name, color, icon)
 VALUES (?, ?, ?)
 RETURNING id;
-          `.trim(),
-          [ category.name, category.color, category.icon ?? null ]
-        );
-        if (queryResult.isError()) return queryResult.toError();
+        `.trim(),
+        [ category.name, category.color, category.icon ?? null ]
+      );
+      if (queryResult.isError()) return queryResult.toError();
 
-        category.id = queryResult.getValue()[0].id;
-        return Result.Ok(category);
-      } finally {
-        await client.close();
-      }
+      category.id = queryResult.getValue()[0].id;
+      return Result.Ok(category);
     },
 
-    update: async (category): PromiseResult<Category> => {
+    update: async (client, category): PromiseResult<Category> => {
       if (category.id === undefined) {
         return Result.Error({
           code: "REPO_MISSING_ID",
@@ -57,58 +36,42 @@ RETURNING id;
         });
       }
 
-      const clientResult = await databaseService.getClient();
-      if (clientResult.isError()) return clientResult.toError();
-      const client = clientResult.getValue();
-
-      try {
-        const runResult = await client.run(`
+      const runResult = await client.run(`
 UPDATE ${Tables.CATEGORY} SET
   name = ?,
   color = ?,
   icon = ?
 WHERE id = ?;
-          `.trim(),
-          [ category.name, category.color, category.icon, category.id ]
-        );
-        if (runResult.isError()) return runResult.toError();
+        `.trim(),
+        [ category.name, category.color, category.icon, category.id ]
+      );
+      if (runResult.isError()) return runResult.toError();
 
-        if (runResult.getValue().changes === 0) {
-          return Result.Error({
-            code: "REPO_NO_UPDATE",
-            data: { table: Tables.CATEGORY },
-          });
-        }
-
-        return Result.Ok(category);
-      } finally {
-        await client.close();
+      if (runResult.getValue().changes === 0) {
+        return Result.Error({
+          code: "REPO_NO_UPDATE",
+          data: { table: Tables.CATEGORY },
+        });
       }
+
+      return Result.Ok(category);
     },
 
-    removeById: async (categoryId): PromiseResult<void> => {
-      const clientResult = await databaseService.getClient();
-      if (clientResult.isError()) return clientResult.toError();
-      const client = clientResult.getValue();
+    removeById: async (client, categoryId): PromiseResult<void> => {
+      const runResult = await client.run(
+        `DELETE FROM ${Tables.CATEGORY} WHERE id = ?;`,
+        [ categoryId ]
+      );
+      if (runResult.isError()) return runResult.toError();
 
-      try {
-        const runResult = await client.run(
-          `DELETE FROM ${Tables.CATEGORY} WHERE id = ?;`,
-          [ categoryId ]
-        );
-        if (runResult.isError()) return runResult.toError();
-
-        if (runResult.getValue().changes === 0) {
-          return Result.Error({
-            code: "REPO_NO_REMOVE",
-            data: { table: Tables.CATEGORY },
-          });
-        }
-
-        return Result.Ok();
-      } finally {
-        await client.close();
+      if (runResult.getValue().changes === 0) {
+        return Result.Error({
+          code: "REPO_NO_REMOVE",
+          data: { table: Tables.CATEGORY },
+        });
       }
+
+      return Result.Ok();
     },
   };
 }

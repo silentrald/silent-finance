@@ -10,23 +10,28 @@ import {
   IonToolbar,
   modalController,
 } from "@ionic/vue";
-import { Category } from "@/entities/category";
-import { ChromePicker } from "vue-color";
 import { ModalAction } from "@/modules/modal";
+import { Transaction } from "@/entities/transaction";
+import { TransactionType } from "@/enums/transaction";
 import { ref } from "vue";
 import useLocale from "@/composables/locale";
 
 const { t } = useLocale();
 
-const name = ref("");
-const color = ref("#ffffff");
+const amount = ref("");
+const description = ref("");
+const categoryId = ref("");
+const walletSourceId = ref("");
 
 const confirm = () => {
-  const category: Category = {
-    name: name.value,
-    color: color.value,
+  const transaction: Transaction = {
+    type: TransactionType.EXPENSE,
+    amount: +amount.value,
+    description: description.value,
+    categoryId: +categoryId.value,
+    walletSourceId: +walletSourceId.value,
   };
-  modalController.dismiss(category, ModalAction.CONFIRM);
+  modalController.dismiss(transaction, ModalAction.CONFIRM);
 };
 
 const close = () => modalController.dismiss(null, ModalAction.CLOSE);
@@ -47,16 +52,36 @@ const close = () => modalController.dismiss(null, ModalAction.CLOSE);
 
   <ion-content class="ion-padding">
     <ion-item>
-      <ion-input v-model="name"
-        type="text"
+      <ion-input v-model="amount"
+        type="number"
         label-placement="stacked"
-        :label="t('category.modal.name')"
-        :placeholder="t('category.modal.name')"
+        label="amount"
+        placeholder="amount"
       />
     </ion-item>
     <ion-item>
-      <!-- TODO: create a component for this -->
-      <chrome-picker v-model="color" />
+      <ion-input v-model="description"
+        type="text"
+        label-placement="stacked"
+        label="description"
+        placeholder="description"
+      />
+    </ion-item>
+    <ion-item>
+      <ion-input v-model="categoryId"
+        type="number"
+        label-placement="stacked"
+        label="categoryId"
+        placeholder="categoryId"
+      />
+    </ion-item>
+    <ion-item>
+      <ion-input v-model="walletSourceId"
+        type="number"
+        label-placement="stacked"
+        label="walletSourceId"
+        placeholder="walletSourceId"
+      />
     </ion-item>
   </ion-content>
 </template>

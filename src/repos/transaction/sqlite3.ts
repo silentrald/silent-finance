@@ -1,32 +1,54 @@
 import { PromiseResult, Result } from "@/types/result";
-import { DatabaseService } from "@/modules/database/type";
+import { Tables } from "@/db/consts";
 import { Transaction } from "@/entities/transaction";
 import { TransactionRepo } from "./type";
 
-export default function createSQLite3TransactionRepo({
-  databaseService,
-}: {
-  databaseService: DatabaseService
-}): TransactionRepo {
+export default function createSQLite3TransactionRepo(): TransactionRepo {
   return {
-    getByWalletId: async (walletId): PromiseResult<Transaction[]> => {
-      const clientResult = await databaseService.getClient();
-      if (clientResult.isError()) return clientResult.toError();
-      const client = clientResult.getValue();
-
-      try {
-        // TODO:
-        return Result.Ok([] as Transaction[]);
-      } finally {
-        await client.close();
+    getByWalletId: async (client, walletId): PromiseResult<Transaction[]> => {
+      if (!walletId) {
+        return Result.Error({
+          code: "REPO_MISSING_ID",
+          data: { table: Tables.TRANSACTION },
+        });
       }
+
+      return client.query<Transaction>(`
+SELECT
+  id, type, amount, description,
+  category_id as "categoryId",
+  wallet_source_id as "walletSourceId",
+  wallet_destination_id as "walletDestinationId"
+FROM ${Tables.TRANSACTION}
+WHERE wallet_source_id = ?
+  OR wallet_destination_id = ?;
+`.trim(), [ walletId, walletId ]);
     },
 
-    create: async (transaction): PromiseResult<Transaction> => {
-      const clientResult = await databaseService.getClient();
-      if (clientResult.isError()) return clientResult.toError();
-      const client = clientResult.getValue();
+    create: async (client, transaction): PromiseResult<Transaction> => {
+      const queryResult = await client.query<{ id: number }>(`
+INSERT INTO ${Tables.TRANSACTION}(
+  type, amount, description,
+  category_id,
+  wallet_source_id, wallet_destination_id
+) VALUES (
+  ?, ?, ?,
+  ?,
+  ?, ?
+)
+RETURNING id;
+`, [
+  transaction.type, transaction.amount, transaction.description || null,
+  transaction.categoryId,
+  transaction.walletSourceId, transaction.walletDestinationId || null,
+]);
+      if (queryResult.isError()) return queryResult.toError();
 
+      transaction.id = queryResult.getValue()[0].id;
+      return Result.Ok(transaction);
+    },
+
+    update: async (client, transaction): PromiseResult<Transaction> => {
       try {
         // TODO:
         return Result.Ok(transaction);
@@ -35,30 +57,21 @@ export default function createSQLite3TransactionRepo({
       }
     },
 
-    update: async (transaction): PromiseResult<Transaction> => {
-      const clientResult = await databaseService.getClient();
-      if (clientResult.isError()) return clientResult.toError();
-      const client = clientResult.getValue();
+    removeById: async (client, transactionId): PromiseResult<void> => {
+      const runResult = await client.run(
+        `DELETE FROM ${Tables.TRANSACTION} WHERE id = ?;`,
+          [ transactionId ]
+      );
+      if (runResult.isError()) return runResult.toError();
 
-      try {
-        // TODO:
-        return Result.Ok(transaction);
-      } finally {
-        await client.close();
+      if (runResult.getValue().changes === 0) {
+        return Result.Error({
+          code: "REPO_NO_REMOVE",
+          data: { table: Tables.TRANSACTION },
+        });
       }
-    },
 
-    removeById: async (transactionId): PromiseResult<void> => {
-      const clientResult = await databaseService.getClient();
-      if (clientResult.isError()) return clientResult.toError();
-      const client = clientResult.getValue();
-
-      try {
-        // TODO:
-        return Result.Ok();
-      } finally {
-        await client.close();
-      }
+      return Result.Ok();
     },
   };
 }

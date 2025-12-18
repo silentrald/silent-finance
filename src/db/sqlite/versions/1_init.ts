@@ -26,11 +26,11 @@ CREATE TABLE ${Tables.TRANSACTION} (
   amount INTEGER NOT NULL,
   description VARCHAR(100),
   category_id INTEGER NOT NULL,
-  wallet_src_id INTEGER NOT NULL,
-  wallet_dst_id INTEGER,
+  wallet_source_id INTEGER NOT NULL,
+  wallet_destination_id INTEGER,
   FOREIGN KEY (category_id) REFERENCES categories(id),
-  FOREIGN KEY (wallet_src_id) REFERENCES wallets(id),
-  FOREIGN KEY (wallet_dst_id) REFERENCES wallets(id)
+  FOREIGN KEY (wallet_source_id) REFERENCES wallets(id),
+  FOREIGN KEY (wallet_destination_id) REFERENCES wallets(id)
 );
 `.trim(),
 

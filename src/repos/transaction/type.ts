@@ -1,11 +1,12 @@
+import { DatabaseClient } from "@/modules/database/type";
 import { PromiseResult } from "@/types/result";
 import { Transaction } from "@/entities/transaction";
 
 export interface TransactionRepo {
-  getByWalletId(walletId: number): PromiseResult<Transaction[]>;
+  getByWalletId(client: DatabaseClient, walletId: number): PromiseResult<Transaction[]>;
 
-  create(transaction: Transaction): PromiseResult<Transaction>;
-  update(transaction: Transaction): PromiseResult<Transaction>;
+  create(client: DatabaseClient, transaction: Transaction): PromiseResult<Transaction>;
+  update(client: DatabaseClient, transaction: Transaction): PromiseResult<Transaction>;
 
-  removeById(transactionId: number): PromiseResult<void>;
+  removeById(client: DatabaseClient, transactionId: number): PromiseResult<void>;
 }

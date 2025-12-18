@@ -11,6 +11,7 @@ import {
   modalController,
 } from "@ionic/vue";
 import { ChromePicker } from "vue-color";
+import { ModalAction } from "@/modules/modal";
 import { Wallet } from "@/entities/wallet";
 import { ref } from "vue";
 import useLocale from "@/composables/locale";
@@ -27,10 +28,10 @@ const confirm = () => {
     amount: +amount.value,
     color: color.value,
   };
-  modalController.dismiss(wallet, "confirm");
+  modalController.dismiss(wallet, ModalAction.CONFIRM);
 };
 
-const close = () => modalController.dismiss(null, "close");
+const close = () => modalController.dismiss(null, ModalAction.CLOSE);
 </script>
 
 <template>

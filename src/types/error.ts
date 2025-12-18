@@ -6,9 +6,7 @@ interface ErrorInterface {
   DATABASE_GET_CLIENT: undefined;
   DATABASE_QUERY: undefined;
   DATABASE_RUN: undefined;
-  DATABASE_BEGIN_TRANSACTION: undefined;
-  DATABASE_COMMIT_TRANSACTION: undefined;
-  DATABASE_ROLLBACK_TRANSACTION: undefined;
+  DATABASE_TRANSACTION: undefined;
   DATABASE_CLOSE: undefined;
 
   // Modules

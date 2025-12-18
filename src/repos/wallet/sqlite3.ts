@@ -1,72 +1,43 @@
 import { PromiseResult, Result } from "@/types/result";
-import { DatabaseService } from "@/modules/database/type";
 import { Tables } from "@/db/consts";
 import { Wallet } from "@/entities/wallet";
 import { WalletRepo } from "./type";
 
-export default function createSQLite3WalletRepo({
-  databaseService,
-}: {
-  databaseService: DatabaseService;
-}): WalletRepo {
+export default function createSQLite3WalletRepo(): WalletRepo {
   return {
-    getById: async (walletId): PromiseResult<Wallet> => {
-      const clientResult = await databaseService.getClient();
-      if (clientResult.isError()) return clientResult.toError();
-      const client = clientResult.getValue();
+    getById: async (client, walletId): PromiseResult<Wallet> => {
+      const queryResult = await client.query(
+        `SELECT * FROM ${Tables.WALLET} WHERE ?;`,
+        [ walletId ]
+      );
+      if (queryResult.isError()) return queryResult.toError();
 
-      try {
-        const queryResult = await client.query(
-          `SELECT * FROM ${Tables.WALLET} WHERE ?;`,
-          [ walletId ]
-        );
-        if (queryResult.isError()) return queryResult.toError();
-
-        return Result.Ok(queryResult.getValue()[0] as Wallet);
-      } finally {
-        await client.close();
-      }
+      return Result.Ok(queryResult.getValue()[0] as Wallet);
     },
 
-    getAll: async (): PromiseResult<Wallet[]> => {
-      const clientResult = await databaseService.getClient();
-      if (clientResult.isError()) return clientResult.toError();
-      const client = clientResult.getValue();
+    getAll: async (client): PromiseResult<Wallet[]> => {
+      const queryResult = await client
+        .query(`SELECT * FROM ${Tables.WALLET};`);
+      if (queryResult.isError()) return queryResult.toError();
 
-      try {
-        const queryResult = await client
-          .query(`SELECT * FROM ${Tables.WALLET};`);
-        if (queryResult.isError()) return queryResult.toError();
-
-        return Result.Ok(queryResult.getValue() as Wallet[]);
-      } finally {
-        await client.close();
-      }
+      return Result.Ok(queryResult.getValue() as Wallet[]);
     },
 
-    create: async (wallet: Wallet): PromiseResult<Wallet> => {
-      const clientResult = await databaseService.getClient();
-      if (clientResult.isError()) return clientResult.toError();
-      const client = clientResult.getValue();
-
-      try {
-        const queryResult = await client.query<Wallet>(`
+    create: async (client, wallet): PromiseResult<Wallet> => {
+      const queryResult = await client.query<Wallet>(`
 INSERT INTO ${Tables.WALLET} (name, amount, color)
 VALUES (?, ?, ?)
 RETURNING id;
-          `.trim(),
-          [ wallet.name, wallet.amount, wallet.color ]
-        );
-        if (queryResult.isError()) return queryResult.toError();
+        `.trim(),
+        [ wallet.name, wallet.amount, wallet.color ]
+      );
+      if (queryResult.isError()) return queryResult.toError();
 
-        wallet.id = queryResult.getValue()[0].id;
-        return Result.Ok(wallet);
-      } finally {
-        await client.close();
-      }
+      wallet.id = queryResult.getValue()[0].id;
+      return Result.Ok(wallet);
     },
 
-    update: async (wallet: Wallet): PromiseResult<Wallet> => {
+    update: async (client, wallet): PromiseResult<Wallet> => {
       if (wallet.id === undefined) {
         return Result.Error({
           code: "REPO_MISSING_ID",
@@ -74,61 +45,45 @@ RETURNING id;
         });
       }
 
-      const clientResult = await databaseService.getClient();
-      if (clientResult.isError()) return clientResult.toError();
-      const client = clientResult.getValue();
-
-      try {
-        const runResult = await client.run(`
+      const runResult = await client.run(`
 UPDATE ${Tables.WALLET}
 SET name = ?,
   amount = ?,
   color = ?
-WHERE id = ?;
-          `.trim(),
-          [
-            wallet.name, wallet.amount,
-            wallet.color, wallet.id,
-          ]
-        );
-        if (runResult.isError()) return runResult.toError();
+WHERE id = ?
+        `.trim(),
+        [
+          wallet.name, wallet.amount,
+          wallet.color, wallet.id,
+        ]
+      );
+      if (runResult.isError()) return runResult.toError();
 
-        if (runResult.getValue().changes === 0) {
-          return Result.Error({
-            code: "REPO_NO_REMOVE",
-            data: { table: Tables.WALLET },
-          });
-        }
-
-        return Result.Ok(wallet);
-      } finally {
-        await client.close();
+      if (runResult.getValue() === 0) {
+        return Result.Error({
+          code: "REPO_NO_REMOVE",
+          data: { table: Tables.WALLET },
+        });
       }
+
+      return Result.Ok(wallet);
     },
 
-    removeById: async (walletId: number): PromiseResult<void> => {
-      const clientResult = await databaseService.getClient();
-      if (clientResult.isError()) return clientResult.toError();
-      const client = clientResult.getValue();
+    removeById: async (client, walletId): PromiseResult<void> => {
+      const runResult = await client.run(
+        `DELETE FROM ${Tables.WALLET} WHERE id = ?;`,
+        [ walletId ]
+      );
+      if (runResult.isError()) return runResult.toError();
 
-      try {
-        const runResult = await client.run(
-          `DELETE FROM ${Tables.WALLET} WHERE id = ?;`,
-          [ walletId ]
-        );
-        if (runResult.isError()) return runResult.toError();
-
-        if (runResult.getValue().changes === 0) {
-          return Result.Error({
-            code: "REPO_NO_REMOVE",
-            data: { table: Tables.WALLET },
-          });
-        }
-
-        return Result.Ok();
-      } finally {
-        await client.close();
+      if (runResult.getValue() === 0) {
+        return Result.Error({
+          code: "REPO_NO_REMOVE",
+          data: { table: Tables.WALLET },
+        });
       }
+
+      return Result.Ok();
     },
   };
 }
