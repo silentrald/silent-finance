@@ -20,7 +20,7 @@ INSERT INTO ${Tables.CATEGORY}(name, color, icon)
 VALUES (?, ?, ?)
 RETURNING id;
         `.trim(),
-        [ category.name, category.color, category.icon ?? null ]
+      [ category.name, category.color, category.icon ?? null ]
       );
       if (queryResult.isError()) return queryResult.toError();
 
@@ -43,7 +43,7 @@ UPDATE ${Tables.CATEGORY} SET
   icon = ?
 WHERE id = ?;
         `.trim(),
-        [ category.name, category.color, category.icon, category.id ]
+      [ category.name, category.color, category.icon, category.id ]
       );
       if (runResult.isError()) return runResult.toError();
 

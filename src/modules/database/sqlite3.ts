@@ -129,18 +129,18 @@ export default function createSQLite3DatabaseService({
 
     async getClient(): PromiseResult<DatabaseClient> {
       try {
-      const db: SQLiteDBConnection = (await shouldRetrieveConnection())
-        ? await sqlite.retrieveConnection(databaseName, READONLY)
-        : await sqlite.createConnection(
+        const db: SQLiteDBConnection = (await shouldRetrieveConnection())
+          ? await sqlite.retrieveConnection(databaseName, READONLY)
+          : await sqlite.createConnection(
             databaseName,
             shouldEncrypt,
             encryptionSecret,
             version,
             READONLY
           );
-      await db.open();
+        await db.open();
 
-      return Result.Ok(new DatabaseClientImpl(db));
+        return Result.Ok(new DatabaseClientImpl(db));
       } catch (error: any) {
         return Result.Error({ code: "DATABASE_GET_CLIENT", error });
       }

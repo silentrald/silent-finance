@@ -61,10 +61,10 @@ INSERT INTO ${Tables.TRANSACTION}(
 )
 RETURNING id;
 `, [
-  transaction.type, transaction.amount, transaction.description || null,
-  transaction.categoryId,
-  transaction.walletSourceId, transaction.walletDestinationId || null,
-]);
+        transaction.type, transaction.amount, transaction.description || null,
+        transaction.categoryId,
+        transaction.walletSourceId, transaction.walletDestinationId || null,
+      ]);
       if (queryResult.isError()) return queryResult.toError();
 
       transaction.id = queryResult.getValue()[0].id;
@@ -82,7 +82,7 @@ RETURNING id;
     removeById: async (client, transactionId): PromiseResult<void> => {
       const runResult = await client.run(
         `DELETE FROM ${Tables.TRANSACTION} WHERE id = ?;`,
-          [ transactionId ]
+        [ transactionId ]
       );
       if (runResult.isError()) return runResult.toError();
 

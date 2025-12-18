@@ -40,7 +40,7 @@ INSERT INTO ${Tables.WALLET} (name, amount, color)
 VALUES (?, ?, ?)
 RETURNING id;
         `.trim(),
-        [ wallet.name, wallet.amount, wallet.color ]
+      [ wallet.name, wallet.amount, wallet.color ]
       );
       if (queryResult.isError()) return queryResult.toError();
 
@@ -63,10 +63,10 @@ SET name = ?,
   color = ?
 WHERE id = ?
         `.trim(),
-        [
-          wallet.name, wallet.amount,
-          wallet.color, wallet.id,
-        ]
+      [
+        wallet.name, wallet.amount,
+        wallet.color, wallet.id,
+      ]
       );
       if (runResult.isError()) return runResult.toError();
 

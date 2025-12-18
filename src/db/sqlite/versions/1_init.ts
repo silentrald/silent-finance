@@ -19,7 +19,7 @@ CREATE TABLE ${Tables.CATEGORY} (
   icon TEXT
 );
 `.trim(),
-`
+  `
 CREATE TABLE ${Tables.TRANSACTION} (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   type CHAR(1) NOT NULL,
@@ -34,8 +34,8 @@ CREATE TABLE ${Tables.TRANSACTION} (
 );
 `.trim(),
 
-// Inserts
-`
+  // Inserts
+  `
 INSERT INTO ${Tables.CATEGORY}(name, color, icon) VALUES
   ('Food', '#FA6868', '/images/restaurant.png'),
   ('Transportation', '#5A9CB5', '/images/car.png'),
