@@ -40,6 +40,13 @@ const loadWallets = async () => {
   wallets.value = walletsResult.getValue();
 };
 
+const updateWalletFromList = (wallet: Wallet) => {
+  const index = wallets.value.findIndex(w => w.id === wallet.id);
+  if (index > -1) {
+    wallets.value[index].amount = wallet.amount;
+  }
+}
+
 const handleCreateWalletModal = async () => {
   const modalResult = await showModal<Wallet>(WalletModal);
   if (modalResult.isError()) {
@@ -60,6 +67,7 @@ const handleCreateWalletModal = async () => {
 }
 
 // Transaction Logic
+
 const loadTransactions = async (walletId: number) => {
   const transactionResult = await transactionUseCase.getTransactionsByWallet(walletId);
   if (transactionResult.isError()) {
@@ -68,6 +76,13 @@ const loadTransactions = async (walletId: number) => {
   }
 
   transactions.value = transactionResult.getValue();
+}
+
+const removeTransactionFromList = (transactionId: number) => {
+  const index = transactions.value.findIndex(t => t.id === transactionId);
+  if (index > -1) {
+    transactions.value.splice(index, 1);
+  }
 }
 
 const handleCreateExpenseModal = async () => {
@@ -92,10 +107,18 @@ const handleCreateExpenseModal = async () => {
 
   const { transaction, wallet } = result.getValue();
   transactions.value.unshift(transaction);
-  const index = wallets.value.findIndex(w => w.id === wallet.id);
-  if (index > -1) {
-    wallets.value[index].amount = wallet.amount;
+  updateWalletFromList(wallet);
+}
+
+const removeTransaction = async (transactionId: number) => {
+  const result = await transactionUseCase.removeTransaction(transactionId);
+  if (result.isError()) {
+    return;
   }
+
+  const { wallet } = result.getValue();
+  removeTransactionFromList(transactionId);
+  updateWalletFromList(wallet);
 }
 </script>
 
@@ -136,6 +159,9 @@ const handleCreateExpenseModal = async () => {
               :key="transaction.id"
             >
               {{ transaction.type }} / {{ transaction.amount }}
+              <ion-button
+                @click="() => removeTransaction(transaction.id!)"
+              >X</ion-button>
             </div>
           </div>
 

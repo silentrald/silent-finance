@@ -8,5 +8,7 @@ export default interface TransactionUseCase {
     transaction: Transaction;
     wallet: Wallet;
   }>;
-  removeTransaction(transactionId: number): PromiseResult<void>;
+  removeTransaction(transactionId: number): PromiseResult<{
+    wallet: Wallet;
+  }>;
 }

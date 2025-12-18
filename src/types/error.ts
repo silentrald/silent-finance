@@ -21,11 +21,16 @@ interface ErrorInterface {
   PREFERENCE_GET: { key: string; };
 
   // Repos
+  REPO_NOT_FOUND: {
+    table: string;
+    fields: Record<string, any>;
+  };
   REPO_NO_UPDATE: { table: string; };
   REPO_NO_REMOVE: { table: string; };
 
   REPO_MISSING_ID: { table: string; };
 
+  NOT_IMPLEMENTED: undefined;
   UNKNOWN: undefined;
 }
 

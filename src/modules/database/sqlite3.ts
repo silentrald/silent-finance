@@ -50,24 +50,23 @@ class DatabaseClientImpl implements DatabaseClient {
     try {
       await this.database.beginTransaction();
       const active = await this.database.isTransactionActive();
-      if (!active) {
-        return Result.Error({
-          code: "DATABASE_TRANSACTION",
-          error: new Error("Transaction not active"),
-        });
+      if (!active.result) {
+        return Result.Error({ code: "DATABASE_TRANSACTION" });
       }
 
       const result = await handler();
 
       if (result.isError()) {
-        await this.database.rollbackTransaction();
+        await this.database.rollbackTransaction()
+          .catch(error => logger.error(error));
         return result.toError();
       }
 
       await this.database.commitTransaction();
       return result;
     } catch (error: any) {
-      await this.database.rollbackTransaction();
+      await this.database.rollbackTransaction()
+        .catch(error => logger.error(error));
       return Result.Error({ code: "DATABASE_TRANSACTION", error });
     }
   }

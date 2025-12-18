@@ -4,7 +4,34 @@ import { Transaction } from "@/entities/transaction";
 import { TransactionRepo } from "./type";
 
 export default function createSQLite3TransactionRepo(): TransactionRepo {
+  const FIELDS = `
+  id, type, amount, description,
+  category_id as "categoryId",
+  wallet_source_id as "walletSourceId",
+  wallet_destination_id as "walletDestinationId"
+`.trim();
   return {
+    getById: async (client, transactionId): PromiseResult<Transaction> => {
+      const queryResult = await client.query<Transaction>(
+        `SELECT ${FIELDS} FROM ${Tables.TRANSACTION} WHERE id = ?;`,
+        [ transactionId ]
+      );
+      if (queryResult.isError()) return queryResult.toError();
+
+      const transactions = queryResult.getValue() as Transaction[];
+      if (transactions.length === 0) {
+        return Result.Error({
+          code: "REPO_NOT_FOUND",
+          data: {
+            table: Tables.TRANSACTION,
+            fields: { id: transactionId },
+          },
+        });
+      }
+
+      return Result.Ok(transactions[0]);
+    },
+
     getByWalletId: async (client, walletId): PromiseResult<Transaction[]> => {
       if (!walletId) {
         return Result.Error({
@@ -14,11 +41,7 @@ export default function createSQLite3TransactionRepo(): TransactionRepo {
       }
 
       return client.query<Transaction>(`
-SELECT
-  id, type, amount, description,
-  category_id as "categoryId",
-  wallet_source_id as "walletSourceId",
-  wallet_destination_id as "walletDestinationId"
+SELECT ${FIELDS}
 FROM ${Tables.TRANSACTION}
 WHERE wallet_source_id = ?
   OR wallet_destination_id = ?;
@@ -48,10 +71,9 @@ RETURNING id;
       return Result.Ok(transaction);
     },
 
-    update: async (client, transaction): PromiseResult<Transaction> => {
+    update: async (client, _transaction): PromiseResult<Transaction> => {
       try {
-        // TODO:
-        return Result.Ok(transaction);
+        return Result.Error({ code: "NOT_IMPLEMENTED" });
       } finally {
         await client.close();
       }

@@ -3,6 +3,7 @@ import { PromiseResult } from "@/types/result";
 import { Transaction } from "@/entities/transaction";
 
 export interface TransactionRepo {
+  getById(client: DatabaseClient, transactionId: number): PromiseResult<Transaction>;
   getByWalletId(client: DatabaseClient, walletId: number): PromiseResult<Transaction[]>;
 
   create(client: DatabaseClient, transaction: Transaction): PromiseResult<Transaction>;

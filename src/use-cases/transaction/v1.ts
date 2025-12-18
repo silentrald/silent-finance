@@ -46,14 +46,14 @@ export default function createTransactionV1UseCase({
           transaction: Transaction;
           wallet: Wallet;
         }>(async () => {
-          const transactionResult = await transactionRepo.create(client, transaction);
-          if (transactionResult.isError()) return transactionResult.toError();
-
           const getResult = await walletRepo.getById(client, transaction.walletSourceId);
           if (getResult.isError()) return getResult.toError();
 
           const wallet = getResult.getValue();
           wallet.amount -= transaction.amount;
+
+          const transactionResult = await transactionRepo.create(client, transaction);
+          if (transactionResult.isError()) return transactionResult.toError();
 
           const walletResult = await walletRepo.update(client, wallet);
           if (walletResult.isError()) return walletResult.toError();
@@ -68,14 +68,39 @@ export default function createTransactionV1UseCase({
       }
     },
 
-    removeTransaction: async (transactionId): PromiseResult<void> => {
+    removeTransaction: async (transactionId): PromiseResult<{
+      wallet: Wallet;
+    }> => {
       const clientResult = await databaseService.getClient();
       if (clientResult.isError()) return clientResult.toError();
       const client = clientResult.getValue();
 
       try {
-        // TODO: update the wallet here
-        return transactionRepo.removeById(client, transactionId);
+        return await client.transaction<{
+          wallet: Wallet;
+        }>(async () => {
+          const getTransactionResult = await transactionRepo.getById(client, transactionId);
+          if (getTransactionResult.isError()) return getTransactionResult.toError();
+          const transaction = getTransactionResult.getValue();
+
+          const getWalletResult = await walletRepo.getById(client, transaction.walletSourceId);
+          if (getWalletResult.isError()) return getWalletResult.toError();
+          const wallet = getWalletResult.getValue();
+
+          if (transaction.type === TransactionType.EXPENSE) {
+            wallet.amount += transaction.amount;
+          }
+
+          const removeResult = await transactionRepo.removeById(client, transactionId);
+          if (removeResult.isError()) return removeResult.toError();
+
+          const updateResult = await walletRepo.update(client, wallet);
+          if (updateResult.isError()) return updateResult.toError();
+
+          return Result.Ok({
+            wallet: updateResult.getValue(),
+          });
+        });
       } finally {
         await client.close();
       }

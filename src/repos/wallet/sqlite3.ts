@@ -12,7 +12,18 @@ export default function createSQLite3WalletRepo(): WalletRepo {
       );
       if (queryResult.isError()) return queryResult.toError();
 
-      return Result.Ok(queryResult.getValue()[0] as Wallet);
+      const wallets = queryResult.getValue() as Wallet[];
+      if (wallets.length === 0) {
+        return Result.Error({
+          code: "REPO_NOT_FOUND",
+          data: {
+            table: Tables.WALLET,
+            fields: { id: walletId },
+          },
+        });
+      }
+
+      return Result.Ok(wallets[0]);
     },
 
     getAll: async (client): PromiseResult<Wallet[]> => {
