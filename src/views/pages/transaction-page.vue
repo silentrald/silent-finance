@@ -2,6 +2,8 @@
 import { IonButton, IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from "@ionic/vue";
 import { ModalAction, showModal } from "@/modules/modal";
 import { inject, onMounted, ref } from "vue";
+import { Category } from "@/entities/category";
+import CategoryUseCase from "@/use-cases/category/types";
 import ExpenseModal from "../components/transaction/expense-modal.vue";
 import { Transaction } from "@/entities/transaction";
 import TransactionUseCase from "@/use-cases/transaction/types";
@@ -14,19 +16,36 @@ import useLocale from "@/composables/locale";
 
 const { t } = useLocale();
 
+const categoryUseCase = inject(UseCases.CATEGORY) as CategoryUseCase;
 const transactionUseCase = inject(UseCases.TRANSACTION) as TransactionUseCase;
 const walletUseCase = inject(UseCases.WALLET) as WalletUseCase;
 
+const categories = ref({} as Record<number, Category>);
 const transactions = ref([] as Transaction[]);
 const wallets = ref([] as Wallet[]);
 
 onMounted(async () => {
+  await loadCategories();
   await loadWallets();
 
   if (wallets.value.length > 0) {
     await loadTransactions(wallets.value[0].id!);
   }
 });
+
+// Category Logic
+
+const loadCategories = async () => {
+  const categoriesResult = await categoryUseCase.getAllCategories();
+  if (categoriesResult.isError()) {
+    // TODO:
+    return;
+  }
+
+  for (const category of categoriesResult.getValue()) {
+    categories.value[category.id!] = category;
+  }
+}
 
 // Wallet Logic
 
@@ -89,7 +108,6 @@ const handleCreateExpenseModal = async () => {
   const modalResult = await showModal<Transaction>(ExpenseModal);
   if (modalResult.isError()) {
     // TODO:
-    console.debug(modalResult.getError());
     return;
   }
 
@@ -98,6 +116,7 @@ const handleCreateExpenseModal = async () => {
     return;
   }
 
+  console.debug(data);
   const result = await transactionUseCase.createExpense(data);
   if (result.isError()) {
     // TODO:
@@ -158,7 +177,7 @@ const removeTransaction = async (transactionId: number) => {
             <div v-for="transaction in transactions"
               :key="transaction.id"
             >
-              {{ transaction.type }} / {{ transaction.amount }}
+              {{ transaction.type }} / {{ transaction.amount }} / {{ categories[transaction.categoryId].name }}
               <ion-button
                 @click="() => removeTransaction(transaction.id!)"
               >X</ion-button>

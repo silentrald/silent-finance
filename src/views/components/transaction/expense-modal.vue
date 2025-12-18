@@ -6,24 +6,43 @@ import {
   IonHeader,
   IonInput,
   IonItem,
+  IonSelect,
+  IonSelectOption,
   IonTitle,
   IonToolbar,
   modalController,
 } from "@ionic/vue";
+import { inject, onMounted, ref } from "vue";
+import { Category } from "@/entities/category";
+import CategoryUseCase from "@/use-cases/category/types";
 import { ModalAction } from "@/modules/modal";
 import { Transaction } from "@/entities/transaction";
 import { TransactionType } from "@/enums/transaction";
-import { ref } from "vue";
+import { UseCases } from "@/use-cases/consts";
 import useLocale from "@/composables/locale";
 
 const { t } = useLocale();
+
+const categoryUseCase = inject(UseCases.CATEGORY) as CategoryUseCase;
 
 const amount = ref("");
 const description = ref("");
 const categoryId = ref("");
 const walletSourceId = ref("");
 
+const categories = ref([] as Category[]);
+
+onMounted(async () => {
+  const categoriesResult = await categoryUseCase.getAllCategories();
+  if (categoriesResult.isError()) {
+    // TODO:
+  } else {
+    categories.value = categoriesResult.getValue();
+  }
+});
+
 const confirm = () => {
+  console.debug("UwU", categoryId.value);
   const transaction: Transaction = {
     type: TransactionType.EXPENSE,
     amount: +amount.value,
@@ -68,12 +87,19 @@ const close = () => modalController.dismiss(null, ModalAction.CLOSE);
       />
     </ion-item>
     <ion-item>
-      <ion-input v-model="categoryId"
-        type="number"
-        label-placement="stacked"
-        label="categoryId"
-        placeholder="categoryId"
-      />
+      <ion-select
+        label="Category"
+        placeholder="Category"
+        :value="categories[0]?.id || 1"
+        @ionChange="categoryId = $event.detail.value"
+      >
+        <ion-select-option v-for="category in categories"
+          :key="category.id"
+          :value="category.id"
+        >
+          {{ category.name }}
+        </ion-select-option>
+      </ion-select>
     </ion-item>
     <ion-item>
       <ion-input v-model="walletSourceId"
