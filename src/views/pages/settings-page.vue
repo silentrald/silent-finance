@@ -11,42 +11,46 @@ import {
 import { onMounted, ref } from "vue";
 import { AppLocale } from "@/types";
 import locale from "@/modules/locale";
-import logger from "@/modules/logger";
 import preferences from "@/modules/preferences";
 import useLocale from "@/composables/locale";
+import useToast from "@/composables/toast";
 
 const { t } = useLocale();
+const toast = useToast();
+
 const language = ref("" as AppLocale);
 
 onMounted(async () => {
   const languageResult = await preferences.get("locale");
   if (languageResult.isError()) {
-    logger.error("Could not get language result from database", languageResult.getError());
+    await toast.error({ error: languageResult.getError()! });
     return;
   }
 
   language.value = languageResult.getValue();
 });
 
-async function onLanguageChanged() {
-  let result = await preferences.set("locale", language.value);
+async function onLanguageChanged(newLanguage: AppLocale) {
+  let result = await preferences.set("locale", newLanguage);
   if (result.isError()) {
-    logger.error(
-      "Could not change locale to ",
-      language.value, result.getError()
-    );
+    await toast.error({
+      message: `Can't change locale to ${newLanguage}`,
+      error: result.getError()!,
+    });
     language.value = locale.current();
     return;
   }
 
-  result = await locale.set(language.value);
+  result = await locale.set(newLanguage);
   if (result.isError()) {
-    logger.error(
-      "Could not set locale to ",
-      language.value, result.getError()
-    );
+    await toast.error({
+      message: `Can't change locale to ${newLanguage}`,
+      error: result.getError()!,
+    });
     return;
   }
+
+  language.value = newLanguage;
 }
 </script>
 
@@ -67,11 +71,11 @@ async function onLanguageChanged() {
 
       <div id="container">
         <ion-select
-          v-model="language"
+          :value="language"
           :label="t('settings.language')"
           :ok-text="t('general.ok')"
           :cancel-text="t('general.cancel')"
-          @ion-change="onLanguageChanged"
+          @ion-change="onLanguageChanged($event.detail.value as AppLocale)"
         >
           <ion-select-option v-for="l in locale.availableLocales()"
             :key="l.locale"

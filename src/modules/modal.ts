@@ -6,6 +6,7 @@ export enum ModalAction {
   CONFIRM = "confirm",
   CANCEL = "cancel",
   CLOSE = "close",
+  ERROR = "error",
 }
 
 export interface ModalReturn<T> {

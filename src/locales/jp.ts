@@ -36,6 +36,10 @@ const jp: LocaleSchema = {
     title: "設定",
     language: "言語",
   },
+
+  errors: {
+    REPO_NOT_FOUND: "{table} にレコードが見つかりませんでした。キー {fields}",
+  },
 };
 
 export default jp;

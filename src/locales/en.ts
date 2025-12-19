@@ -35,6 +35,10 @@ const en: LocaleSchema = {
     title: "Settings",
     language: "Language",
   },
+
+  errors: {
+    REPO_NOT_FOUND: "Could not find record in {table}. Keys {fields}",
+  },
 };
 
 export default en;

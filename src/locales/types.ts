@@ -1,8 +1,11 @@
+import { ErrorCodes } from "@/types/error";
 
-// page.label
-// page.modal.label
-// If modal is used by other pages
-// modals.modal.label
+/**
+ * Key formats
+ * - page.label
+ * - page.modal.label
+ * - modals.modal.label
+ **/
 export default interface LocaleSchema {
   general: {
     ok: string;
@@ -38,4 +41,6 @@ export default interface LocaleSchema {
     title: string;
     language: string;
   };
+
+  errors: Partial<Record<ErrorCodes, string>>;
 }

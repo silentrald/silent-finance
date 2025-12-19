@@ -20,8 +20,10 @@ import { Transaction } from "@/entities/transaction";
 import { TransactionType } from "@/enums/transaction";
 import { UseCases } from "@/use-cases/consts";
 import useLocale from "@/composables/locale";
+import useToast from "@/composables/toast";
 
 const { t } = useLocale();
+const toast = useToast();
 
 const categoryUseCase = inject(UseCases.CATEGORY) as CategoryUseCase;
 
@@ -35,14 +37,15 @@ const categories = ref([] as Category[]);
 onMounted(async () => {
   const categoriesResult = await categoryUseCase.getAllCategories();
   if (categoriesResult.isError()) {
-    // TODO:
-  } else {
-    categories.value = categoriesResult.getValue();
+    await toast.error({ error: categoriesResult.getError()! });
+    modalController.dismiss(null, ModalAction.ERROR);
+    return;
   }
+
+  categories.value = categoriesResult.getValue();
 });
 
 const confirm = () => {
-  console.debug("UwU", categoryId.value);
   const transaction: Transaction = {
     type: TransactionType.EXPENSE,
     amount: +amount.value,
@@ -91,7 +94,7 @@ const close = () => modalController.dismiss(null, ModalAction.CLOSE);
         :label="t('transaction.expenseModal.category')"
         :placeholder="t('transaction.expenseModal.category')"
         :value="categories[0]?.id || 1"
-        @ionChange="categoryId = $event.detail.value"
+        @ion-change="categoryId = $event.detail.value"
       >
         <ion-select-option v-for="category in categories"
           :key="category.id"

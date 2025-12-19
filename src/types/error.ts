@@ -17,6 +17,7 @@ interface ErrorInterface {
   LOCALE_SET: undefined;
 
   SHOW_MODAL: undefined;
+  SHOW_TOAST: undefined;
   PREFERENCE_SET: { key: string; value: string; };
   PREFERENCE_GET: { key: string; };
 

@@ -12,6 +12,7 @@ export default function useLocale() {
   const i18n = useI18n();
 
   return {
-    t: (key: NestedKeyOf<LocaleSchema>, parameters: Record<string, string> = {}) => i18n.t(key, parameters),
+    t: (key: NestedKeyOf<LocaleSchema>, parameters: Record<string, string> = {}): string =>
+      i18n.t(key, parameters),
   };
 }

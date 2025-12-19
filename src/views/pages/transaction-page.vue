@@ -13,8 +13,10 @@ import WalletCard from "../components/wallet/wallet-card.vue";
 import WalletModal from "../components/wallet/wallet-modal.vue";
 import WalletUseCase from "@/use-cases/wallet/types";
 import useLocale from "@/composables/locale";
+import useToast from "@/composables/toast";
 
 const { t } = useLocale();
+const toast = useToast();
 
 const categoryUseCase = inject(UseCases.CATEGORY) as CategoryUseCase;
 const transactionUseCase = inject(UseCases.TRANSACTION) as TransactionUseCase;
@@ -38,7 +40,7 @@ onMounted(async () => {
 const loadCategories = async () => {
   const categoriesResult = await categoryUseCase.getAllCategories();
   if (categoriesResult.isError()) {
-    // TODO:
+    await toast.error({ error: categoriesResult.getError()! });
     return;
   }
 
@@ -52,7 +54,7 @@ const loadCategories = async () => {
 const loadWallets = async () => {
   const walletsResult = await walletUseCase.getAllWallets();
   if (walletsResult.isError()) {
-    // TODO:
+    await toast.error({ error: walletsResult.getError()! });
     return;
   }
 
@@ -69,6 +71,7 @@ const updateWalletFromList = (wallet: Wallet) => {
 const handleCreateWalletModal = async () => {
   const modalResult = await showModal<Wallet>(WalletModal);
   if (modalResult.isError()) {
+    await toast.error({ error: modalResult.getError()! });
     return;
   }
 
@@ -79,6 +82,7 @@ const handleCreateWalletModal = async () => {
 
   const result = await walletUseCase.createWallet(data);
   if (result.isError()) {
+    await toast.error({ error: result.getError()! });
     return;
   }
 
@@ -90,7 +94,7 @@ const handleCreateWalletModal = async () => {
 const loadTransactions = async (walletId: number) => {
   const transactionResult = await transactionUseCase.getTransactionsByWallet(walletId);
   if (transactionResult.isError()) {
-    // TODO:
+    await toast.error({ error: transactionResult.getError()! });
     return;
   }
 
@@ -107,7 +111,7 @@ const removeTransactionFromList = (transactionId: number) => {
 const handleCreateExpenseModal = async () => {
   const modalResult = await showModal<Transaction>(ExpenseModal);
   if (modalResult.isError()) {
-    // TODO:
+    await toast.error({ error: modalResult.getError()! });
     return;
   }
 
@@ -116,11 +120,9 @@ const handleCreateExpenseModal = async () => {
     return;
   }
 
-  console.debug(data);
   const result = await transactionUseCase.createExpense(data);
   if (result.isError()) {
-    // TODO:
-    console.debug(result.getError());
+    await toast.error({ error: result.getError()! });
     return;
   }
 
@@ -132,6 +134,7 @@ const handleCreateExpenseModal = async () => {
 const removeTransaction = async (transactionId: number) => {
   const result = await transactionUseCase.removeTransaction(transactionId);
   if (result.isError()) {
+    await toast.error({ error: result.getError()! });
     return;
   }
 

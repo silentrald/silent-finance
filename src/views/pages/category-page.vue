@@ -14,10 +14,11 @@ import CategoryItem from "../components/category/category-item.vue";
 import CategoryModal from "../components/category/category-modal.vue";
 import CategoryUseCase from "@/use-cases/category/types";
 import { UseCases } from "@/use-cases/consts";
-import logger from "@/modules/logger";
 import useLocale from "@/composables/locale";
+import useToast from "@/composables/toast";
 
 const { t } = useLocale();
+const toast = useToast();
 
 const categoryUseCase = inject(UseCases.CATEGORY) as CategoryUseCase;
 const categories = ref([] as Category[]);
@@ -25,7 +26,7 @@ const categories = ref([] as Category[]);
 onMounted(async () => {
   const categoriesResult = await categoryUseCase.getAllCategories();
   if (categoriesResult.isError()) {
-    logger.error("Could not get categories", categoriesResult.getError());
+    await toast.error({ error: categoriesResult.getError()! });
     return;
   }
 
@@ -35,7 +36,7 @@ onMounted(async () => {
 const removeCategory = async (categoryId: number): Promise<void> => {
   const result = await categoryUseCase.removeCategory(categoryId);
   if (result.isError()) {
-    logger.error("Could not delete category", result.getError());
+    await toast.error({ error: result.getError()! });
     return;
   }
 
@@ -48,7 +49,7 @@ const removeCategory = async (categoryId: number): Promise<void> => {
 const showCreateModal = async () => {
   const modalResult = await showModal<Category>(CategoryModal);
   if (modalResult.isError()) {
-    logger.error("Could not open modal", modalResult.getError());
+    await toast.error({ error: modalResult.getError()! });
     return;
   }
 
@@ -59,7 +60,7 @@ const showCreateModal = async () => {
 
   const result = await categoryUseCase.createCategory(data);
   if (result.isError()) {
-    logger.error("Could not create category", result.getError());
+    await toast.error({ error: result.getError()! });
     return;
   }
 
