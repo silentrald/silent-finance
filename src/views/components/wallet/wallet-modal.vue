@@ -40,7 +40,7 @@ const close = () => modalController.dismiss(null, ModalAction.CLOSE);
       <ion-buttons slot="start">
         <ion-button color="medium" @click="close">{{ t("general.close") }}</ion-button>
       </ion-buttons>
-      <ion-title>{{ t("transaction.walletModal.addWallet") }}</ion-title>
+      <ion-title>{{ t("transaction.walletModal.title") }}</ion-title>
       <ion-buttons slot="end">
         <ion-button @click="confirm" :strong="true">{{ t("general.confirm") }}</ion-button>
       </ion-buttons>

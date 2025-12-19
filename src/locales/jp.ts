@@ -11,16 +11,23 @@ const jp: LocaleSchema = {
   transaction: {
     title: "取引",
     walletModal: {
-      addWallet: "ウォレットを追加",
+      title: "ウォレットを追加",
       name: "名前",
       amount: "額",
       color: "色",
+    },
+    expenseModal: {
+      title: "経費",
+      amount: "額",
+      description: "説明",
+      category: "カテゴリ",
+      wallet: "財布",
     },
   },
   category: {
     title: "カテゴリ",
     modal: {
-      addCategory: "カテゴリを追加",
+      title: "カテゴリを追加",
       name: "名前",
       color: "色",
     },

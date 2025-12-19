@@ -1,3 +1,8 @@
+
+// page.label
+// page.modal.label
+// If modal is used by other pages
+// modals.modal.label
 export default interface LocaleSchema {
   general: {
     ok: string;
@@ -8,16 +13,23 @@ export default interface LocaleSchema {
   transaction: {
     title: string;
     walletModal: {
-      addWallet: string;
+      title: string;
       name: string;
       amount: string;
       color: string;
+    };
+    expenseModal: {
+      title: string;
+      amount: string;
+      description: string;
+      category: string;
+      wallet: string;
     };
   };
   category: {
     title: string;
     modal: {
-      addCategory: string;
+      title: string;
       name: string;
       color: string;
     };

@@ -62,7 +62,7 @@ const close = () => modalController.dismiss(null, ModalAction.CLOSE);
       <ion-buttons slot="start">
         <ion-button color="medium" @click="close">{{ t("general.close") }}</ion-button>
       </ion-buttons>
-      <ion-title>{{ t("category.modal.addCategory") }}</ion-title>
+      <ion-title>{{ t("transaction.expenseModal.title") }}</ion-title>
       <ion-buttons slot="end">
         <ion-button @click="confirm" :strong="true">{{ t("general.confirm") }}</ion-button>
       </ion-buttons>
@@ -74,22 +74,22 @@ const close = () => modalController.dismiss(null, ModalAction.CLOSE);
       <ion-input v-model="amount"
         type="number"
         label-placement="stacked"
-        label="amount"
-        placeholder="amount"
+        :label="t('transaction.expenseModal.amount')"
+        :placeholder="t('transaction.expenseModal.amount')"
       />
     </ion-item>
     <ion-item>
       <ion-input v-model="description"
         type="text"
         label-placement="stacked"
-        label="description"
-        placeholder="description"
+        :label="t('transaction.expenseModal.description')"
+        :placeholder="t('transaction.expenseModal.description')"
       />
     </ion-item>
     <ion-item>
       <ion-select
-        label="Category"
-        placeholder="Category"
+        :label="t('transaction.expenseModal.category')"
+        :placeholder="t('transaction.expenseModal.category')"
         :value="categories[0]?.id || 1"
         @ionChange="categoryId = $event.detail.value"
       >
@@ -105,8 +105,8 @@ const close = () => modalController.dismiss(null, ModalAction.CLOSE);
       <ion-input v-model="walletSourceId"
         type="number"
         label-placement="stacked"
-        label="walletSourceId"
-        placeholder="walletSourceId"
+        :label="t('transaction.expenseModal.wallet')"
+        :placeholder="t('transaction.expenseModal.wallet')"
       />
     </ion-item>
   </ion-content>

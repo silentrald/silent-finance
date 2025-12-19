@@ -10,16 +10,23 @@ const en: LocaleSchema = {
   transaction: {
     title: "Transactions",
     walletModal: {
-      addWallet: "Add Wallet",
+      title: "Add Wallet",
       name: "Name",
       amount: "Amount",
       color: "Color",
+    },
+    expenseModal: {
+      title: "Expense",
+      amount: "Amount",
+      description: "Description",
+      category: "Category",
+      wallet: "Wallet",
     },
   },
   category: {
     title: "Categories",
     modal: {
-      addCategory: "Add Category",
+      title: "Add Category",
       name: "Name",
       color: "Color",
     },

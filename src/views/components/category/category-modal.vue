@@ -38,7 +38,7 @@ const close = () => modalController.dismiss(null, ModalAction.CLOSE);
       <ion-buttons slot="start">
         <ion-button color="medium" @click="close">{{ t("general.close") }}</ion-button>
       </ion-buttons>
-      <ion-title>{{ t("category.modal.addCategory") }}</ion-title>
+      <ion-title>{{ t("category.modal.title") }}</ion-title>
       <ion-buttons slot="end">
         <ion-button @click="confirm" :strong="true">{{ t("general.confirm") }}</ion-button>
       </ion-buttons>
