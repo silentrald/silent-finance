@@ -20,7 +20,19 @@ const en: LocaleSchema = {
       amount: "Amount",
       description: "Description",
       category: "Category",
-      wallet: "Wallet",
+    },
+    incomeModal: {
+      title: "Income",
+      amount: "Amount",
+      description: "Description",
+      category: "Category",
+    },
+    transferModal: {
+      title: "Transfer",
+      amount: "Amount",
+      description: "Description",
+      category: "Category",
+      destinationWallet: "Destination Wallet",
     },
   },
   category: {
@@ -38,6 +50,8 @@ const en: LocaleSchema = {
 
   errors: {
     REPO_NOT_FOUND: "Could not find record in {table}. Keys {fields}",
+
+    NO_DESTINATION_WALLET: "Could not find any wallet to transfer to.",
   },
 };
 

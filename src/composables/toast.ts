@@ -52,6 +52,26 @@ export default function useToast() {
         logger.error("Could not show error toast", error);
       }
     },
+
+    errorCode: async ({ code, data }: {
+      code: ErrorCodes;
+      data?: Record<string, any>;
+    }): Promise<void> => {
+      logger.error("Error ", code);
+
+      try {
+        const toast = await toastController.create({
+          message: t(`errors.${code}`, data || {}),
+          position: "bottom",
+          buttons: [
+            { text: "X" },
+          ],
+        });
+        await toast.present();
+      } catch (error: any) {
+        logger.error("Could not show error code toast", error);
+      }
+    },
   }
 }
 

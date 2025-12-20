@@ -31,6 +31,9 @@ interface ErrorInterface {
 
   REPO_MISSING_ID: { table: string; };
 
+  // Views
+  NO_DESTINATION_WALLET: undefined;
+
   NOT_IMPLEMENTED: undefined;
   UNKNOWN: undefined;
 }

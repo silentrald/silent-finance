@@ -6,8 +6,10 @@ import { inject, onMounted, ref } from "vue";
 import { Category } from "@/entities/category";
 import CategoryUseCase from "@/use-cases/category/types";
 import ExpenseModal from "../components/transaction/expense-modal.vue";
+import IncomeModal from "../components/transaction/income-modal.vue";
 import { Transaction } from "@/entities/transaction";
 import TransactionUseCase from "@/use-cases/transaction/types";
+import TransferModal from "../components/transaction/transfer-modal.vue";
 import { UseCases } from "@/use-cases/consts";
 import { Wallet } from "@/entities/wallet";
 import WalletCard from "../components/wallet/wallet-card.vue";
@@ -149,8 +151,6 @@ const handleCreateExpenseModal = async () => {
     return;
   }
 
-  console.debug("UwU", data);
-
   const result = await transactionUseCase.createExpense(data);
   if (result.isError()) {
     await toast.error({ error: result.getError()! });
@@ -162,6 +162,70 @@ const handleCreateExpenseModal = async () => {
   updateWalletFromList(wallet);
 }
 
+const handleCreateIncomeModal = async () => {
+  if (currentWallet.value === null) {
+    return;
+  }
+
+  const modalResult = await showModal<Transaction>(IncomeModal, {
+    walletId: currentWallet.value.id!,
+  });
+  if (modalResult.isError()) {
+    await toast.error({ error: modalResult.getError()! });
+    return;
+  }
+
+  const { action, data } = modalResult.getValue();
+  if (action !== ModalAction.CONFIRM) {
+    return;
+  }
+
+  const result = await transactionUseCase.createIncome(data);
+  if (result.isError()) {
+    await toast.error({ error: result.getError()! });
+    return;
+  }
+
+  const { transaction, wallet } = result.getValue();
+  transactions.value.unshift(transaction);
+  updateWalletFromList(wallet);
+}
+
+const handleCreateTransferModal = async () => {
+  if (currentWallet.value === null) {
+    return;
+  }
+
+  if (wallets.value.length === 1) {
+    await toast.errorCode({ code: "NO_DESTINATION_WALLET" });
+    return;
+  }
+
+  const modalResult = await showModal<Transaction>(TransferModal, {
+    walletId: currentWallet.value.id!,
+  });
+  if (modalResult.isError()) {
+    await toast.error({ error: modalResult.getError()! });
+    return;
+  }
+
+  const { action, data } = modalResult.getValue();
+  if (action !== ModalAction.CONFIRM) {
+    return;
+  }
+
+  const result = await transactionUseCase.createTransfer(data);
+  if (result.isError()) {
+    await toast.error({ error: result.getError()! });
+    return;
+  }
+
+  const { transaction, sourceWallet, destinationWallet } = result.getValue();
+  transactions.value.unshift(transaction);
+  updateWalletFromList(sourceWallet);
+  updateWalletFromList(destinationWallet);
+}
+
 const removeTransaction = async (transactionId: number) => {
   const result = await transactionUseCase.removeTransaction(transactionId);
   if (result.isError()) {
@@ -169,9 +233,12 @@ const removeTransaction = async (transactionId: number) => {
     return;
   }
 
-  const { wallet } = result.getValue();
+  const { sourceWallet, destinationWallet } = result.getValue();
   removeTransactionFromList(transactionId);
-  updateWalletFromList(wallet);
+  updateWalletFromList(sourceWallet);
+  if (destinationWallet) {
+    updateWalletFromList(destinationWallet);
+  }
 }
 </script>
 
@@ -226,12 +293,29 @@ const removeTransaction = async (transactionId: number) => {
             </div>
           </div>
 
-          <ion-button id="add-button"
+          <ion-button v-if="currentWallet"
+            id="add-button"
             expand="full"
             fill="clear"
             @click="handleCreateExpenseModal"
           >
-            +
+            Expense
+          </ion-button>
+          <ion-button v-if="currentWallet"
+            id="add-button"
+            expand="full"
+            fill="clear"
+            @click="handleCreateIncomeModal"
+          >
+            Income
+          </ion-button>
+          <ion-button v-if="currentWallet"
+            id="add-button"
+            expand="full"
+            fill="clear"
+            @click="handleCreateTransferModal"
+          >
+            Transfer
           </ion-button>
         </div>
       </div>

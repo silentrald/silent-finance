@@ -7,7 +7,7 @@ export default function createSQLite3WalletRepo(): WalletRepo {
   return {
     getById: async (client, walletId): PromiseResult<Wallet> => {
       const queryResult = await client.query(
-        `SELECT * FROM ${Tables.WALLET} WHERE ?;`,
+        `SELECT * FROM ${Tables.WALLET} WHERE id = ?;`,
         [ walletId ]
       );
       if (queryResult.isError()) return queryResult.toError();

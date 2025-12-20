@@ -26,7 +26,19 @@ export default interface LocaleSchema {
       amount: string;
       description: string;
       category: string;
-      wallet: string;
+    };
+    incomeModal: {
+      title: string;
+      amount: string;
+      description: string;
+      category: string;
+    };
+    transferModal: {
+      title: string;
+      amount: string;
+      description: string;
+      category: string;
+      destinationWallet: string;
     };
   };
   category: {

@@ -21,7 +21,19 @@ const jp: LocaleSchema = {
       amount: "額",
       description: "説明",
       category: "カテゴリ",
-      wallet: "財布",
+    },
+    incomeModal: {
+      title: "所得",
+      amount: "額",
+      description: "説明",
+      category: "カテゴリ",
+    },
+    transferModal: {
+      title: "移行",
+      amount: "額",
+      description: "説明",
+      category: "カテゴリ",
+      destinationWallet: "デスティネーションウォレット",
     },
   },
   category: {
@@ -39,6 +51,8 @@ const jp: LocaleSchema = {
 
   errors: {
     REPO_NOT_FOUND: "{table} にレコードが見つかりませんでした。キー {fields}",
+
+    NO_DESTINATION_WALLET: "転送先のウォレットが見つかりませんでした。",
   },
 };
 

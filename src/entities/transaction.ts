@@ -1,3 +1,4 @@
+import { Result } from "@/types/result";
 import { TransactionType } from "@/enums/transaction";
 import { compileValidator } from "@/modules/ajv";
 
@@ -28,5 +29,32 @@ const validate = compileValidator<Transaction>({
 });
 
 export default function validateTransaction(transaction: Transaction) {
-  return validate(transaction);
+  const result = validate(transaction);
+  if (result.isError()) return result.toError();
+
+  if (transaction.type === TransactionType.TRANSFER) {
+    if (!transaction.walletDestinationId) {
+      return Result.Error({
+        code: "ENTITY_INVALID",
+        data: [ {
+          property: "walletDestinationId",
+          code: "required",
+          message: "Transaction transfer needs a wallet destination",
+        } ],
+      });
+    }
+
+    if (transaction.walletSourceId === transaction.walletDestinationId) {
+      return Result.Error({
+        code: "ENTITY_INVALID",
+        data: [ {
+          property: "wallets",
+          code: "same",
+          message: "Transaction source and destination wallet are the same",
+        } ],
+      });
+    }
+  }
+
+  return Result.Ok();
 }
