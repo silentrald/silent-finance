@@ -21,15 +21,228 @@ import useToast from "@/composables/toast";
 const { t } = useLocale();
 const toast = useToast();
 
-const categoryUseCase = inject(UseCases.CATEGORY) as CategoryUseCase;
-const transactionUseCase = inject(UseCases.TRANSACTION) as TransactionUseCase;
-const walletUseCase = inject(UseCases.WALLET) as WalletUseCase;
+// Category Hook
+const {
+  categories,
+  loadCategories,
+} = (() => {
+  const categoryUseCase = inject(UseCases.CATEGORY) as CategoryUseCase;
 
-const categories = ref({} as Record<number, Category>);
-const transactions = ref([] as Transaction[]);
-const wallets = ref([] as Wallet[]);
+  const categories = ref({} as Record<number, Category>);
 
-const currentWallet = ref(null as Wallet | null);
+  return {
+    categories,
+
+    loadCategories: async () => {
+      const categoriesResult = await categoryUseCase.getAllCategories();
+      if (categoriesResult.isError()) {
+        await toast.error({ error: categoriesResult.getError()! });
+        return;
+      }
+
+      for (const category of categoriesResult.getValue()) {
+        categories.value[category.id!] = category;
+      }
+    },
+  }
+})();
+
+// Wallet/Transaction Hook
+const {
+  transactions, wallets,
+  currentWallet,
+
+  loadWallets, loadTransactions,
+
+  removeTransaction,
+
+  // Modals
+  handleCreateWalletModal,
+  handleCreateExpenseModal,
+  handleCreateIncomeModal,
+  handleCreateTransferModal,
+} = (() => {
+  const transactionUseCase = inject(UseCases.TRANSACTION) as TransactionUseCase;
+  const walletUseCase = inject(UseCases.WALLET) as WalletUseCase;
+
+  const transactions = ref([] as Transaction[]);
+  const wallets = ref([] as Wallet[]);
+  const currentWallet = ref(null as Wallet | null);
+
+  const updateWalletFromList = (wallet: Wallet) => {
+    const index = wallets.value.findIndex(w => w.id === wallet.id);
+    if (index > -1) {
+      wallets.value[index].amount = wallet.amount;
+    }
+  };
+
+  const removeTransactionFromList = (transactionId: number) => {
+    const index = transactions.value.findIndex(t => t.id === transactionId);
+    if (index > -1) {
+      transactions.value.splice(index, 1);
+    }
+  };
+
+  return {
+    transactions, wallets,
+    currentWallet,
+
+    loadWallets: async () => {
+      const walletsResult = await walletUseCase.getAllWallets();
+      if (walletsResult.isError()) {
+        await toast.error({ error: walletsResult.getError()! });
+        return;
+      }
+
+      wallets.value = walletsResult.getValue();
+      currentWallet.value = walletsResult.getValue()[0];
+    },
+
+    handleCreateWalletModal: async () => {
+      const modalResult = await showModal<Wallet>(WalletModal);
+      if (modalResult.isError()) {
+        await toast.error({ error: modalResult.getError()! });
+        return;
+      }
+
+      const { action, data } = modalResult.getValue();
+      if (action !== ModalAction.CONFIRM) {
+        return;
+      }
+
+      const result = await walletUseCase.createWallet(data);
+      if (result.isError()) {
+        await toast.error({ error: result.getError()! });
+        return;
+      }
+
+      wallets.value.push(result.getValue());
+      if (!currentWallet.value) {
+        currentWallet.value = result.getValue();
+      }
+    },
+
+    // Transaction Logic
+
+    loadTransactions: async (walletId: number) => {
+      const transactionResult = await transactionUseCase.getTransactionsByWallet(walletId);
+      if (transactionResult.isError()) {
+        await toast.error({ error: transactionResult.getError()! });
+        return;
+      }
+
+      transactions.value = transactionResult.getValue();
+    },
+
+    handleCreateExpenseModal: async () => {
+      if (currentWallet.value === null) {
+        return;
+      }
+
+      const modalResult = await showModal<Transaction>(ExpenseModal, {
+        walletId: currentWallet.value.id!,
+      });
+      if (modalResult.isError()) {
+        await toast.error({ error: modalResult.getError()! });
+        return;
+      }
+
+      const { action, data } = modalResult.getValue();
+      if (action !== ModalAction.CONFIRM) {
+        return;
+      }
+
+      const result = await transactionUseCase.createExpense(data);
+      if (result.isError()) {
+        await toast.error({ error: result.getError()! });
+        return;
+      }
+
+      const { transaction, wallet } = result.getValue();
+      transactions.value.unshift(transaction);
+      updateWalletFromList(wallet);
+    },
+
+    handleCreateIncomeModal: async () => {
+      if (currentWallet.value === null) {
+        return;
+      }
+
+      const modalResult = await showModal<Transaction>(IncomeModal, {
+        walletId: currentWallet.value.id!,
+      });
+      if (modalResult.isError()) {
+        await toast.error({ error: modalResult.getError()! });
+        return;
+      }
+
+      const { action, data } = modalResult.getValue();
+      if (action !== ModalAction.CONFIRM) {
+        return;
+      }
+
+      const result = await transactionUseCase.createIncome(data);
+      if (result.isError()) {
+        await toast.error({ error: result.getError()! });
+        return;
+      }
+
+      const { transaction, wallet } = result.getValue();
+      transactions.value.unshift(transaction);
+      updateWalletFromList(wallet);
+    },
+
+    handleCreateTransferModal: async () => {
+      if (currentWallet.value === null) {
+        return;
+      }
+
+      if (wallets.value.length === 1) {
+        await toast.errorCode({ code: "NO_DESTINATION_WALLET" });
+        return;
+      }
+
+      const modalResult = await showModal<Transaction>(TransferModal, {
+        walletId: currentWallet.value.id!,
+      });
+      if (modalResult.isError()) {
+        await toast.error({ error: modalResult.getError()! });
+        return;
+      }
+
+      const { action, data } = modalResult.getValue();
+      if (action !== ModalAction.CONFIRM) {
+        return;
+      }
+
+      const result = await transactionUseCase.createTransfer(data);
+      if (result.isError()) {
+        await toast.error({ error: result.getError()! });
+        return;
+      }
+
+      const { transaction, sourceWallet, destinationWallet } = result.getValue();
+      transactions.value.unshift(transaction);
+      updateWalletFromList(sourceWallet);
+      updateWalletFromList(destinationWallet);
+    },
+
+    removeTransaction: async (transactionId: number) => {
+      const result = await transactionUseCase.removeTransaction(transactionId);
+      if (result.isError()) {
+        await toast.error({ error: result.getError()! });
+        return;
+      }
+
+      const { sourceWallet, destinationWallet } = result.getValue();
+      removeTransactionFromList(transactionId);
+      updateWalletFromList(sourceWallet);
+      if (destinationWallet) {
+        updateWalletFromList(destinationWallet);
+      }
+    },
+  };
+})();
 
 onMounted(async () => {
   await loadCategories();
@@ -54,191 +267,6 @@ const onSlideMoved = async ({ currentSlideIndex }: any) => {
   }
   currentWallet.value = wallet;
   await loadTransactions(wallet.id!);
-}
-
-// Category Logic
-
-const loadCategories = async () => {
-  const categoriesResult = await categoryUseCase.getAllCategories();
-  if (categoriesResult.isError()) {
-    await toast.error({ error: categoriesResult.getError()! });
-    return;
-  }
-
-  for (const category of categoriesResult.getValue()) {
-    categories.value[category.id!] = category;
-  }
-}
-
-// Wallet Logic
-
-const loadWallets = async () => {
-  const walletsResult = await walletUseCase.getAllWallets();
-  if (walletsResult.isError()) {
-    await toast.error({ error: walletsResult.getError()! });
-    return;
-  }
-
-  wallets.value = walletsResult.getValue();
-  currentWallet.value = walletsResult.getValue()[0];
-};
-
-const updateWalletFromList = (wallet: Wallet) => {
-  const index = wallets.value.findIndex(w => w.id === wallet.id);
-  if (index > -1) {
-    wallets.value[index].amount = wallet.amount;
-  }
-}
-
-const handleCreateWalletModal = async () => {
-  const modalResult = await showModal<Wallet>(WalletModal);
-  if (modalResult.isError()) {
-    await toast.error({ error: modalResult.getError()! });
-    return;
-  }
-
-  const { action, data } = modalResult.getValue();
-  if (action !== ModalAction.CONFIRM) {
-    return;
-  }
-
-  const result = await walletUseCase.createWallet(data);
-  if (result.isError()) {
-    await toast.error({ error: result.getError()! });
-    return;
-  }
-
-  wallets.value.push(result.getValue());
-  if (!currentWallet.value) {
-    currentWallet.value = result.getValue();
-  }
-}
-
-// Transaction Logic
-
-const loadTransactions = async (walletId: number) => {
-  const transactionResult = await transactionUseCase.getTransactionsByWallet(walletId);
-  if (transactionResult.isError()) {
-    await toast.error({ error: transactionResult.getError()! });
-    return;
-  }
-
-  transactions.value = transactionResult.getValue();
-}
-
-const removeTransactionFromList = (transactionId: number) => {
-  const index = transactions.value.findIndex(t => t.id === transactionId);
-  if (index > -1) {
-    transactions.value.splice(index, 1);
-  }
-}
-
-const handleCreateExpenseModal = async () => {
-  if (currentWallet.value === null) {
-    return;
-  }
-
-  const modalResult = await showModal<Transaction>(ExpenseModal, {
-    walletId: currentWallet.value.id!,
-  });
-  if (modalResult.isError()) {
-    await toast.error({ error: modalResult.getError()! });
-    return;
-  }
-
-  const { action, data } = modalResult.getValue();
-  if (action !== ModalAction.CONFIRM) {
-    return;
-  }
-
-  const result = await transactionUseCase.createExpense(data);
-  if (result.isError()) {
-    await toast.error({ error: result.getError()! });
-    return;
-  }
-
-  const { transaction, wallet } = result.getValue();
-  transactions.value.unshift(transaction);
-  updateWalletFromList(wallet);
-}
-
-const handleCreateIncomeModal = async () => {
-  if (currentWallet.value === null) {
-    return;
-  }
-
-  const modalResult = await showModal<Transaction>(IncomeModal, {
-    walletId: currentWallet.value.id!,
-  });
-  if (modalResult.isError()) {
-    await toast.error({ error: modalResult.getError()! });
-    return;
-  }
-
-  const { action, data } = modalResult.getValue();
-  if (action !== ModalAction.CONFIRM) {
-    return;
-  }
-
-  const result = await transactionUseCase.createIncome(data);
-  if (result.isError()) {
-    await toast.error({ error: result.getError()! });
-    return;
-  }
-
-  const { transaction, wallet } = result.getValue();
-  transactions.value.unshift(transaction);
-  updateWalletFromList(wallet);
-}
-
-const handleCreateTransferModal = async () => {
-  if (currentWallet.value === null) {
-    return;
-  }
-
-  if (wallets.value.length === 1) {
-    await toast.errorCode({ code: "NO_DESTINATION_WALLET" });
-    return;
-  }
-
-  const modalResult = await showModal<Transaction>(TransferModal, {
-    walletId: currentWallet.value.id!,
-  });
-  if (modalResult.isError()) {
-    await toast.error({ error: modalResult.getError()! });
-    return;
-  }
-
-  const { action, data } = modalResult.getValue();
-  if (action !== ModalAction.CONFIRM) {
-    return;
-  }
-
-  const result = await transactionUseCase.createTransfer(data);
-  if (result.isError()) {
-    await toast.error({ error: result.getError()! });
-    return;
-  }
-
-  const { transaction, sourceWallet, destinationWallet } = result.getValue();
-  transactions.value.unshift(transaction);
-  updateWalletFromList(sourceWallet);
-  updateWalletFromList(destinationWallet);
-}
-
-const removeTransaction = async (transactionId: number) => {
-  const result = await transactionUseCase.removeTransaction(transactionId);
-  if (result.isError()) {
-    await toast.error({ error: result.getError()! });
-    return;
-  }
-
-  const { sourceWallet, destinationWallet } = result.getValue();
-  removeTransactionFromList(transactionId);
-  updateWalletFromList(sourceWallet);
-  if (destinationWallet) {
-    updateWalletFromList(destinationWallet);
-  }
 }
 </script>
 
