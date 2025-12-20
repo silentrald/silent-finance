@@ -48,7 +48,6 @@ const wallet = ref(walletProps);
   aspect-ratio: 1.6;
   min-width: 300px;
   max-width: 600px;
-  width: 75%;
 
   .wallet-name {
     font-weight: 700;

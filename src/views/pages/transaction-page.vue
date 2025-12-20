@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Carousel, Slide } from "vue3-carousel";
 import { IonButton, IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from "@ionic/vue";
 import { ModalAction, showModal } from "@/modules/modal";
 import { inject, onMounted, ref } from "vue";
@@ -26,6 +27,8 @@ const categories = ref({} as Record<number, Category>);
 const transactions = ref([] as Transaction[]);
 const wallets = ref([] as Wallet[]);
 
+const currentWallet = ref(null as Wallet | null);
+
 onMounted(async () => {
   await loadCategories();
   await loadWallets();
@@ -34,6 +37,22 @@ onMounted(async () => {
     await loadTransactions(wallets.value[0].id!);
   }
 });
+
+const onSlideMoved = async ({ currentSlideIndex }: any) => {
+  if (
+    currentSlideIndex < 0
+    || currentSlideIndex >= wallets.value.length
+  ) {
+    return;
+  }
+
+  const wallet = wallets.value[currentSlideIndex];
+  if (wallet.id === currentWallet.value?.id) {
+    return;
+  }
+  currentWallet.value = wallet;
+  await loadTransactions(wallet.id!);
+}
 
 // Category Logic
 
@@ -59,6 +78,7 @@ const loadWallets = async () => {
   }
 
   wallets.value = walletsResult.getValue();
+  currentWallet.value = walletsResult.getValue()[0];
 };
 
 const updateWalletFromList = (wallet: Wallet) => {
@@ -87,6 +107,9 @@ const handleCreateWalletModal = async () => {
   }
 
   wallets.value.push(result.getValue());
+  if (!currentWallet.value) {
+    currentWallet.value = result.getValue();
+  }
 }
 
 // Transaction Logic
@@ -109,7 +132,13 @@ const removeTransactionFromList = (transactionId: number) => {
 }
 
 const handleCreateExpenseModal = async () => {
-  const modalResult = await showModal<Transaction>(ExpenseModal);
+  if (currentWallet.value === null) {
+    return;
+  }
+
+  const modalResult = await showModal<Transaction>(ExpenseModal, {
+    walletId: currentWallet.value.id!,
+  });
   if (modalResult.isError()) {
     await toast.error({ error: modalResult.getError()! });
     return;
@@ -119,6 +148,8 @@ const handleCreateExpenseModal = async () => {
   if (action !== ModalAction.CONFIRM) {
     return;
   }
+
+  console.debug("UwU", data);
 
   const result = await transactionUseCase.createExpense(data);
   if (result.isError()) {
@@ -161,14 +192,22 @@ const removeTransaction = async (transactionId: number) => {
 
       <div id="container">
         <div id="wallet-container">
-          <div v-for="wallet in wallets" :key="wallet.id">
-            <wallet-card :wallet="wallet" />
-          </div>
+          <carousel :items-to-show="2.5"
+            @slide-end="onSlideMoved"
+          >
+            <slide v-for="wallet in wallets"
+              :key="wallet.id"
+            >
+              <wallet-card :wallet="wallet" />
+            </slide>
 
-          <ion-button id="add-wallet-button"
-            fill="clear"
-            @click="handleCreateWalletModal"
-          >+</ion-button>
+            <slide>
+              <ion-button id="add-wallet-button"
+                fill="clear"
+                @click="handleCreateWalletModal"
+              >+</ion-button>
+            </slide>
+          </carousel>
         </div>
 
         <div id="transaction-container">
@@ -202,16 +241,11 @@ const removeTransaction = async (transactionId: number) => {
 
 <style scoped>
 #wallet-container {
-  display: flex;
-  column-gap: 16px;
-  padding: 8px 16px;
-  overflow-x: scroll;
 
   #add-wallet-button {
     aspect-ratio: 1.6;
     min-width: 300px;
     max-width: 600px;
-    width: 75%;
     margin: 0;
 
     border: 2px dashed white;
@@ -232,5 +266,6 @@ const removeTransaction = async (transactionId: number) => {
     background-color: white;
     border-color: black;
   }
+
 }
 </style>

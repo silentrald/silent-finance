@@ -15,10 +15,13 @@ export interface ModalReturn<T> {
 }
 
 export async function showModal<T>(
-  component: ComponentRef
+  component: ComponentRef,
+  props?: any
 ): PromiseResult<ModalReturn<T>> {
   try {
-    const modal = await modalController.create({ component });
+    const modal = await modalController.create({
+      component, componentProps: props,
+    });
     modal.present();
 
     const { data, role } = await modal.onWillDismiss();

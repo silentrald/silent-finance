@@ -22,6 +22,10 @@ import { UseCases } from "@/use-cases/consts";
 import useLocale from "@/composables/locale";
 import useToast from "@/composables/toast";
 
+const { walletId } = defineProps<{
+  walletId: number;
+}>();
+
 const { t } = useLocale();
 const toast = useToast();
 
@@ -30,7 +34,6 @@ const categoryUseCase = inject(UseCases.CATEGORY) as CategoryUseCase;
 const amount = ref("");
 const description = ref("");
 const categoryId = ref("");
-const walletSourceId = ref("");
 
 const categories = ref([] as Category[]);
 
@@ -43,6 +46,7 @@ onMounted(async () => {
   }
 
   categories.value = categoriesResult.getValue();
+  categoryId.value = categoriesResult.getValue()[0].id!.toString();
 });
 
 const confirm = () => {
@@ -51,7 +55,7 @@ const confirm = () => {
     amount: +amount.value,
     description: description.value,
     categoryId: +categoryId.value,
-    walletSourceId: +walletSourceId.value,
+    walletSourceId: walletId,
   };
   modalController.dismiss(transaction, ModalAction.CONFIRM);
 };
@@ -93,7 +97,6 @@ const close = () => modalController.dismiss(null, ModalAction.CLOSE);
       <ion-select
         :label="t('transaction.expenseModal.category')"
         :placeholder="t('transaction.expenseModal.category')"
-        :value="categories[0]?.id || 1"
         @ion-change="categoryId = $event.detail.value"
       >
         <ion-select-option v-for="category in categories"
@@ -103,14 +106,6 @@ const close = () => modalController.dismiss(null, ModalAction.CLOSE);
           {{ category.name }}
         </ion-select-option>
       </ion-select>
-    </ion-item>
-    <ion-item>
-      <ion-input v-model="walletSourceId"
-        type="number"
-        label-placement="stacked"
-        :label="t('transaction.expenseModal.wallet')"
-        :placeholder="t('transaction.expenseModal.wallet')"
-      />
     </ion-item>
   </ion-content>
 </template>
