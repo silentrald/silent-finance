@@ -5,7 +5,7 @@ import { TransactionRepo } from "./type";
 
 export default function createSQLite3TransactionRepo(): TransactionRepo {
   const FIELDS = `
-  id, type, amount, description,
+  id, type, amount, description, timestamp,
   category_id as "categoryId",
   wallet_source_id as "walletSourceId",
   wallet_destination_id as "walletDestinationId"
@@ -44,7 +44,8 @@ export default function createSQLite3TransactionRepo(): TransactionRepo {
 SELECT ${FIELDS}
 FROM ${Tables.TRANSACTION}
 WHERE wallet_source_id = ?
-  OR wallet_destination_id = ?;
+  OR wallet_destination_id = ?
+ORDER BY timestamp DESC;
 `.trim(), [ walletId, walletId ]);
     },
 

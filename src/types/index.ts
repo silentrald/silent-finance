@@ -1,7 +1,7 @@
 
 export type Platform = "web" | "android";
 
-export type AppLocale = "en" | "jp";
+export type AppLocale = "en" | "ja";
 
 export interface ValidatorError {
   property: string;

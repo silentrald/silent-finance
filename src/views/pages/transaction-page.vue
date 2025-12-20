@@ -1,13 +1,27 @@
 <script setup lang="ts">
-import { Carousel, Slide } from "vue3-carousel";
-import { IonButton, IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from "@ionic/vue";
+import {
+  IonButton,
+  IonContent,
+  IonHeader,
+  IonIcon,
+  IonItem,
+  IonItemOption,
+  IonItemOptions,
+  IonItemSliding,
+  IonPage,
+  IonTitle,
+  IonToolbar,
+} from "@ionic/vue";
 import { ModalAction, showModal } from "@/modules/modal";
+import { Swiper, SwiperSlide } from "swiper/vue";
+import { arrowDown, arrowUp, swapVertical, trash } from "ionicons/icons";
 import { inject, onMounted, ref } from "vue";
 import { Category } from "@/entities/category";
 import CategoryUseCase from "@/use-cases/category/types";
 import ExpenseModal from "../components/transaction/expense-modal.vue";
 import IncomeModal from "../components/transaction/income-modal.vue";
 import { Transaction } from "@/entities/transaction";
+import { TransactionType } from "@/enums/transaction";
 import TransactionUseCase from "@/use-cases/transaction/types";
 import TransferModal from "../components/transaction/transfer-modal.vue";
 import { UseCases } from "@/use-cases/consts";
@@ -15,6 +29,7 @@ import { Wallet } from "@/entities/wallet";
 import WalletCard from "../components/wallet/wallet-card.vue";
 import WalletModal from "../components/wallet/wallet-modal.vue";
 import WalletUseCase from "@/use-cases/wallet/types";
+import { formatDate } from "@/modules/date";
 import useLocale from "@/composables/locale";
 import useToast from "@/composables/toast";
 
@@ -53,6 +68,8 @@ const {
   currentWallet,
 
   loadWallets, loadTransactions,
+
+  formatAmount,
 
   removeTransaction,
 
@@ -132,6 +149,35 @@ const {
       }
 
       transactions.value = transactionResult.getValue();
+    },
+
+    formatAmount: (transaction: Transaction) => {
+      let symbol = "+";
+
+      if (transaction.type === TransactionType.EXPENSE) {
+        symbol = "-";
+      } else if (transaction.type === TransactionType.TRANSFER) {
+        if (currentWallet.value?.id === transaction.walletSourceId) {
+          symbol = "-";
+        }
+      }
+
+      return `${symbol}${transaction.amount}`;
+    },
+
+    removeTransaction: async (transactionId: number) => {
+      const result = await transactionUseCase.removeTransaction(transactionId);
+      if (result.isError()) {
+        await toast.error({ error: result.getError()! });
+        return;
+      }
+
+      const { sourceWallet, destinationWallet } = result.getValue();
+      removeTransactionFromList(transactionId);
+      updateWalletFromList(sourceWallet);
+      if (destinationWallet) {
+        updateWalletFromList(destinationWallet);
+      }
     },
 
     handleCreateExpenseModal: async () => {
@@ -226,21 +272,6 @@ const {
       updateWalletFromList(sourceWallet);
       updateWalletFromList(destinationWallet);
     },
-
-    removeTransaction: async (transactionId: number) => {
-      const result = await transactionUseCase.removeTransaction(transactionId);
-      if (result.isError()) {
-        await toast.error({ error: result.getError()! });
-        return;
-      }
-
-      const { sourceWallet, destinationWallet } = result.getValue();
-      removeTransactionFromList(transactionId);
-      updateWalletFromList(sourceWallet);
-      if (destinationWallet) {
-        updateWalletFromList(destinationWallet);
-      }
-    },
   };
 })();
 
@@ -253,15 +284,20 @@ onMounted(async () => {
   }
 });
 
-const onSlideMoved = async ({ currentSlideIndex }: any) => {
-  if (
-    currentSlideIndex < 0
-    || currentSlideIndex >= wallets.value.length
-  ) {
+const onSlideChanged = async (event: any) => {
+  const { activeIndex: index } = event;
+
+  if (index < 0 || index > wallets.value.length) {
     return;
   }
 
-  const wallet = wallets.value[currentSlideIndex];
+  if (index === wallets.value.length) {
+    currentWallet.value = null;
+    transactions.value = [];
+    return;
+  }
+
+  const wallet = wallets.value[index];
   if (wallet.id === currentWallet.value?.id) {
     return;
   }
@@ -287,64 +323,122 @@ const onSlideMoved = async ({ currentSlideIndex }: any) => {
 
       <div id="container">
         <div id="wallet-container">
-          <carousel :items-to-show="2.5"
-            @slide-end="onSlideMoved"
+          <swiper
+            :slidesPerView="3"
+            :spaceBetween="30"
+            :centeredSlides="true"
+            :pagination="{
+              clickable: true,
+            }"
+            @slide-change="onSlideChanged"
           >
-            <slide v-for="wallet in wallets"
+            <swiper-slide v-for="wallet in wallets"
               :key="wallet.id"
             >
               <wallet-card :wallet="wallet" />
-            </slide>
+            </swiper-slide>
 
-            <slide>
+            <swiper-slide>
               <ion-button id="add-wallet-button"
                 fill="clear"
                 @click="handleCreateWalletModal"
               >+</ion-button>
-            </slide>
-          </carousel>
+            </swiper-slide>
+          </swiper>
+        </div>
+
+        <div id="transaction-buttons">
+          <div class="button-container">
+            <ion-button id="create-expense-button"
+              expand="full"
+              shape="round"
+              @click="handleCreateExpenseModal"
+            >
+              <ion-icon :icon="arrowDown"
+                slot="icon-only"
+                size="large"
+              />
+            </ion-button>
+
+            <div>Expense</div>
+          </div>
+
+          <div class="button-container">
+            <ion-button id="create-income-button"
+              expand="full"
+              shape="round"
+              @click="handleCreateIncomeModal"
+            >
+              <ion-icon :icon="arrowUp"
+                slot="icon-only"
+                size="large"
+              />
+            </ion-button>
+
+            <div>Income</div>
+          </div>
+
+          <div class="button-container">
+            <ion-button id="create-transfer-button"
+              expand="full"
+              shape="round"
+              @click="handleCreateTransferModal"
+            >
+              <ion-icon :icon="swapVertical"
+                slot="icon-only"
+                size="large"
+              />
+            </ion-button>
+
+            <div>Transfer</div>
+          </div>
         </div>
 
         <div id="transaction-container">
-          <div>
+          <div id="transaction-title">
             {{ t("transaction.title") }}
           </div>
 
-          <div>
-            <div v-for="transaction in transactions"
-              :key="transaction.id"
+          <div v-for="(transaction, index) in transactions"
+            :key="transaction.id"
+          >
+            <div v-if="
+              index === 0
+              || formatDate(transactions[index - 1].timestamp!, 'YYYY-MM-DD') !== formatDate(transaction.timestamp!, 'YYYY-MM-DD')"
+              class="date-divider"
             >
-              {{ transaction.type }} / {{ transaction.amount }} / {{ categories[transaction.categoryId].name }}
-              <ion-button
-                @click="() => removeTransaction(transaction.id!)"
-              >X</ion-button>
+              {{ formatDate(transaction.timestamp!, "MMMM D") }}
             </div>
-          </div>
 
-          <ion-button v-if="currentWallet"
-            id="add-button"
-            expand="full"
-            fill="clear"
-            @click="handleCreateExpenseModal"
-          >
-            Expense
-          </ion-button>
-          <ion-button v-if="currentWallet"
-            id="add-button"
-            expand="full"
-            fill="clear"
-            @click="handleCreateIncomeModal"
-          >
-            Income
-          </ion-button>
-          <ion-button v-if="currentWallet"
-            id="add-button"
-            expand="full"
-            fill="clear"
-            @click="handleCreateTransferModal"
-          >
-            Transfer
-          </ion-button>
+            <ion-item-sliding class="transaction-slide">
+              <ion-item>
+                <div class="transaction-item"
+                  :style="{
+                    backgroundColor: categories[transaction.categoryId].color
+                  }"
+                >
+                  <div class="transaction-icon">
+                    <img :src="categories[transaction.categoryId].icon" />
+                  </div>
+                  <div class="transaction-name">
+                    {{ categories[transaction.categoryId].name }}
+                  </div>
+                  <div class="transaction-amount">
+                    {{ formatAmount(transaction) }}
+                  </div>
+                  <div class="transaction-timestamp">
+                    {{ formatDate(transaction.timestamp!, "h:MM A") }}
+                  </div>
+                </div>
+              </ion-item>
+
+              <ion-item-options side="end">
+                <ion-item-option color="danger" @click="() => removeTransaction(transaction.id!)">
+                  <ion-icon slot="icon-only" :icon="trash"/>
+                </ion-item-option>
+              </ion-item-options>
+            </ion-item-sliding>
+          </div>
         </div>
       </div>
     </ion-content>
@@ -377,6 +471,111 @@ const onSlideMoved = async ({ currentSlideIndex }: any) => {
     color: black;
     background-color: white;
     border-color: black;
+  }
+
+}
+
+#transaction-buttons {
+  display: flex;
+  justify-content: space-evenly;
+  margin: 16px 0;
+
+  .button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    #create-expense-button,
+    #create-income-button,
+    #create-transfer-button {
+      aspect-ratio: 1;
+      width: 64px;
+      margin: 0 0 8px 0;
+    }
+  }
+}
+
+#transaction-container {
+
+  #transaction-title {
+    margin: 8px 16px;
+
+    font-weight: 700;
+    font-size: 32px;
+  }
+
+  .date-divider {
+    overflow: hidden;
+    text-align: center;
+    margin: 0 16px 8px 16px;
+  }
+
+  .date-divider::before,
+  .date-divider::after {
+    background-color: white;
+    content: "";
+    display: inline-block;
+    height: 1px;
+    position: relative;
+    vertical-align: middle;
+    width: 50%;
+  }
+
+  .date-divider::before {
+    right: 0.5em;
+    margin-left: -50%;
+  }
+
+  .date-divider::after {
+    left: 0.5em;
+    margin-right: -50%;
+  }
+
+  .transaction-slide {
+    margin-bottom: 8px;
+  }
+
+  .transaction-item {
+    display: grid;
+    grid-template-columns: 32px 4fr 1fr;
+    width: 100%;
+
+    padding: 8px 16px;
+    border-radius: 4px;
+
+    .transaction-icon {
+      grid-row: 1 / span 2;
+      grid-column: 1;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .transaction-name {
+      grid-row: 1;
+      grid-column: 2;
+
+      padding-left: 8px;
+      font-weight: 700;
+    }
+
+    .transaction-amount {
+      grid-row: 1;
+      grid-column: 3;
+
+      text-align: end;
+      font-weight: 700;
+    }
+
+    .transaction-timestamp {
+      grid-row: 2;
+      grid-column: 3;
+
+      text-align: end;
+      font-size: 12px;
+    }
+
   }
 
 }

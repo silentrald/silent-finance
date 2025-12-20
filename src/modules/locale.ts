@@ -9,7 +9,7 @@ const LOCALES: {
   text: string;
 }[] = [
   { locale: "en", text: "English" },
-  { locale: "jp", text: "日本語" },
+  { locale: "ja", text: "日本語" },
 ];
 let i18n: I18n;
 

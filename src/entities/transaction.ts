@@ -8,6 +8,7 @@ export interface Transaction {
   type: TransactionType;
   amount: number;
   description?: string;
+  timestamp?: string; // Custom type?
   categoryId: number;
   walletSourceId: number;
   walletDestinationId?: number;
@@ -18,8 +19,9 @@ const validate = compileValidator<Transaction>({
   properties: {
     id: { type: "integer", nullable: true },
     type: { type: "string", minLength: 1, maxLength: 1 },
-    amount: { type: "integer" },
+    amount: { type: "integer", minimum: 1 },
     description: { type: "string", nullable: true, maxLength: 100 },
+    timestamp: { type: "string", nullable: true },
     categoryId: { type: "integer" },
     walletSourceId: { type: "integer" },
     walletDestinationId: { type: "integer", nullable: true },

@@ -28,7 +28,8 @@ import "@ionic/vue/css/palettes/dark.system.css";
 /* Theme variables */
 import "./theme/variables.css";
 import "vue-color/style.css";
-import "vue3-carousel/carousel.css";
+import "swiper/css";
+import "@ionic/vue/css/ionic-swiper.css";
 
 import App from "./App.vue";
 import { AppLocale } from "./types";
