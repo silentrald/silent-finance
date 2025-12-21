@@ -33,7 +33,7 @@ import { formatDate } from "@/modules/date";
 import useLocale from "@/composables/locale";
 import useToast from "@/composables/toast";
 
-const { t } = useLocale();
+const { t, m } = useLocale();
 const toast = useToast();
 
 // Category Hook
@@ -162,7 +162,7 @@ const {
         }
       }
 
-      return `${symbol}${transaction.amount}`;
+      return `${symbol}${m(transaction.amount)}`;
     },
 
     removeTransaction: async (transactionId: number) => {
@@ -324,12 +324,9 @@ const onSlideChanged = async (event: any) => {
       <div id="container">
         <div id="wallet-container">
           <swiper
-            :slidesPerView="3"
-            :spaceBetween="30"
+            :slidesPerView="1.25"
+            :spaceBetween="10"
             :centeredSlides="true"
-            :pagination="{
-              clickable: true,
-            }"
             @slide-change="onSlideChanged"
           >
             <swiper-slide v-for="wallet in wallets"

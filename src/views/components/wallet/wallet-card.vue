@@ -3,6 +3,7 @@ import { IonButton, IonIcon } from "@ionic/vue";
 import { Wallet } from "@/entities/wallet";
 import { closeOutline } from "ionicons/icons";
 import { ref } from "vue";
+import useLocale from "@/composables/locale";
 
 const { wallet: walletProps } = defineProps<{
   wallet: Wallet;
@@ -10,6 +11,8 @@ const { wallet: walletProps } = defineProps<{
 const emit = defineEmits<{
   remove: [];
 }>();
+
+const { m } = useLocale();
 
 const wallet = ref(walletProps);
 </script>
@@ -21,7 +24,7 @@ const wallet = ref(walletProps);
     }"
   >
     <div class="wallet-name">{{ wallet.name }}</div>
-    <div class="wallet-amount">{{ wallet.amount }}</div>
+    <div class="wallet-amount">{{ m(wallet.amount) }}</div>
     <ion-button class="wallet-remove"
       fill="clear"
       @click="emit('remove')"

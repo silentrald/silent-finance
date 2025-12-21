@@ -1,3 +1,4 @@
+import { AppLocale } from "@/types";
 import LocaleSchema from "@/locales/types";
 import { useI18n } from "vue-i18n";
 
@@ -14,5 +15,12 @@ export default function useLocale() {
   return {
     t: (key: NestedKeyOf<LocaleSchema>, parameters: Record<string, string> = {}): string =>
       i18n.t(key, parameters),
+
+    n: (num: number, format: string, locale?: AppLocale): string =>
+      i18n.n(num, format, locale || "en"),
+
+    // format money
+    m: (num: number, locale?: AppLocale): string =>
+      i18n.n(num / 100, "money", locale || "en"),
   };
 }

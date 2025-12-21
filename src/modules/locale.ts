@@ -31,6 +31,22 @@ export default {
         legacy: false,
         locale,
         fallbackLocale: "en",
+        numberFormats: {
+          en: {
+            money: {
+              style: "decimal",
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            },
+          },
+          jp: {
+            money: {
+              style: "decimal",
+              minimumSignificantDigits: 3,
+              maximumSignificantDigits: 5,
+            },
+          },
+        },
       });
 
       await loadLocale(locale);
