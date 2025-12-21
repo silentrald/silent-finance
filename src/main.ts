@@ -35,12 +35,15 @@ import App from "./App.vue";
 import { AppLocale } from "./types";
 import { IonicVue } from "@ionic/vue";
 import { createApp } from "vue";
+import { createPinia } from "pinia";
 import createSQLite3DatabaseService from "./modules/database/sqlite3";
 import locale from "./modules/locale";
 import logger from "./modules/logger";
 import preferences from "./modules/preferences";
 import router from "./router";
 import { setupUseCases } from "./use-cases";
+import useCategoryStore from "./stores/category";
+import useWalletStore from "./stores/wallet";
 
 window.addEventListener("DOMContentLoaded", async () => {
   logger.info("Starting");
@@ -54,9 +57,17 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   const app = createApp(App)
     .use(IonicVue)
+    .use(createPinia())
     .use(router);
 
   setupUseCases({ app, databaseService });
+
+  const categoryStore = useCategoryStore();
+  const walletStore = useWalletStore();
+  await Promise.all([
+    categoryStore.loadCategories(),
+    walletStore.loadWallets(),
+  ]);
 
   const localePrefs: AppLocale = (await preferences.get("locale"))
     .orElse(error => {

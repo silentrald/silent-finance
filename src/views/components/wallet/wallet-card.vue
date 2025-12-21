@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { IonButton, IonIcon } from "@ionic/vue";
+import { ref, watch } from "vue";
 import { Wallet } from "@/entities/wallet";
 import { closeOutline } from "ionicons/icons";
-import { ref } from "vue";
 import useLocale from "@/composables/locale";
 
-const { wallet: walletProps } = defineProps<{
+const props = defineProps<{
   wallet: Wallet;
 }>();
 const emit = defineEmits<{
@@ -14,7 +14,9 @@ const emit = defineEmits<{
 
 const { m } = useLocale();
 
-const wallet = ref(walletProps);
+const wallet = ref(props.wallet);
+
+watch(() => props.wallet, () => wallet.value = props.wallet);
 </script>
 
 <template>

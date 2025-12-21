@@ -12,59 +12,26 @@ import {
   IonToolbar,
   modalController,
 } from "@ionic/vue";
-import { inject, onMounted, ref } from "vue";
-import { Category } from "@/entities/category";
-import CategoryUseCase from "@/use-cases/category/types";
 import { ModalAction } from "@/modules/modal";
 import { Transaction } from "@/entities/transaction";
 import { TransactionType } from "@/enums/transaction";
-import { UseCases } from "@/use-cases/consts";
-import { Wallet } from "@/entities/wallet";
-import WalletUseCase from "@/use-cases/wallet/types";
+import { ref } from "vue";
+import useCategoryStore from "@/stores/category";
 import useLocale from "@/composables/locale";
-import useToast from "@/composables/toast";
+import useWalletStore from "@/stores/wallet";
 
 const { walletId } = defineProps<{
   walletId: number;
 }>();
 
 const { t } = useLocale();
-const toast = useToast();
-
-const categoryUseCase = inject(UseCases.CATEGORY) as CategoryUseCase;
-const walletUseCase = inject(UseCases.WALLET) as WalletUseCase;
+const categoryStore = useCategoryStore();
+const walletStore = useWalletStore();
 
 const amount = ref("");
 const description = ref("");
 const categoryId = ref("");
 const destinationWalletId = ref("");
-
-const categories = ref([] as Category[]);
-const wallets = ref([] as Wallet[]);
-
-onMounted(async () => {
-  const categoriesResult = await categoryUseCase.getAllCategories();
-  if (categoriesResult.isError()) {
-    await toast.error({ error: categoriesResult.getError()! });
-    modalController.dismiss(null, ModalAction.ERROR);
-    return;
-  }
-
-  const walletsResult = await walletUseCase.getAllWallets();
-  if (walletsResult.isError()) {
-    await toast.error({ error: walletsResult.getError()! });
-    modalController.dismiss(null, ModalAction.ERROR);
-    return;
-  }
-
-  categories.value = categoriesResult.getValue();
-  categoryId.value = categoriesResult.getValue()[0].id!.toString();
-
-  const _wallets = walletsResult.getValue()
-    .filter(w => w.id !== walletId);
-  wallets.value = _wallets;
-  destinationWalletId.value = _wallets[0].id!.toString();
-});
 
 const confirm = () => {
   const transaction: Transaction = {
@@ -117,7 +84,7 @@ const close = () => modalController.dismiss(null, ModalAction.CLOSE);
         :placeholder="t('transaction.transferModal.category')"
         @ion-change="categoryId = $event.detail.value"
       >
-        <ion-select-option v-for="category in categories"
+        <ion-select-option v-for="category in categoryStore.getCategories()"
           :key="category.id"
           :value="category.id"
         >
@@ -129,9 +96,10 @@ const close = () => modalController.dismiss(null, ModalAction.CLOSE);
       <ion-select
         :label="t('transaction.transferModal.destinationWallet')"
         :placeholder="t('transaction.transferModal.destinationWallet')"
-        @ion-change="categoryId = $event.detail.value"
+        @ion-change="destinationWalletId = $event.detail.value"
       >
-        <ion-select-option v-for="wallet in wallets"
+        <ion-select-option
+          v-for="wallet in walletStore.getWallets().filter(w => w.id !== walletId)"
           :key="wallet.id"
           :value="wallet.id"
         >

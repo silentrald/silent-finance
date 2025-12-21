@@ -8,41 +8,22 @@ import {
   IonToolbar,
 } from "@ionic/vue";
 import { ModalAction, showModal } from "@/modules/modal";
-import { inject, onMounted, ref } from "vue";
 import { Category } from "@/entities/category";
 import CategoryItem from "../components/category/category-item.vue";
 import CategoryModal from "../components/category/category-modal.vue";
-import CategoryUseCase from "@/use-cases/category/types";
-import { UseCases } from "@/use-cases/consts";
+import useCategoryStore from "@/stores/category";
 import useLocale from "@/composables/locale";
 import useToast from "@/composables/toast";
 
 const { t } = useLocale();
 const toast = useToast();
 
-const categoryUseCase = inject(UseCases.CATEGORY) as CategoryUseCase;
-const categories = ref([] as Category[]);
-
-onMounted(async () => {
-  const categoriesResult = await categoryUseCase.getAllCategories();
-  if (categoriesResult.isError()) {
-    await toast.error({ error: categoriesResult.getError()! });
-    return;
-  }
-
-  categories.value = categoriesResult.getValue();
-});
+const categoryStore = useCategoryStore();
 
 const removeCategory = async (categoryId: number): Promise<void> => {
-  const result = await categoryUseCase.removeCategory(categoryId);
+  const result = await categoryStore.removeCategory(categoryId);
   if (result.isError()) {
     await toast.error({ error: result.getError()! });
-    return;
-  }
-
-  const index = categories.value.findIndex(c => c.id === categoryId);
-  if (index > -1) {
-    categories.value.splice(index, 1);
   }
 };
 
@@ -58,13 +39,10 @@ const showCreateModal = async () => {
     return;
   }
 
-  const result = await categoryUseCase.createCategory(data);
+  const result = await categoryStore.createCategory(data);
   if (result.isError()) {
     await toast.error({ error: result.getError()! });
-    return;
   }
-
-  categories.value.push(result.getValue());
 };
 </script>
 
@@ -85,7 +63,7 @@ const showCreateModal = async () => {
 
       <div id="container">
         <div id="category-container">
-          <div v-for="category in categories" :key="category.id">
+          <div v-for="category in categoryStore.getCategories()" :key="category.id">
             <category-item :category="category"
               @remove="() => removeCategory(category.id!)"
             />

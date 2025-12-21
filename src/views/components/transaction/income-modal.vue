@@ -12,42 +12,23 @@ import {
   IonToolbar,
   modalController,
 } from "@ionic/vue";
-import { inject, onMounted, ref } from "vue";
-import { Category } from "@/entities/category";
-import CategoryUseCase from "@/use-cases/category/types";
 import { ModalAction } from "@/modules/modal";
 import { Transaction } from "@/entities/transaction";
 import { TransactionType } from "@/enums/transaction";
-import { UseCases } from "@/use-cases/consts";
+import { ref } from "vue";
+import useCategoryStore from "@/stores/category";
 import useLocale from "@/composables/locale";
-import useToast from "@/composables/toast";
 
 const { walletId } = defineProps<{
   walletId: number;
 }>();
 
 const { t } = useLocale();
-const toast = useToast();
-
-const categoryUseCase = inject(UseCases.CATEGORY) as CategoryUseCase;
+const categoryStore = useCategoryStore();
 
 const amount = ref("");
 const description = ref("");
 const categoryId = ref("");
-
-const categories = ref([] as Category[]);
-
-onMounted(async () => {
-  const categoriesResult = await categoryUseCase.getAllCategories();
-  if (categoriesResult.isError()) {
-    await toast.error({ error: categoriesResult.getError()! });
-    modalController.dismiss(null, ModalAction.ERROR);
-    return;
-  }
-
-  categories.value = categoriesResult.getValue();
-  categoryId.value = categoriesResult.getValue()[0].id!.toString();
-});
 
 const confirm = () => {
   const transaction: Transaction = {
@@ -99,7 +80,7 @@ const close = () => modalController.dismiss(null, ModalAction.CLOSE);
         :placeholder="t('transaction.incomeModal.category')"
         @ion-change="categoryId = $event.detail.value"
       >
-        <ion-select-option v-for="category in categories"
+        <ion-select-option v-for="category in categoryStore.getCategories()"
           :key="category.id"
           :value="category.id"
         >
