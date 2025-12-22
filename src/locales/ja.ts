@@ -49,6 +49,14 @@ const jp: LocaleSchema = {
     language: "言語",
   },
 
+  enums: {
+    transactionType: {
+      E: "経費",
+      I: "所得",
+      T: "移行",
+    },
+  },
+
   errors: {
     REPO_NOT_FOUND: "{table} にレコードが見つかりませんでした。キー {fields}",
 

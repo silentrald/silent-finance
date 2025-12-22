@@ -1,4 +1,5 @@
 import { ErrorCodes } from "@/types/error";
+import { TransactionType } from "@/enums/transaction";
 
 /**
  * Key formats
@@ -52,6 +53,10 @@ export default interface LocaleSchema {
   settings: {
     title: string;
     language: string;
+  };
+
+  enums: {
+    transactionType: Record<TransactionType, string>;
   };
 
   errors: Partial<Record<ErrorCodes, string>>;

@@ -2,7 +2,6 @@ import { Result } from "@/types/result";
 import { TransactionType } from "@/enums/transaction";
 import { compileValidator } from "@/modules/ajv";
 
-// TODO: Add timestamp
 export interface Transaction {
   id?: number;
   type: TransactionType;

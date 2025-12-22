@@ -3,6 +3,7 @@ import { IonButton, IonIcon } from "@ionic/vue";
 import { Category } from "@/entities/category";
 import { closeOutline } from "ionicons/icons";
 import { ref } from "vue";
+import useLocale from "@/composables/locale";
 
 const { category: categoryProps } = defineProps<{
   category: Category;
@@ -10,6 +11,8 @@ const { category: categoryProps } = defineProps<{
 const emit = defineEmits<{
   remove: [];
 }>();
+
+const { t } = useLocale();
 
 const category = ref(categoryProps);
 </script>
@@ -24,7 +27,10 @@ const category = ref(categoryProps);
       :src="category.icon || '/images/help-outline.png'"
       alt=""
     />
-    <div class="category-name">{{ category.name }}</div>
+    <div class="category-name">
+      {{ category.type && `${t(`enums.transactionType.${category.type!}`)} -` }}
+      {{ category.name }}
+    </div>
     <ion-button class="category-remove"
       fill="clear"
       @click="emit('remove')"

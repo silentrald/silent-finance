@@ -84,7 +84,7 @@ const close = () => modalController.dismiss(null, ModalAction.CLOSE);
         :placeholder="t('transaction.transferModal.category')"
         @ion-change="categoryId = $event.detail.value"
       >
-        <ion-select-option v-for="category in categoryStore.getCategories()"
+        <ion-select-option v-for="category in categoryStore.getTransferCategories()"
           :key="category.id"
           :value="category.id"
         >

@@ -63,7 +63,7 @@ const showCreateModal = async () => {
 
       <div id="container">
         <div id="category-container">
-          <div v-for="category in categoryStore.getCategories()" :key="category.id">
+          <div v-for="category in categoryStore.getAllCategories()" :key="category.id">
             <category-item :category="category"
               @remove="() => removeCategory(category.id!)"
             />

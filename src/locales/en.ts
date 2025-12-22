@@ -48,6 +48,14 @@ const en: LocaleSchema = {
     language: "Language",
   },
 
+  enums: {
+    transactionType: {
+      E: "Expense",
+      I: "Income",
+      T: "Transfer",
+    },
+  },
+
   errors: {
     REPO_NOT_FOUND: "Could not find record in {table}. Keys {fields}",
 

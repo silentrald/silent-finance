@@ -47,13 +47,16 @@ const formatAmount = (transaction: Transaction) => {
       <img :src="categoryStore.getCategory(transaction.categoryId).icon" />
     </div>
 
-    <div v-if="transaction.type === TransactionType.TRANSFER" class="transaction-name">
+    <div class="transaction-name">
+      {{ categoryStore.getCategory(transaction.categoryId).name }}
+    </div>
+
+    <div v-if="transaction.type === TransactionType.TRANSFER"
+      class="transaction-description"
+    >
       <div>{{ walletStore.getWalletById(transaction.walletSourceId).name }}</div>
       <ion-icon :icon="arrowForward" />
       <div>{{ walletStore.getWalletById(transaction.walletDestinationId!).name }}</div>
-    </div>
-    <div v-else class="transaction-name">
-      {{ categoryStore.getCategory(transaction.categoryId).name }}
     </div>
 
     <div class="transaction-amount">
@@ -74,6 +77,8 @@ const formatAmount = (transaction: Transaction) => {
   padding: 8px 16px;
   border-radius: 4px;
 
+  height: 60px;
+
   .transaction-icon {
     grid-row: 1 / span 2;
     grid-column: 1;
@@ -87,12 +92,19 @@ const formatAmount = (transaction: Transaction) => {
     grid-row: 1;
     grid-column: 2;
 
+    padding-left: 8px;
+    font-weight: 700;
+  }
+
+  .transaction-description {
+    grid-row: 2;
+    grid-column: 2;
+
     display: flex;
     align-items: center;
     column-gap: 4px;
 
     padding-left: 8px;
-    font-weight: 700;
   }
 
   .transaction-amount {

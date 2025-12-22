@@ -7,7 +7,8 @@ CREATE TABLE ${Tables.WALLET} (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name VARCHAR(50) NOT NULL,
   amount INTEGER NOT NULL DEFAULT 0,
-  color ${Datatypes.COLOR} NOT NULL
+  color ${Datatypes.COLOR} NOT NULL,
+  UNIQUE (name)
 );
 `.trim();
 

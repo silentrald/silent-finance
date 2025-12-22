@@ -1,3 +1,4 @@
+import { TransactionType } from "@/enums/transaction";
 import { compileValidator } from "../modules/ajv";
 
 export interface Category {
@@ -5,6 +6,7 @@ export interface Category {
   name: string;
   color: string; // TODO: Create a type for this
   icon?: string;
+  type?: TransactionType;
 }
 
 const validate = compileValidator<Category>({
@@ -14,6 +16,7 @@ const validate = compileValidator<Category>({
     name: { type: "string", minLength: 1, maxLength: 50 },
     color: { type: "string", color: true },
     icon: { type: "string", nullable: true },
+    type: { type: "string", nullable: true },
   },
   required: [ "name", "color" ],
   additionalProperties: false,
