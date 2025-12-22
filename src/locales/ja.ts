@@ -7,6 +7,7 @@ const jp: LocaleSchema = {
     cancel: "いいえ",
     confirm: "確認する",
     close: "近い",
+    all: "全て",
   },
   transaction: {
     title: "取引",
@@ -42,6 +43,7 @@ const jp: LocaleSchema = {
       title: "カテゴリを追加",
       name: "名前",
       color: "色",
+      type: "タイプ",
     },
   },
   settings: {

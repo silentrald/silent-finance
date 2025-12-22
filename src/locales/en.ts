@@ -6,6 +6,7 @@ const en: LocaleSchema = {
     cancel: "Cancel",
     confirm: "Confirm",
     close: "Close",
+    all: "All",
   },
   transaction: {
     title: "Transactions",
@@ -41,6 +42,7 @@ const en: LocaleSchema = {
       title: "Add Category",
       name: "Name",
       color: "Color",
+      type: "Type",
     },
   },
   settings: {

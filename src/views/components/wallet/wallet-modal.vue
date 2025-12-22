@@ -10,7 +10,7 @@ import {
   IonToolbar,
   modalController,
 } from "@ionic/vue";
-import { ChromePicker } from "vue-color";
+import ColorInput from "../input/color-input.vue";
 import { ModalAction } from "@/modules/modal";
 import { Wallet } from "@/entities/wallet";
 import { ref } from "vue";
@@ -65,8 +65,9 @@ const close = () => modalController.dismiss(null, ModalAction.CLOSE);
       />
     </ion-item>
     <ion-item>
-      <!-- TODO: create a component for this -->
-      <chrome-picker v-model="color" />
+      <color-input v-model="color"
+        :label="t('transaction.walletModal.color')"
+      />
     </ion-item>
   </ion-content>
 </template>

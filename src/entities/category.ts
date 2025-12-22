@@ -6,7 +6,7 @@ export interface Category {
   name: string;
   color: string; // TODO: Create a type for this
   icon?: string;
-  type?: TransactionType;
+  type?: TransactionType | null;
 }
 
 const validate = compileValidator<Category>({

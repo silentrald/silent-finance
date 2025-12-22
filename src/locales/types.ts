@@ -13,6 +13,7 @@ export default interface LocaleSchema {
     cancel: string;
     confirm: string;
     close: string;
+    all: string;
   },
   transaction: {
     title: string;
@@ -48,6 +49,7 @@ export default interface LocaleSchema {
       title: string;
       name: string;
       color: string;
+      type: string;
     };
   };
   settings: {
