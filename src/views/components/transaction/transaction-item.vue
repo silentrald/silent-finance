@@ -19,6 +19,7 @@ const categoryStore = useCategoryStore();
 const walletStore = useWalletStore();
 
 const transaction = ref(props.transaction);
+const showDescription = ref(false);
 
 const formatAmount = (transaction: Transaction) => {
   let symbol = "+";
@@ -38,89 +39,105 @@ const formatAmount = (transaction: Transaction) => {
 </script>
 
 <template>
-  <div class="transaction-item"
-    :style="{
-      backgroundColor: categoryStore.getCategory(transaction.categoryId).color
-    }"
-  >
-    <div class="transaction-icon">
-      <img :src="categoryStore.getCategory(transaction.categoryId).icon" />
-    </div>
-
-    <div class="transaction-name">
-      {{ categoryStore.getCategory(transaction.categoryId).name }}
-    </div>
-
-    <div v-if="transaction.type === TransactionType.TRANSFER"
-      class="transaction-description"
+  <div class="transaction-item">
+    <div class="transaction-content"
+      :style="{
+        backgroundColor: categoryStore.getCategory(transaction.categoryId).color
+      }"
+      @click="showDescription = !showDescription"
     >
-      <div>{{ walletStore.getWalletById(transaction.walletSourceId).name }}</div>
-      <ion-icon :icon="arrowForward" />
-      <div>{{ walletStore.getWalletById(transaction.walletDestinationId!).name }}</div>
+      <div class="transaction-icon">
+        <img :src="categoryStore.getCategory(transaction.categoryId).icon" />
+      </div>
+
+      <div class="transaction-name">
+        {{ categoryStore.getCategory(transaction.categoryId).name }}
+      </div>
+
+      <div v-if="transaction.type === TransactionType.TRANSFER"
+        class="transaction-info"
+      >
+        <div>{{ walletStore.getWalletById(transaction.walletSourceId).name }}</div>
+        <ion-icon :icon="arrowForward" />
+        <div>{{ walletStore.getWalletById(transaction.walletDestinationId!).name }}</div>
+      </div>
+
+      <div class="transaction-amount">
+        {{ formatAmount(transaction) }}
+      </div>
+      <div class="transaction-timestamp">
+        {{ formatDate(transaction.timestamp!, "h:MM A") }}
+      </div>
     </div>
 
-    <div class="transaction-amount">
-      {{ formatAmount(transaction) }}
-    </div>
-    <div class="transaction-timestamp">
-      {{ formatDate(transaction.timestamp!, "h:MM A") }}
+    <div v-if="showDescription && transaction.description" class="transaction-description">
+      {{ transaction.description }}
     </div>
   </div>
 </template>
 
 <style scoped>
 .transaction-item {
-  display: grid;
-  grid-template-columns: 32px 4fr 1fr;
   width: 100%;
 
-  padding: 8px 16px;
-  border-radius: 4px;
+  .transaction-content {
+    display: grid;
+    grid-template-columns: 32px 4fr 1fr;
 
-  height: 60px;
+    padding: 8px 16px;
+    border-radius: 4px;
 
-  .transaction-icon {
-    grid-row: 1 / span 2;
-    grid-column: 1;
+    height: 60px;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+    .transaction-icon {
+      grid-row: 1 / span 2;
+      grid-column: 1;
 
-  .transaction-name {
-    grid-row: 1;
-    grid-column: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-    padding-left: 8px;
-    font-weight: 700;
+    .transaction-name {
+      grid-row: 1;
+      grid-column: 2;
+
+      padding-left: 8px;
+      font-weight: 700;
+    }
+
+    .transaction-info {
+      grid-row: 2;
+      grid-column: 2;
+
+      display: flex;
+      align-items: center;
+      column-gap: 4px;
+
+      padding-left: 8px;
+    }
+
+    .transaction-amount {
+      grid-row: 1;
+      grid-column: 3;
+
+      text-align: end;
+      font-weight: 700;
+    }
+
+    .transaction-timestamp {
+      grid-row: 2;
+      grid-column: 3;
+
+      text-align: end;
+      font-size: 12px;
+    }
+
   }
 
   .transaction-description {
-    grid-row: 2;
-    grid-column: 2;
-
-    display: flex;
-    align-items: center;
-    column-gap: 4px;
-
-    padding-left: 8px;
-  }
-
-  .transaction-amount {
-    grid-row: 1;
-    grid-column: 3;
-
-    text-align: end;
-    font-weight: 700;
-  }
-
-  .transaction-timestamp {
-    grid-row: 2;
-    grid-column: 3;
-
-    text-align: end;
-    font-size: 12px;
+    padding: 8px 16px;
+    border-radius: 4px;
   }
 
 }
