@@ -16,7 +16,7 @@ export default function useLocale() {
     t: (key: NestedKeyOf<LocaleSchema>, parameters: Record<string, string> = {}): string =>
       i18n.t(key, parameters),
 
-    n: (num: number, format: string, locale?: AppLocale): string =>
+    n: (num: number, format: string = "default", locale?: AppLocale): string =>
       i18n.n(num, format, locale || "en"),
 
     // format money

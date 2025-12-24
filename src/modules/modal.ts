@@ -7,6 +7,7 @@ export enum ModalAction {
   CANCEL = "cancel",
   CLOSE = "close",
   ERROR = "error",
+  BACKDROP = "backdrop", // When outside of the modal is clicked
 }
 
 export interface ModalReturn<T> {
@@ -21,6 +22,28 @@ export async function showModal<T>(
   try {
     const modal = await modalController.create({
       component, componentProps: props,
+    });
+    modal.present();
+
+    const { data, role } = await modal.onWillDismiss();
+    return Result.Ok({
+      action: role as ModalAction,
+      data: data as T,
+    });
+  } catch (error: any) {
+    return Result.Error({ code: "SHOW_MODAL", error });
+  }
+}
+
+export async function showBottomModal<T>(
+  component: ComponentRef,
+  props?: any
+): PromiseResult<ModalReturn<T>> {
+  try {
+    const modal = await modalController.create({
+      component, componentProps: props,
+      initialBreakpoint: 1,
+      breakpoints: [ 0, 1 ],
     });
     modal.present();
 

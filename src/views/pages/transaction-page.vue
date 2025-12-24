@@ -12,7 +12,7 @@ import {
   IonTitle,
   IonToolbar,
 } from "@ionic/vue";
-import { ModalAction, showModal } from "@/modules/modal";
+import { ModalAction, showBottomModal, showModal } from "@/modules/modal";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { arrowDown, arrowUp, swapVertical, trash } from "ionicons/icons";
 import { inject, onMounted, ref } from "vue";
@@ -114,7 +114,7 @@ const {
         return;
       }
 
-      const modalResult = await showModal<Transaction>(ExpenseModal, {
+      const modalResult = await showBottomModal<Transaction>(ExpenseModal, {
         walletId: walletStore.getCurrentWallet()!.id!,
       });
       if (modalResult.isError()) {
@@ -143,7 +143,7 @@ const {
         return;
       }
 
-      const modalResult = await showModal<Transaction>(IncomeModal, {
+      const modalResult = await showBottomModal<Transaction>(IncomeModal, {
         walletId: walletStore.getCurrentWallet()!.id!,
       });
       if (modalResult.isError()) {
@@ -177,7 +177,7 @@ const {
         return;
       }
 
-      const modalResult = await showModal<Transaction>(TransferModal, {
+      const modalResult = await showBottomModal<Transaction>(TransferModal, {
         walletId: walletStore.getCurrentWallet()!.id!,
       });
       if (modalResult.isError()) {

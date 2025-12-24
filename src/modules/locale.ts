@@ -33,6 +33,9 @@ export default {
         fallbackLocale: "en",
         numberFormats: {
           en: {
+            default: {
+              style: "decimal",
+            },
             money: {
               style: "decimal",
               minimumFractionDigits: 2,
@@ -40,6 +43,9 @@ export default {
             },
           },
           jp: {
+            default: {
+              style: "decimal",
+            },
             money: {
               style: "decimal",
               minimumSignificantDigits: 3,
