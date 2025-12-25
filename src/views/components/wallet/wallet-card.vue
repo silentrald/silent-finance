@@ -2,7 +2,7 @@
 import { IonButton, IonIcon } from "@ionic/vue";
 import { ref, watch } from "vue";
 import { Wallet } from "@/entities/wallet";
-import { closeOutline } from "ionicons/icons";
+import { trash } from "ionicons/icons";
 import useLocale from "@/composables/locale";
 
 const props = defineProps<{
@@ -20,32 +20,29 @@ watch(() => props.wallet, () => wallet.value = props.wallet);
 </script>
 
 <template>
-  <div class="wallet-card"
+  <div class="wallet-card ion-padding"
     :style="{
       backgroundColor: wallet.color,
     }"
   >
     <div class="wallet-name">{{ wallet.name }}</div>
     <div class="wallet-amount">{{ m(wallet.amount) }}</div>
-    <ion-button class="wallet-remove"
-      fill="clear"
-      @click="emit('remove')"
-    >
-      <ion-icon class="wallet-remove-icon"
-        slot="icon-only"
-        :icon="closeOutline"
+
+    <!-- TODO: Create a proper way for deleting this -->
+    <div class="wallet-remove">
+      <ion-button fill="clear"
+        @click="emit('remove')"
         color="light"
-      />
-    </ion-button>
+      >
+        <ion-icon :icon="trash" />
+      </ion-button>
+    </div>
   </div>
 </template>
 
 <style scoped>
 .wallet-card {
-  display: flex;
-  align-items: center;
-  column-gap: 8px;
-  padding: 8px;
+  display: grid;
 
   border-radius: 4px;
   color: black;
@@ -55,21 +52,30 @@ watch(() => props.wallet, () => wallet.value = props.wallet);
   max-width: 600px;
 
   .wallet-name {
+    grid-row: 1;
+    grid-column: 1;
+
+    text-align: start;
     font-weight: 700;
     text-overflow: ellipsis;
   }
 
   .wallet-amount {
+    grid-row: 2;
+    grid-column: 1 / span 2;
+
+    display: flex;
+    justify-content: end;
+    align-items: end;
+
     font-weight: 700;
   }
 
   .wallet-remove {
-    margin-left: auto;
+    grid-row: 1;
+    grid-column: 2;
 
-    .wallet-remove-icon {
-      width: 32px;
-      height: 32px;
-    }
+    margin-left: auto;
   }
 }
 </style>

@@ -1,16 +1,12 @@
 <script setup lang="ts">
 import {
   IonButton,
-  IonContent,
-  IonHeader,
   IonIcon,
   IonItem,
   IonItemOption,
   IonItemOptions,
   IonItemSliding,
   IonPage,
-  IonTitle,
-  IonToolbar,
 } from "@ionic/vue";
 import { ModalAction, showBottomModal, showModal } from "@/modules/modal";
 import { Swiper, SwiperSlide } from "swiper/vue";
@@ -257,121 +253,107 @@ const onSlideChanged = async (event: any) => {
 
 <template>
   <ion-page>
-    <ion-header :translucent="true">
-      <ion-toolbar>
-        <ion-title>{{ t("transaction.title") }}</ion-title>
-      </ion-toolbar>
-    </ion-header>
-
-    <ion-content :fullscreen="true">
-      <ion-header collapse="condense">
-        <ion-toolbar>
-          <ion-title size="large">{{ t("transaction.title") }}</ion-title>
-        </ion-toolbar>
-      </ion-header>
-
-      <div id="container">
-        <div id="wallet-container">
-          <swiper
-            :slidesPerView="1.25"
-            :spaceBetween="10"
-            :centeredSlides="true"
-            @slide-change="onSlideChanged"
+    <div id="container" class="ion-padding">
+      <div id="wallet-container">
+        <swiper
+          :slidesPerView="1.25"
+          :spaceBetween="10"
+          :centeredSlides="true"
+          @slide-change="onSlideChanged"
+        >
+          <swiper-slide v-for="wallet in walletStore.getWallets()"
+            :key="wallet.id"
           >
-            <swiper-slide v-for="wallet in walletStore.getWallets()"
-              :key="wallet.id"
-            >
-              <wallet-card :wallet="wallet"
-                @remove="() => removeWallet(wallet)"
-              />
-            </swiper-slide>
+            <wallet-card :wallet="wallet"
+              @remove="() => removeWallet(wallet)"
+            />
+          </swiper-slide>
 
-            <swiper-slide>
-              <ion-button id="add-wallet-button"
-                fill="clear"
-                @click="createWallet"
-              >+</ion-button>
-            </swiper-slide>
-          </swiper>
+          <swiper-slide>
+            <ion-button id="add-wallet-button"
+              fill="clear"
+              @click="createWallet"
+            >+</ion-button>
+          </swiper-slide>
+        </swiper>
+      </div>
+
+      <div id="transaction-buttons">
+        <div class="button-container">
+          <ion-button id="create-expense-button"
+            expand="full"
+            shape="round"
+            @click="createExpenseTransaction"
+          >
+            <ion-icon :icon="arrowDown"
+              slot="icon-only"
+              size="large"
+            />
+          </ion-button>
+
+          <div>{{ t("enums.transactionType.E") }}</div>
         </div>
 
-        <div id="transaction-buttons">
-          <div class="button-container">
-            <ion-button id="create-expense-button"
-              expand="full"
-              shape="round"
-              @click="createExpenseTransaction"
-            >
-              <ion-icon :icon="arrowDown"
-                slot="icon-only"
-                size="large"
-              />
-            </ion-button>
+        <div class="button-container">
+          <ion-button id="create-income-button"
+            expand="full"
+            shape="round"
+            @click="createIncomeTransaction"
+          >
+            <ion-icon :icon="arrowUp"
+              slot="icon-only"
+              size="large"
+            />
+          </ion-button>
 
-            <div>Expense</div>
-          </div>
-
-          <div class="button-container">
-            <ion-button id="create-income-button"
-              expand="full"
-              shape="round"
-              @click="createIncomeTransaction"
-            >
-              <ion-icon :icon="arrowUp"
-                slot="icon-only"
-                size="large"
-              />
-            </ion-button>
-
-            <div>Income</div>
-          </div>
-
-          <div class="button-container">
-            <ion-button id="create-transfer-button"
-              expand="full"
-              shape="round"
-              @click="createTransferTransaction"
-            >
-              <ion-icon :icon="swapVertical"
-                slot="icon-only"
-                size="large"
-              />
-            </ion-button>
-
-            <div>Transfer</div>
-          </div>
+          <div>{{ t("enums.transactionType.I") }}</div>
         </div>
 
-        <div id="transaction-container">
-          <div id="transaction-title">
-            {{ t("transaction.title") }}
-          </div>
-          <div v-for="(transaction, index) in transactions"
-            :key="transaction.id"
+        <div class="button-container">
+          <ion-button id="create-transfer-button"
+            expand="full"
+            shape="round"
+            @click="createTransferTransaction"
           >
-            <div v-if="
-              index === 0
-              || formatDate(transactions[index - 1].timestamp!, 'YYYY-MM-DD') !== formatDate(transaction.timestamp!, 'YYYY-MM-DD')"
-              class="date-divider"
-            >
-              {{ formatDate(transaction.timestamp!, "MMMM D") }}
-            </div>
+            <ion-icon :icon="swapVertical"
+              slot="icon-only"
+              size="large"
+            />
+          </ion-button>
 
-            <ion-item-sliding class="transaction-slide">
-              <ion-item>
-                <transaction-item :transaction="transaction" />
-              </ion-item>
-
-              <ion-item-options side="end">
-                <ion-item-option color="danger" @click="() => removeTransaction(transaction.id!)">
-                  <ion-icon slot="icon-only" :icon="trash"/>
-                </ion-item-option>
-              </ion-item-options>
-            </ion-item-sliding>
-          </div>
+          <div>{{ t("enums.transactionType.T") }}</div>
         </div>
       </div>
-    </ion-content>
+
+      <div id="transaction-container">
+        <div id="transaction-title">
+          {{ t("transaction.title") }}
+        </div>
+        <div v-for="(transaction, index) in transactions"
+          :key="transaction.id"
+        >
+          <div v-if="
+            index === 0
+            || formatDate(transactions[index - 1].timestamp!, 'YYYY-MM-DD') !== formatDate(transaction.timestamp!, 'YYYY-MM-DD')"
+            class="date-divider"
+          >
+            {{ formatDate(transaction.timestamp!, "MMMM D") }}
+          </div>
+
+          <ion-item-sliding class="transaction-slide">
+            <ion-item>
+              <transaction-item :transaction="transaction" />
+            </ion-item>
+
+            <ion-item-options side="end">
+              <ion-item-option color="danger" @click="() => removeTransaction(transaction.id!)">
+                <ion-icon slot="icon-only" :icon="trash"/>
+              </ion-item-option>
+            </ion-item-options>
+          </ion-item-sliding>
+        </div>
+      </div>
+    </div>
   </ion-page>
 </template>
 
@@ -420,7 +402,7 @@ const onSlideChanged = async (event: any) => {
     #create-transfer-button {
       aspect-ratio: 1;
       width: 64px;
-      margin: 0 0 8px 0;
+      margin-bottom: 8px;
     }
   }
 }
@@ -428,7 +410,7 @@ const onSlideChanged = async (event: any) => {
 #transaction-container {
 
   #transaction-title {
-    margin: 8px 16px;
+    margin: 8px 0;
 
     font-weight: 700;
     font-size: 32px;
@@ -437,7 +419,7 @@ const onSlideChanged = async (event: any) => {
   .date-divider {
     overflow: hidden;
     text-align: center;
-    margin: 0 16px 8px 16px;
+    margin-bottom: 8px;
   }
 
   .date-divider::before,
