@@ -42,6 +42,7 @@ export default interface LocaleSchema {
       category: string;
       destinationWallet: string;
     };
+    removeWallet: string;
   };
   category: {
     title: string;
@@ -51,6 +52,7 @@ export default interface LocaleSchema {
       color: string;
       type: string;
     };
+    removeModal: string;
   };
   settings: {
     title: string;

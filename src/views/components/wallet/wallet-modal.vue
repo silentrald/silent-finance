@@ -2,7 +2,6 @@
 import {
   IonButton,
   IonButtons,
-  IonContent,
   IonHeader,
   IonInput,
   IonItem,
@@ -47,46 +46,26 @@ const close = () => modalController.dismiss(null, ModalAction.CLOSE);
     </ion-toolbar>
   </ion-header>
 
-  <ion-content class="ion-padding">
-    <ion-item>
-      <ion-input v-model="name"
-        type="text"
-        label-placement="stacked"
-        :label="t('transaction.walletModal.name')"
-        :placeholder="t('transaction.walletModal.name')"
-      />
-    </ion-item>
-    <ion-item>
-      <ion-input v-model="amount"
-        type="number"
-        label-placement="stacked"
-        :label="t('transaction.walletModal.amount')"
-        :placeholder="t('transaction.walletModal.amount')"
-      />
-    </ion-item>
-    <ion-item>
-      <color-input v-model="color"
-        :label="t('transaction.walletModal.color')"
-      />
-    </ion-item>
-  </ion-content>
+  <ion-item>
+    <ion-input v-model="name"
+      type="text"
+      label-placement="stacked"
+      :label="t('transaction.walletModal.name')"
+      :placeholder="t('transaction.walletModal.name')"
+    />
+  </ion-item>
+  <ion-item>
+    <ion-input v-model="amount"
+      type="number"
+      label-placement="stacked"
+      :label="t('transaction.walletModal.amount')"
+      :placeholder="t('transaction.walletModal.amount')"
+    />
+  </ion-item>
+  <ion-item>
+    <color-input v-model="color"
+      :label="t('transaction.walletModal.color')"
+    />
+  </ion-item>
 </template>
 
-<style>
-ion-modal {
-  --height: 50%;
-  --border-radius: 16px;
-  --box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  padding: 0 16px;
-}
-
-ion-modal::part(backdrop) {
-  background: rgba(209, 213, 219);
-  opacity: 1;
-}
-
-ion-modal ion-toolbar {
-  --background: rgb(14 116 144);
-  --color: white;
-}
-</style>

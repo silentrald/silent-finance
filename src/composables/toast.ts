@@ -33,15 +33,16 @@ export default function useToast() {
       error: ResultError<E>
       message?: string;
     }): Promise<void> => {
+      logger.error(error);
+
+      let toastMessage = t(`errors.${error.code}`, (error as any).data);
       if (message) {
-        logger.error(message, " ", error);
-      } else {
-        logger.error(error);
+        toastMessage = `${message} ${toastMessage}`;
       }
 
       try {
         const toast = await toastController.create({
-          message: t(`errors.${error.code}`, (error as any).data),
+          message: toastMessage,
           position: "bottom",
           buttons: [
             { text: "X" },

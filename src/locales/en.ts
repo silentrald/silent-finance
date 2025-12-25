@@ -35,6 +35,7 @@ const en: LocaleSchema = {
       category: "Category",
       destinationWallet: "Destination Wallet",
     },
+    removeWallet: "Do you want to remove \"{wallet}\" wallet?",
   },
   category: {
     title: "Categories",
@@ -44,6 +45,7 @@ const en: LocaleSchema = {
       color: "Color",
       type: "Type",
     },
+    removeModal: "Do you want to remove \"{type}{category}\" category?",
   },
   settings: {
     title: "Settings",

@@ -36,6 +36,7 @@ const jp: LocaleSchema = {
       category: "カテゴリ",
       destinationWallet: "デスティネーションウォレット",
     },
+    removeWallet: "\"{wallet}\"ウォレットを削除しますか?",
   },
   category: {
     title: "カテゴリ",
@@ -45,6 +46,7 @@ const jp: LocaleSchema = {
       color: "色",
       type: "タイプ",
     },
+    removeModal: "\"{type}{category}\" カテゴリを削除しますか?",
   },
   settings: {
     title: "設定",

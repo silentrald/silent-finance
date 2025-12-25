@@ -11,6 +11,7 @@ import { ModalAction, showModal } from "@/modules/modal";
 import { Category } from "@/entities/category";
 import CategoryItem from "../components/category/category-item.vue";
 import CategoryModal from "../components/category/category-modal.vue";
+import SimpleModal from "../components/simple-modal.vue";
 import useCategoryStore from "@/stores/category";
 import useLocale from "@/composables/locale";
 import useToast from "@/composables/toast";
@@ -20,8 +21,26 @@ const toast = useToast();
 
 const categoryStore = useCategoryStore();
 
-const removeCategory = async (categoryId: number): Promise<void> => {
-  const result = await categoryStore.removeCategory(categoryId);
+const removeCategory = async (category: Category): Promise<void> => {
+  const type = category.type
+    ? `${t(`enums.transactionType.${category.type!}`)} - `
+    : "";
+  const modalResult = await showModal(SimpleModal, {
+    text: t("category.removeModal", { type, category: category.name }),
+  });
+  if (modalResult.isError()) {
+    await toast.error({
+      message: "Could not delete category",
+      error: modalResult.getError()!,
+    });
+  }
+
+  const { action } = modalResult.getValue();
+  if (action !== ModalAction.CONFIRM) {
+    return;
+  }
+
+  const result = await categoryStore.removeCategory(category.id!);
   if (result.isError()) {
     await toast.error({ error: result.getError()! });
   }
@@ -65,7 +84,7 @@ const showCreateModal = async () => {
         <div id="category-container">
           <div v-for="category in categoryStore.getAllCategories()" :key="category.id">
             <category-item :category="category"
-              @remove="() => removeCategory(category.id!)"
+              @remove="() => removeCategory(category)"
             />
           </div>
         </div>

@@ -18,6 +18,7 @@ import { arrowDown, arrowUp, swapVertical, trash } from "ionicons/icons";
 import { inject, onMounted, ref } from "vue";
 import ExpenseModal from "../components/transaction/expense-modal.vue";
 import IncomeModal from "../components/transaction/income-modal.vue";
+import SimpleModal from "../components/simple-modal.vue";
 import { Transaction } from "@/entities/transaction";
 import TransactionItem from "../components/transaction/transaction-item.vue";
 import TransactionUseCase from "@/use-cases/transaction/types";
@@ -42,13 +43,13 @@ const {
 
   loadTransactions,
 
-  removeTransaction,
+  createWallet,
+  removeWallet,
 
-  // Modals
-  handleCreateWalletModal,
-  handleCreateExpenseModal,
-  handleCreateIncomeModal,
-  handleCreateTransferModal,
+  createExpenseTransaction,
+  createIncomeTransaction,
+  createTransferTransaction,
+  removeTransaction,
 } = (() => {
   const transactionUseCase = inject(UseCases.TRANSACTION) as TransactionUseCase;
 
@@ -64,7 +65,7 @@ const {
   return {
     transactions,
 
-    handleCreateWalletModal: async () => {
+    createWallet: async () => {
       const modalResult = await showModal<Wallet>(WalletModal);
       if (modalResult.isError()) {
         await toast.error({ error: modalResult.getError()! });
@@ -77,6 +78,28 @@ const {
       }
 
       const result = await walletStore.createWallet(data);
+      if (result.isError()) {
+        await toast.error({ error: result.getError()! });
+      }
+    },
+
+    removeWallet: async (wallet: Wallet) => {
+      const modalResult = await showModal(SimpleModal, {
+        text: t("transaction.removeWallet", {
+          wallet: wallet.name,
+        }),
+      });
+      if (modalResult.isError()) {
+        await toast.error({ error: modalResult.getError()! });
+        return;
+      }
+
+      const { action } = modalResult.getValue();
+      if (action !== ModalAction.CONFIRM) {
+        return;
+      }
+
+      const result = await walletStore.removeWallet(wallet.id!);
       if (result.isError()) {
         await toast.error({ error: result.getError()! });
       }
@@ -109,7 +132,7 @@ const {
       }
     },
 
-    handleCreateExpenseModal: async () => {
+    createExpenseTransaction: async () => {
       if (walletStore.getCurrentWallet() === null) {
         return;
       }
@@ -138,7 +161,7 @@ const {
       walletStore.updateWallet(wallet);
     },
 
-    handleCreateIncomeModal: async () => {
+    createIncomeTransaction: async () => {
       if (walletStore.getCurrentWallet() === null) {
         return;
       }
@@ -167,7 +190,7 @@ const {
       walletStore.updateWallet(wallet);
     },
 
-    handleCreateTransferModal: async () => {
+    createTransferTransaction: async () => {
       if (walletStore.getCurrentWallet() === null) {
         return;
       }
@@ -258,13 +281,15 @@ const onSlideChanged = async (event: any) => {
             <swiper-slide v-for="wallet in walletStore.getWallets()"
               :key="wallet.id"
             >
-              <wallet-card :wallet="wallet" />
+              <wallet-card :wallet="wallet"
+                @remove="() => removeWallet(wallet)"
+              />
             </swiper-slide>
 
             <swiper-slide>
               <ion-button id="add-wallet-button"
                 fill="clear"
-                @click="handleCreateWalletModal"
+                @click="createWallet"
               >+</ion-button>
             </swiper-slide>
           </swiper>
@@ -275,7 +300,7 @@ const onSlideChanged = async (event: any) => {
             <ion-button id="create-expense-button"
               expand="full"
               shape="round"
-              @click="handleCreateExpenseModal"
+              @click="createExpenseTransaction"
             >
               <ion-icon :icon="arrowDown"
                 slot="icon-only"
@@ -290,7 +315,7 @@ const onSlideChanged = async (event: any) => {
             <ion-button id="create-income-button"
               expand="full"
               shape="round"
-              @click="handleCreateIncomeModal"
+              @click="createIncomeTransaction"
             >
               <ion-icon :icon="arrowUp"
                 slot="icon-only"
@@ -305,7 +330,7 @@ const onSlideChanged = async (event: any) => {
             <ion-button id="create-transfer-button"
               expand="full"
               shape="round"
-              @click="handleCreateTransferModal"
+              @click="createTransferTransaction"
             >
               <ion-icon :icon="swapVertical"
                 slot="icon-only"

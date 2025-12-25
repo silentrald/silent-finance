@@ -19,7 +19,7 @@ export default function createWalletUseCaseV1({
       const client = clientResult.getValue();
 
       try {
-        return walletRepo.getAll(client);
+        return await walletRepo.getAll(client);
       } finally {
         await client.close();
       }
@@ -34,7 +34,7 @@ export default function createWalletUseCaseV1({
       const client = clientResult.getValue();
 
       try {
-        return walletRepo.create(client, wallet);
+        return await walletRepo.create(client, wallet);
       } finally {
         await client.close();
       }
@@ -46,7 +46,7 @@ export default function createWalletUseCaseV1({
       const client = clientResult.getValue();
 
       try {
-        return walletRepo.removeById(client, walletId);
+        return await walletRepo.removeById(client, walletId);
       } finally {
         await client.close();
       }
