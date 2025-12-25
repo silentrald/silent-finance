@@ -37,7 +37,7 @@ const confirmModal = () => {
 </script>
 
 <template>
-  <div id="expense-modal">
+  <div class="ion-padding">
     <ion-select
       :label="t('transaction.expenseModal.category')"
       :placeholder="t('transaction.expenseModal.category')"
@@ -62,8 +62,8 @@ const confirmModal = () => {
   </div>
 </template>
 
-<style scoped>
-#expense-modal {
-  padding: 16px 32px;
+<style>
+ion-modal#expense-modal {
+  --border-radius: 16px 16px 0 0;
 }
 </style>

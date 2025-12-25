@@ -22,7 +22,7 @@ export async function showModal<T = null>(
   try {
     const modal = await modalController.create({
       component, componentProps: props,
-      id: "sample",
+      id: (component as any)?.__name || "modal",
     });
     modal.present();
 
@@ -43,6 +43,7 @@ export async function showBottomModal<T>(
   try {
     const modal = await modalController.create({
       component, componentProps: props,
+      id: (component as any)?.__name || "modal",
       initialBreakpoint: 1,
       breakpoints: [ 0, 1 ],
     });

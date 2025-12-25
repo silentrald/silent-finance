@@ -41,7 +41,7 @@ const confirmModal = () => {
 </script>
 
 <template>
-  <div id="transfer-modal">
+  <div class="ion-padding">
     <ion-select
       :label="t('transaction.transferModal.category')"
       @ion-change="categoryId = $event.detail.value"
@@ -77,8 +77,8 @@ const confirmModal = () => {
   </div>
 </template>
 
-<style scoped>
-#transfer-modal {
-  padding: 16px 32px;
+<style>
+ion-modal#transfer-modal {
+  --border-radius: 16px 16px 0 0;
 }
 </style>
