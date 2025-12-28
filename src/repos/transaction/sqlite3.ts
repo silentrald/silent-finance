@@ -3,7 +3,7 @@ import { Tables } from "@/db/consts";
 import { Transaction } from "@/entities/transaction";
 import { TransactionRepo } from "./type";
 
-export default function createSQLite3TransactionRepo(): TransactionRepo {
+export default function createTransactionRepoSQLite3(): TransactionRepo {
   const FIELDS = `
   id, type, amount, description, timestamp,
   category_id as "categoryId",

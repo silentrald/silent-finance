@@ -3,11 +3,16 @@ import { Tables } from "@/db/consts";
 import { Wallet } from "@/entities/wallet";
 import { WalletRepo } from "./type";
 
-export default function createSQLite3WalletRepo(): WalletRepo {
+export default function createWalletRepoSQLite3(): WalletRepo {
+  const FIELDS = `
+  id, name, amount, color,
+  currency_id as "currencyId",
+  has_denomination as "hasDenomination"
+`.trim();
   return {
     getById: async (client, walletId): PromiseResult<Wallet> => {
       const queryResult = await client.query(
-        `SELECT * FROM ${Tables.WALLET} WHERE id = ?;`,
+        `SELECT ${FIELDS} FROM ${Tables.WALLET} WHERE id = ?;`,
         [ walletId ]
       );
       if (queryResult.isError()) return queryResult.toError();
@@ -28,7 +33,7 @@ export default function createSQLite3WalletRepo(): WalletRepo {
 
     getAll: async (client): PromiseResult<Wallet[]> => {
       const queryResult = await client
-        .query(`SELECT * FROM ${Tables.WALLET};`);
+        .query(`SELECT ${FIELDS} FROM ${Tables.WALLET};`);
       if (queryResult.isError()) return queryResult.toError();
 
       return Result.Ok(queryResult.getValue() as Wallet[]);
@@ -36,16 +41,24 @@ export default function createSQLite3WalletRepo(): WalletRepo {
 
     create: async (client, wallet): PromiseResult<Wallet> => {
       const queryResult = await client.query<Wallet>(`
-INSERT INTO ${Tables.WALLET} (name, amount, color)
-VALUES (?, ?, ?)
-RETURNING id;
+INSERT INTO ${Tables.WALLET} (
+  name, amount, color,
+  currency_id, has_denomination
+)
+VALUES (
+  ?, ?, ?,
+  ?, ?
+)
+RETURNING *;
         `.trim(),
-      [ wallet.name, wallet.amount, wallet.color ]
+      [
+        wallet.name, wallet.amount, wallet.color,
+        wallet.currencyId, +Boolean(wallet.denominations),
+      ]
       );
       if (queryResult.isError()) return queryResult.toError();
 
-      wallet.id = queryResult.getValue()[0].id;
-      return Result.Ok(wallet);
+      return Result.Ok(queryResult.getValue()[0]);
     },
 
     update: async (client, wallet): PromiseResult<Wallet> => {
@@ -60,17 +73,20 @@ RETURNING id;
 UPDATE ${Tables.WALLET}
 SET name = ?,
   amount = ?,
-  color = ?
+  color = ?,
+  currency_id = ?,
+  has_denomination = ?
 WHERE id = ?
         `.trim(),
       [
-        wallet.name, wallet.amount,
-        wallet.color, wallet.id,
+        wallet.name, wallet.amount, wallet.color,
+        wallet.currencyId, +wallet.hasDenomination,
+        wallet.id,
       ]
       );
       if (runResult.isError()) return runResult.toError();
 
-      if (runResult.getValue() === 0) {
+      if (runResult.getValue().changes === 0) {
         return Result.Error({
           code: "REPO_NO_REMOVE",
           data: { table: Tables.WALLET },
@@ -87,7 +103,7 @@ WHERE id = ?
       );
       if (runResult.isError()) return runResult.toError();
 
-      if (runResult.getValue() === 0) {
+      if (runResult.getValue().changes === 0) {
         return Result.Error({
           code: "REPO_NO_REMOVE",
           data: { table: Tables.WALLET },

@@ -9,3 +9,5 @@ export interface ValidatorError {
   message: string;
 }
 
+export type HexColor = `#${string}`;
+

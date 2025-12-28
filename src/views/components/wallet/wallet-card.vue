@@ -1,9 +1,13 @@
 <script setup lang="ts">
-import { IonButton, IonIcon } from "@ionic/vue";
-import { ref, watch } from "vue";
+import { IonButton, IonIcon, IonPopover } from "@ionic/vue";
+import { inject, ref, watch } from "vue";
+import { AmountCount } from "@/dtos/denomination";
+import DenominationUseCase from "@/use-cases/denomination/types";
+import { UseCases } from "@/use-cases/consts";
 import { Wallet } from "@/entities/wallet";
 import { trash } from "ionicons/icons";
 import useLocale from "@/composables/locale";
+import useToast from "@/composables/toast";
 
 const props = defineProps<{
   wallet: Wallet;
@@ -12,11 +16,30 @@ const emit = defineEmits<{
   remove: [];
 }>();
 
+const denominationUseCase = inject(UseCases.DENOMINATION) as DenominationUseCase;
+
 const { m } = useLocale();
+const toast = useToast();
 
 const wallet = ref(props.wallet);
+const showDenominations = ref(false);
+const denominations = ref(null as AmountCount[] | null);
 
 watch(() => props.wallet, () => wallet.value = props.wallet);
+
+watch(() => showDenominations.value, async () => {
+  if (!showDenominations.value || denominations.value) {
+    return;
+  }
+
+  const result = await denominationUseCase.getAmountCountOfWallet(props.wallet.id);
+  if (result.isError()) {
+    await toast.error({ error: result.getError()! });
+    return;
+  }
+
+  denominations.value = result.getValue();
+})
 </script>
 
 <template>
@@ -24,9 +47,13 @@ watch(() => props.wallet, () => wallet.value = props.wallet);
     :style="{
       backgroundColor: wallet.color,
     }"
+    @click="showDenominations = !showDenominations"
   >
     <div class="wallet-name">{{ wallet.name }}</div>
-    <div class="wallet-amount">{{ m(wallet.amount) }}</div>
+    <div class="wallet-amount">
+      {{ wallet.currencyId }}
+      {{ m(wallet.amount) }}
+    </div>
 
     <!-- TODO: Create a proper way for deleting this -->
     <div class="wallet-remove">
@@ -38,6 +65,23 @@ watch(() => props.wallet, () => wallet.value = props.wallet);
       </ion-button>
     </div>
   </div>
+
+  <!-- TODO: Temporary -->
+  <ion-popover :is-open="showDenominations">
+    <table>
+      <tr>
+        <th>Amount</th>
+        <th>Count</th>
+      </tr>
+
+      <tr v-for="denomination in denominations"
+        :key="denomination.amount"
+      >
+        <td>{{ wallet.currencyId }} {{ m(denomination.amount) }}</td>
+        <td>{{ denomination.count }}</td>
+      </tr>
+    </table>
+  </ion-popover>
 </template>
 
 <style scoped>

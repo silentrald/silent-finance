@@ -15,6 +15,7 @@ const READONLY = false;
 
 class DatabaseClientImpl implements DatabaseClient {
   private database: SQLiteDBConnection;
+  private _isTransaction = false;
 
   constructor(database: SQLiteDBConnection) {
     this.database = database;
@@ -49,6 +50,8 @@ class DatabaseClientImpl implements DatabaseClient {
   async transaction<T>(handler: () => PromiseResult<T>): PromiseResult<T> {
     try {
       await this.database.beginTransaction();
+      this._isTransaction = true;
+
       const active = await this.database.isTransactionActive();
       if (!active.result) {
         return Result.Error({ code: "DATABASE_TRANSACTION" });
@@ -68,7 +71,13 @@ class DatabaseClientImpl implements DatabaseClient {
       await this.database.rollbackTransaction()
         .catch(error => logger.error(error));
       return Result.Error({ code: "DATABASE_TRANSACTION", error });
+    } finally {
+      this._isTransaction = false;
     }
+  }
+
+  isTransaction(): boolean {
+    return this._isTransaction;
   }
 
   async close(): PromiseResult<void> {

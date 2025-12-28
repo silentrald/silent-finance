@@ -12,7 +12,6 @@ export interface Transaction {
   walletSourceId: number;
   walletDestinationId?: number;
   // Check if there are coins/bills attached to the transaction for tracking
-  hasDenomination: boolean;
 }
 
 const validate = compileValidator<Transaction>({
@@ -26,7 +25,6 @@ const validate = compileValidator<Transaction>({
     categoryId: { type: "integer" },
     walletSourceId: { type: "integer" },
     walletDestinationId: { type: "integer", nullable: true },
-    hasDenomination: { type: "boolean" },
   },
   required: [ "type", "amount", "categoryId", "walletSourceId" ],
   additionalProperties: false,

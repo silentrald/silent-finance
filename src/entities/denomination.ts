@@ -3,7 +3,7 @@ import { compileValidator } from "@/modules/ajv";
 export interface Denomination {
   id?: number;
   amount: number;
-  currencyId: number;
+  currencyId: string;
 }
 
 const validate = compileValidator<Denomination>({
@@ -11,7 +11,7 @@ const validate = compileValidator<Denomination>({
   properties: {
     id: { type: "integer", nullable: true },
     amount: { type: "integer", minimum: 0 },
-    currencyId: { type: "integer" },
+    currencyId: { type: "string", minLength: 3, maxLength: 3 },
   },
   required: [ "amount", "currencyId" ],
   additionalProperties: false,

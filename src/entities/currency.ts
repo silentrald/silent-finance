@@ -1,19 +1,17 @@
 import { compileValidator } from "@/modules/ajv";
 
 export interface Currency {
-  id?: number;
-  short: string; // Unicode
-  long: string;  // 3 letter code
+  id: string; // 3 letter code
+  unicode: string;
 }
 
 const validate = compileValidator<Currency>({
   type: "object",
   properties: {
-    id: { type: "integer", nullable: true },
-    short: { type: "string", minLength: 1, maxLength: 4 },
-    long: { type: "string", minLength: 1, maxLength: 3 },
+    id: { type: "string", minLength: 3, maxLength: 3 },
+    unicode: { type: "string", minLength: 1, maxLength: 4 },
   },
-  required: [ "short", "long" ],
+  required: [ "id", "unicode" ],
   additionalProperties: false,
 });
 

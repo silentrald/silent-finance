@@ -3,5 +3,7 @@ export const Tables = {
   CURRENCY: "currencies",
   DENOMINATION: "denominations",
   TRANSACTION: "transactions",
+  TRANSACTION_DENOMINATION: "transactionDenominations",
   WALLET: "wallets",
+  WALLET_DENOMINATION: "walletDenominations",
 };

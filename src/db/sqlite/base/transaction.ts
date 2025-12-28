@@ -10,7 +10,6 @@ CREATE TABLE ${Tables.TRANSACTION} (
   category_id INTEGER NOT NULL,
   wallet_source_id INTEGER NOT NULL,
   wallet_destination_id INTEGER,
-  has_denomination INTEGER NOT NULL,
   FOREIGN KEY (category_id) REFERENCES ${Tables.CATEGORY}(id),
   FOREIGN KEY (wallet_source_id) REFERENCES ${Tables.WALLET}(id),
   FOREIGN KEY (wallet_destination_id) REFERENCES ${Tables.WALLET}(id)

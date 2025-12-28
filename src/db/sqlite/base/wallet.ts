@@ -7,7 +7,7 @@ CREATE TABLE ${Tables.WALLET} (
   name VARCHAR(50) NOT NULL,
   amount INTEGER NOT NULL DEFAULT 0,
   color ${Datatypes.COLOR} NOT NULL,
-  currency_id ${Tables.CURRENCY} NOT NULL,
+  currency_id CHAR(3) NOT NULL,
   has_denomination INTEGER NOT NULL,
   FOREIGN KEY (currency_id) REFERENCES ${Tables.CURRENCY}(id),
   UNIQUE (name)

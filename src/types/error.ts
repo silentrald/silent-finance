@@ -31,6 +31,11 @@ interface ErrorInterface {
 
   REPO_MISSING_ID: { table: string; };
 
+  REPO_REQUIRE_TRANSACTION: { table: string };
+
+  // Generic
+  NOT_FOUND: { entity: string };
+
   // Views
   NO_DESTINATION_WALLET: undefined;
 

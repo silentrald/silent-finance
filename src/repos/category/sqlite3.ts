@@ -3,15 +3,12 @@ import { Category } from "@/entities/category";
 import { CategoryRepo } from "./type";
 import { Tables } from "@/db/consts";
 
-export default function createSQLite3CategoryRepo(): CategoryRepo {
+export default function createCategoryRepoSQLite3(): CategoryRepo {
   return {
     getAll: async (client): PromiseResult<Category[]> => {
-      const queryResult = await client.query(
+      return await client.query(
         `SELECT * FROM ${Tables.CATEGORY};`
       );
-      if (queryResult.isError()) return queryResult.toError();
-
-      return Result.Ok(queryResult.getValue() as Category[]);
     },
 
     create: async (client, category): PromiseResult<Category> => {

@@ -6,10 +6,8 @@ export default [
 // Create Tables
   `
 CREATE TABLE ${Tables.CURRENCY} (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  short VARCHAR(4) NOT NULL,
-  long VARCHAR(3) NOT NULL,
-  UNIQUE(short, long)
+  id CHAR(3) PRIMARY KEY NOT NULL,
+  unicode VARCHAR(4) NOT NULL
 )`.trim(),
   `
 CREATE TABLE ${Tables.WALLET} (
@@ -17,12 +15,11 @@ CREATE TABLE ${Tables.WALLET} (
   name VARCHAR(50) NOT NULL,
   amount INTEGER NOT NULL DEFAULT 0,
   color ${Datatypes.COLOR} NOT NULL,
-  currency_id ${Tables.CURRENCY} NOT NULL,
+  currency_id CHAR(3) NOT NULL,
   has_denomination INTEGER NOT NULL,
   FOREIGN KEY (currency_id) REFERENCES ${Tables.CURRENCY}(id),
   UNIQUE (name)
-);
-`.trim(),
+);`.trim(),
   `
 CREATE TABLE ${Tables.CATEGORY} (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -31,8 +28,7 @@ CREATE TABLE ${Tables.CATEGORY} (
   icon TEXT,
   type CHAR(1),
   UNIQUE (name, type)
-);
-`.trim(),
+);`.trim(),
   `
 CREATE TABLE ${Tables.TRANSACTION} (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -43,20 +39,39 @@ CREATE TABLE ${Tables.TRANSACTION} (
   category_id INTEGER NOT NULL,
   wallet_source_id INTEGER NOT NULL,
   wallet_destination_id INTEGER,
-  has_denomination INTEGER NOT NULL,
   FOREIGN KEY (category_id) REFERENCES ${Tables.CATEGORY}(id),
   FOREIGN KEY (wallet_source_id) REFERENCES ${Tables.WALLET}(id),
   FOREIGN KEY (wallet_destination_id) REFERENCES ${Tables.WALLET}(id)
-);
-`.trim(),
+);`.trim(),
   `
 CREATE TABLE ${Tables.DENOMINATION} (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   amount INTEGER NOT NULL,
-  currency_id INTEGER NOT NULL,
+  currency_id CHAR(3) NOT NULL,
   FOREIGN KEY (currency_id) REFERENCES ${Tables.CURRENCY}(id),
   UNIQUE(amount, currency_id)
-)`.trim(),
+);`.trim(),
+  `
+CREATE TABLE ${Tables.WALLET_DENOMINATION} (
+  wallet_id INTEGER NOT NULL,
+  denomination_id INTEGER NOT NULL,
+  count INTEGER NOT NULL,
+  PRIMARY KEY (wallet_id, denomination_id),
+  FOREIGN KEY (wallet_id) REFERENCES ${Tables.WALLET}(id)
+    ON DELETE CASCADE,
+  FOREIGN KEY (denomination_id) REFERENCES ${Tables.DENOMINATION}(id)
+);`.trim(),
+  `
+CREATE TABLE ${Tables.TRANSACTION_DENOMINATION} (
+  transaction_id INTEGER NOT NULL,
+  denomination_id INTEGER NOT NULL,
+  count INTEGER NOT NULL,
+  PRIMARY KEY (transaction_id, denomination_id),
+  FOREIGN KEY (transaction_id) REFERENCES ${Tables.TRANSACTION}(id)
+    ON DELETE CASCADE,
+  FOREIGN KEY (denomination_id) REFERENCES ${Tables.DENOMINATION}(id)
+
+);`.trim(),
 
   // Inserts
   `
@@ -70,32 +85,19 @@ INSERT INTO ${Tables.CATEGORY}(name, color, icon, type) VALUES
   ('Other', '#CCCCCC', '/images/help-outline.png', null)
 ;`.trim(),
   `
-INSERT INTO ${Tables.CURRENCY}(short, long) VALUES
-  ('₱', 'Php'),
-  ('$', 'Usd')
+INSERT INTO ${Tables.CURRENCY}(id, unicode) VALUES
+  ('Php', '₱'),
+  ('Usd', '$')
 ;`.trim(),
   `
 INSERT INTO ${Tables.DENOMINATION}(amount, currency_id) VALUES
-  (100, (SELECT id FROM ${Tables.CURRENCY} WHERE long = 'Php')),
-  (500, (SELECT id FROM ${Tables.CURRENCY} WHERE long = 'Php')),
-  (1000, (SELECT id FROM ${Tables.CURRENCY} WHERE long = 'Php')),
-  (2000, (SELECT id FROM ${Tables.CURRENCY} WHERE long = 'Php')),
-  (5000, (SELECT id FROM ${Tables.CURRENCY} WHERE long = 'Php')),
-  (10000, (SELECT id FROM ${Tables.CURRENCY} WHERE long = 'Php')),
-  (20000, (SELECT id FROM ${Tables.CURRENCY} WHERE long = 'Php')),
-  (50000, (SELECT id FROM ${Tables.CURRENCY} WHERE long = 'Php')),
-  (100000, (SELECT id FROM ${Tables.CURRENCY} WHERE long = 'Php')),
-  (1, (SELECT id FROM ${Tables.CURRENCY} WHERE long = 'Usd')),
-  (5, (SELECT id FROM ${Tables.CURRENCY} WHERE long = 'Usd')),
-  (10, (SELECT id FROM ${Tables.CURRENCY} WHERE long = 'Usd')),
-  (25, (SELECT id FROM ${Tables.CURRENCY} WHERE long = 'Usd')),
-  (50, (SELECT id FROM ${Tables.CURRENCY} WHERE long = 'Usd')),
-  (100, (SELECT id FROM ${Tables.CURRENCY} WHERE long = 'Usd')),
-  (200, (SELECT id FROM ${Tables.CURRENCY} WHERE long = 'Usd')),
-  (500, (SELECT id FROM ${Tables.CURRENCY} WHERE long = 'Usd')),
-  (1000, (SELECT id FROM ${Tables.CURRENCY} WHERE long = 'Usd')),
-  (2000, (SELECT id FROM ${Tables.CURRENCY} WHERE long = 'Usd')),
-  (5000, (SELECT id FROM ${Tables.CURRENCY} WHERE long = 'Usd')),
-  (10000, (SELECT id FROM ${Tables.CURRENCY} WHERE long = 'Usd'))
+  -- Php
+  (100, 'Php'), (500, 'Php'), (1000, 'Php'), (2000, 'Php'),
+  (5000, 'Php'), (10000, 'Php'), (20000, 'Php'),
+  (50000, 'Php'), (100000, 'Php'),
+  -- Usd
+  (1, 'Usd'), (5, 'Usd'), (10, 'Usd'), (25, 'Usd'), (50, 'Usd'),
+  (100, 'Usd'), (200, 'Usd'), (500, 'Usd'), (1000, 'Usd'),
+  (2000, 'Usd'), (5000, 'Usd'), (10000, 'Usd')
 ;`.trim(),
 ];

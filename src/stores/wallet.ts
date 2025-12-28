@@ -1,7 +1,7 @@
+import { CreateWallet, Wallet } from "@/entities/wallet";
 import { PromiseResult, Result } from "@/types/result";
 import { inject, ref } from "vue";
 import { UseCases } from "@/use-cases/consts";
-import { Wallet } from "@/entities/wallet";
 import WalletUseCase from "@/use-cases/wallet/types";
 import { defineStore } from "pinia";
 import logger from "@/modules/logger";
@@ -48,13 +48,14 @@ const useWalletStore = defineStore("wallet", () => {
       return Result.Ok();
     },
 
-    createWallet: async (wallet: Wallet): PromiseResult<Wallet> => {
+    createWallet: async (wallet: CreateWallet): PromiseResult<Wallet> => {
       const result = await walletUseCase.createWallet(wallet);
       if (result.isError()) return result.toError();
 
-      const newWallet = result.getValue();
+      const { wallet: newWallet } = result.getValue();
+      logger.debug("UwU created", newWallet);
       wallets.value.push(newWallet);
-      walletMap.value[newWallet.id!] = newWallet;
+      walletMap.value[newWallet.id] = newWallet;
       if (!currentWallet.value) {
         currentWallet.value = newWallet;
       }

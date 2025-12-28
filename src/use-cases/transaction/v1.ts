@@ -8,7 +8,7 @@ import { Wallet } from "@/entities/wallet";
 import { WalletRepo } from "@/repos/wallet/type";
 
 
-export default function createTransactionV1UseCase({
+export default function createTransactionUseCaseV1({
   databaseService,
   transactionRepo,
   walletRepo,
