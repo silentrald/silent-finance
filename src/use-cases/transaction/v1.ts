@@ -1,5 +1,5 @@
 import { PromiseResult, Result } from "@/types/result";
-import validateTransaction, { Transaction } from "@/entities/transaction";
+import { Transaction, validateCreateTransaction } from "@/entities/transaction";
 import { DatabaseService } from "@/modules/database/type";
 import { TransactionRepo } from "@/repos/transaction/type";
 import { TransactionType } from "@/enums/transaction";
@@ -37,7 +37,7 @@ export default function createTransactionUseCaseV1({
     }> => {
       transaction.type = TransactionType.EXPENSE; // Force to be a expense transaction
 
-      const validateResult = validateTransaction(transaction);
+      const validateResult = validateCreateTransaction(transaction);
       if (validateResult.isError()) return validateResult.toError();
 
       const clientResult = await databaseService.getClient();
@@ -74,7 +74,7 @@ export default function createTransactionUseCaseV1({
     }> => {
       transaction.type = TransactionType.INCOME; // Force to be a income transaction
 
-      const validateResult = validateTransaction(transaction);
+      const validateResult = validateCreateTransaction(transaction);
       if (validateResult.isError()) return validateResult.toError();
 
       const clientResult = await databaseService.getClient();
@@ -112,7 +112,7 @@ export default function createTransactionUseCaseV1({
     }> => {
       transaction.type = TransactionType.TRANSFER; // Force to be a transfer transaction
 
-      const validateResult = validateTransaction(transaction);
+      const validateResult = validateCreateTransaction(transaction);
       if (validateResult.isError()) return validateResult.toError();
 
       const clientResult = await databaseService.getClient();

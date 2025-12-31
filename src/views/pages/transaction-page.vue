@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { CreateTransaction, Transaction } from "@/entities/transaction";
+import { CreateWallet, Wallet } from "@/entities/wallet";
 import {
   IonButton,
   IonIcon,
@@ -15,12 +17,10 @@ import { inject, onMounted, ref } from "vue";
 import ExpenseModal from "../components/transaction/expense-modal.vue";
 import IncomeModal from "../components/transaction/income-modal.vue";
 import SimpleModal from "../components/simple-modal.vue";
-import { Transaction } from "@/entities/transaction";
 import TransactionItem from "../components/transaction/transaction-item.vue";
 import TransactionUseCase from "@/use-cases/transaction/types";
 import TransferModal from "../components/transaction/transfer-modal.vue";
 import { UseCases } from "@/use-cases/consts";
-import { Wallet } from "@/entities/wallet";
 import WalletCard from "../components/wallet/wallet-card.vue";
 import WalletModal from "../components/wallet/wallet-modal.vue";
 import { formatDate } from "@/modules/date";
@@ -62,7 +62,7 @@ const {
     transactions,
 
     createWallet: async () => {
-      const modalResult = await showModal<Wallet>(WalletModal);
+      const modalResult = await showModal<CreateWallet>(WalletModal);
       if (modalResult.isError()) {
         await toast.error({ error: modalResult.getError()! });
         return;
@@ -133,7 +133,7 @@ const {
         return;
       }
 
-      const modalResult = await showBottomModal<Transaction>(ExpenseModal, {
+      const modalResult = await showBottomModal<CreateTransaction>(ExpenseModal, {
         walletId: walletStore.getCurrentWallet()!.id!,
       });
       if (modalResult.isError()) {
@@ -162,7 +162,7 @@ const {
         return;
       }
 
-      const modalResult = await showBottomModal<Transaction>(IncomeModal, {
+      const modalResult = await showBottomModal<CreateTransaction>(IncomeModal, {
         walletId: walletStore.getCurrentWallet()!.id!,
       });
       if (modalResult.isError()) {
@@ -196,7 +196,7 @@ const {
         return;
       }
 
-      const modalResult = await showBottomModal<Transaction>(TransferModal, {
+      const modalResult = await showBottomModal<CreateTransaction>(TransferModal, {
         walletId: walletStore.getCurrentWallet()!.id!,
       });
       if (modalResult.isError()) {

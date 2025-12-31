@@ -1,4 +1,4 @@
-import { Category, validateCategory } from "@/entities/category";
+import { Category, validateCreateCategory } from "@/entities/category";
 import { CategoryRepo } from "@/repos/category/type";
 import CategoryUseCase from "./types";
 import { DatabaseService } from "@/modules/database/type";
@@ -25,7 +25,7 @@ export default function createCategoryUseCaseV1({
     },
 
     createCategory: async (category): PromiseResult<Category> => {
-      const validateResult = validateCategory(category);
+      const validateResult = validateCreateCategory(category);
       if (validateResult.isError()) return validateResult.toError();
 
       const clientResult = await databaseService.getClient();

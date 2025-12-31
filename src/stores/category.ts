@@ -1,6 +1,6 @@
+import { Category, CreateCategory } from "@/entities/category";
 import { PromiseResult, Result } from "@/types/result";
 import { inject, ref } from "vue";
-import { Category } from "@/entities/category";
 import CategoryUseCase from "@/use-cases/category/types";
 import { TransactionType } from "@/enums/transaction";
 import { UseCases } from "@/use-cases/consts";
@@ -58,13 +58,13 @@ const useCategoryStore = defineStore("category", () => {
       return Result.Ok();
     },
 
-    createCategory: async (category: Category): PromiseResult<Category> => {
+    createCategory: async (category: CreateCategory): PromiseResult<Category> => {
       const result = await categoryUseCase.createCategory(category);
       if (result.isError()) return result.toError();
 
       const newCategory = result.getValue();
       categories.value.push(newCategory);
-      categoryMap.value[category.id!] = newCategory;
+      categoryMap.value[newCategory.id] = newCategory;
 
       return result;
     },

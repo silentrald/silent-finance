@@ -69,17 +69,19 @@ watch(() => showDenominations.value, async () => {
   <!-- TODO: Temporary -->
   <ion-popover :is-open="showDenominations">
     <table>
-      <tr>
-        <th>Amount</th>
-        <th>Count</th>
-      </tr>
+      <tbody>
+        <tr>
+          <th>Amount</th>
+          <th>Count</th>
+        </tr>
 
-      <tr v-for="denomination in denominations"
-        :key="denomination.amount"
-      >
-        <td>{{ wallet.currencyId }} {{ m(denomination.amount) }}</td>
-        <td>{{ denomination.count }}</td>
-      </tr>
+        <tr v-for="denomination in denominations"
+          :key="denomination.amount"
+        >
+          <td>{{ wallet.currencyId }} {{ m(denomination.amount) }}</td>
+          <td>{{ denomination.count }}</td>
+        </tr>
+      </tbody>
     </table>
   </ion-popover>
 </template>

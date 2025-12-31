@@ -53,7 +53,6 @@ const useWalletStore = defineStore("wallet", () => {
       if (result.isError()) return result.toError();
 
       const { wallet: newWallet } = result.getValue();
-      logger.debug("UwU created", newWallet);
       wallets.value.push(newWallet);
       walletMap.value[newWallet.id] = newWallet;
       if (!currentWallet.value) {

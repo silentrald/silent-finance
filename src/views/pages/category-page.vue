@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Category, CreateCategory } from "@/entities/category";
 import {
   IonButton,
   IonContent,
@@ -8,7 +9,6 @@ import {
   IonToolbar,
 } from "@ionic/vue";
 import { ModalAction, showModal } from "@/modules/modal";
-import { Category } from "@/entities/category";
 import CategoryItem from "../components/category/category-item.vue";
 import CategoryModal from "../components/category/category-modal.vue";
 import SimpleModal from "../components/simple-modal.vue";
@@ -47,7 +47,7 @@ const removeCategory = async (category: Category): Promise<void> => {
 };
 
 const showCreateModal = async () => {
-  const modalResult = await showModal<Category>(CategoryModal);
+  const modalResult = await showModal<CreateCategory>(CategoryModal);
   if (modalResult.isError()) {
     await toast.error({ error: modalResult.getError()! });
     return;

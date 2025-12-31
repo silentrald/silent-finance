@@ -39,6 +39,10 @@ const validate = compileValidator<Wallet>({
   additionalProperties: false,
 });
 
+export function validateWallet(wallet: Wallet) {
+  return validate(wallet);
+}
+
 const validateCreate = compileValidator<CreateWallet>({
   type: "object",
   properties: {
@@ -57,10 +61,6 @@ const validateCreate = compileValidator<CreateWallet>({
   ],
   additionalProperties: false,
 });
-
-export function validateWallet(wallet: Wallet) {
-  return validate(wallet);
-}
 
 export function validateCreateWallet(wallet: CreateWallet) {
   return validateCreate(wallet);

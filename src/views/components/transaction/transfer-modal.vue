@@ -5,9 +5,9 @@ import {
   IonSelectOption,
   modalController,
 } from "@ionic/vue";
+import { CreateTransaction } from "@/entities/transaction";
 import { ModalAction } from "@/modules/modal";
 import NumberInput from "../input/number-input.vue";
-import { Transaction } from "@/entities/transaction";
 import { TransactionType } from "@/enums/transaction";
 import { ref } from "vue";
 import useCategoryStore from "@/stores/category";
@@ -28,7 +28,7 @@ const categoryId = ref("");
 const destinationWalletId = ref("");
 
 const confirmModal = () => {
-  const transaction: Transaction = {
+  const transaction: CreateTransaction = {
     type: TransactionType.EXPENSE,
     amount: amount.value,
     description: description.value,

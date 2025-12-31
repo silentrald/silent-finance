@@ -1,7 +1,12 @@
 import { compileValidator } from "@/modules/ajv";
 
 export interface Denomination {
-  id?: number;
+  id: number;
+  amount: number;
+  currencyId: string;
+}
+
+export interface CreateDenomination {
   amount: number;
   currencyId: string;
 }
@@ -9,7 +14,21 @@ export interface Denomination {
 const validate = compileValidator<Denomination>({
   type: "object",
   properties: {
-    id: { type: "integer", nullable: true },
+    id: { type: "integer" },
+    amount: { type: "integer", minimum: 0 },
+    currencyId: { type: "string", minLength: 3, maxLength: 3 },
+  },
+  required: [ "id", "amount", "currencyId" ],
+  additionalProperties: false,
+});
+
+export function validateDenomination(denomination: Denomination) {
+  return validate(denomination);
+}
+
+const validateCreate = compileValidator<CreateDenomination>({
+  type: "object",
+  properties: {
     amount: { type: "integer", minimum: 0 },
     currencyId: { type: "string", minLength: 3, maxLength: 3 },
   },
@@ -17,6 +36,6 @@ const validate = compileValidator<Denomination>({
   additionalProperties: false,
 });
 
-export function validateDenomination(denomination: Denomination) {
-  return validate(denomination);
+export function validateCreateDenomination(denomination: CreateDenomination) {
+  return validateCreate(denomination);
 }

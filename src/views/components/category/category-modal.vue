@@ -11,8 +11,9 @@ import {
   IonToolbar,
   modalController,
 } from "@ionic/vue";
-import { Category } from "@/entities/category";
 import ColorInput from "../input/color-input.vue";
+import { CreateCategory } from "@/entities/category";
+import { HexColor } from "@/types";
 import { ModalAction } from "@/modules/modal";
 import { TransactionType } from "@/enums/transaction";
 import { ref } from "vue";
@@ -21,11 +22,11 @@ import useLocale from "@/composables/locale";
 const { t } = useLocale();
 
 const name = ref("");
-const color = ref("#ffffff");
+const color = ref("#ffffff" as HexColor);
 const type = ref("all" as TransactionType | "all");
 
 const confirm = () => {
-  const category: Category = {
+  const category: CreateCategory = {
     name: name.value,
     color: color.value,
     type: type.value === "all" ? null : type.value,

@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { IonButton, IonPopover } from "@ionic/vue";
 import { ChromePicker } from "vue-color";
+import { HexColor } from "@/types";
 import { ref } from "vue";
 
-const color = defineModel();
+const color = defineModel<HexColor>();
 
 const props = defineProps<{
   label?: string;

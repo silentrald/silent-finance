@@ -33,11 +33,11 @@ const validate = compileValidator<WalletDenomination>({
   additionalProperties: false,
 });
 
-const validateCreate = compileValidator(createWalletDenominationSchema);
-
 export function validateWalletDenomination(walletDenomination: WalletDenomination) {
   return validate(walletDenomination);
 }
+
+const validateCreate = compileValidator(createWalletDenominationSchema);
 
 export function validateCreateWalletDenomination(
   walletDenomination: CreateWalletDenomination

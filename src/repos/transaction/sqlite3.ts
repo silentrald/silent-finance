@@ -50,7 +50,7 @@ ORDER BY timestamp DESC;
     },
 
     create: async (client, transaction): PromiseResult<Transaction> => {
-      const queryResult = await client.query<{ id: number }>(`
+      const queryResult = await client.query<Transaction>(`
 INSERT INTO ${Tables.TRANSACTION}(
   type, amount, description,
   category_id,
@@ -60,7 +60,7 @@ INSERT INTO ${Tables.TRANSACTION}(
   ?,
   ?, ?
 )
-RETURNING id;
+RETURNING *;
 `, [
         transaction.type, transaction.amount, transaction.description || null,
         transaction.categoryId,
@@ -68,8 +68,7 @@ RETURNING id;
       ]);
       if (queryResult.isError()) return queryResult.toError();
 
-      transaction.id = queryResult.getValue()[0].id;
-      return Result.Ok(transaction);
+      return Result.Ok(queryResult.getValue()[0]);
     },
 
     update: async (client, _transaction): PromiseResult<Transaction> => {
