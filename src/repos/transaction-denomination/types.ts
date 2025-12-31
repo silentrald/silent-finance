@@ -1,6 +1,6 @@
+import { CreateTransactionDenomination, TransactionDenomination } from "@/entities/transaction-denomination";
 import { DatabaseClient } from "@/modules/database/type";
 import { PromiseResult } from "@/types/result";
-import { TransactionDenomination } from "@/entities/transaction-denomination";
 
 export interface TransactionDenominationRepo {
   getByTransactionId(
@@ -10,7 +10,8 @@ export interface TransactionDenominationRepo {
 
   createList(
     client: DatabaseClient,
-    transactionDenominations: TransactionDenomination[]
+    transactionId: number,
+    transactionDenominations: CreateTransactionDenomination[]
   ): PromiseResult<TransactionDenomination[]>;
 
   removeByTransactionId(

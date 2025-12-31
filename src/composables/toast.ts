@@ -47,6 +47,7 @@ export default function useToast() {
           buttons: [
             { text: "X" },
           ],
+          duration: 5000,
         });
         await toast.present();
       } catch (error: any) {

@@ -1,5 +1,6 @@
 import { CreateTransaction, Transaction } from "@/entities/transaction";
 import { PromiseResult } from "@/types/result";
+import { TransactionDenomination } from "@/entities/transaction-denomination";
 import { Wallet } from "@/entities/wallet";
 
 export default interface TransactionUseCase {
@@ -8,15 +9,18 @@ export default interface TransactionUseCase {
   createExpense(transaction: CreateTransaction): PromiseResult<{
     transaction: Transaction;
     wallet: Wallet;
+    transactionDenominations: TransactionDenomination[];
   }>;
   createIncome(transaction: CreateTransaction): PromiseResult<{
     transaction: Transaction;
     wallet: Wallet;
+    transactionDenominations: TransactionDenomination[];
   }>;
   createTransfer(transaction: CreateTransaction): PromiseResult<{
     transaction: Transaction;
     sourceWallet: Wallet;
     destinationWallet: Wallet;
+    transactionDenominations: TransactionDenomination[];
   }>;
 
   removeTransaction(transactionId: number): PromiseResult<{

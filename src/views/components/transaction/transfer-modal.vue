@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import {
+  IonButton,
   IonInput,
   IonSelect,
   IonSelectOption,
   modalController,
 } from "@ionic/vue";
+import { AmountCount } from "@/dtos/denomination";
 import { CreateTransaction } from "@/entities/transaction";
+import { CreateTransactionDenomination } from "@/entities/transaction-denomination";
+import DenominationInput from "../denomination/denomination-input.vue";
 import { ModalAction } from "@/modules/modal";
 import NumberInput from "../input/number-input.vue";
 import { TransactionType } from "@/enums/transaction";
@@ -26,8 +30,33 @@ const amount = ref(0);
 const description = ref("");
 const categoryId = ref("");
 const destinationWalletId = ref("");
+const denominationData = ref({
+  amountCount: {},
+  total: 0,
+} as {
+  // id = count
+  amountCount: Record<number, AmountCount>;
+  total: number;
+})
+
+const getCurrencyId = () => walletStore.getWalletById(walletId).currencyId;
+const hasDenomination = () => walletStore.getWalletById(walletId).hasDenomination;
+
+// === Events === //
 
 const confirmModal = () => {
+  let denominations: CreateTransactionDenomination[] | null = null;
+  if (hasDenomination()) {
+    denominations = [];
+    const ref = denominationData.value.amountCount;
+    for (const id in ref) {
+      denominations.push({
+        denominationId: +id,
+        count: ref[id].count,
+      });
+    }
+  }
+
   const transaction: CreateTransaction = {
     type: TransactionType.EXPENSE,
     amount: amount.value,
@@ -42,7 +71,7 @@ const confirmModal = () => {
 
 <template>
   <div class="ion-padding">
-    <ion-select
+    <ion-select required
       :label="t('transaction.transferModal.category')"
       @ion-change="categoryId = $event.detail.value"
     >
@@ -66,14 +95,27 @@ const confirmModal = () => {
       </ion-select-option>
     </ion-select>
 
-    <number-input v-model="amount"
-      @confirm="confirmModal"
-    >
+    <template v-if="hasDenomination()">
       <ion-input v-model="description"
         type="text"
-        :placeholder="t('transaction.transferModal.description')"
+        :placeholder="t('transaction.expenseModal.description')"
       />
-    </number-input>
+      <denomination-input v-model="denominationData"
+        :currency-id="getCurrencyId()"
+        support-negative
+      />
+      <ion-button @click="confirmModal">Confirm</ion-button>
+    </template>
+    <template v-else>
+      <number-input v-model="amount"
+        @confirm="confirmModal"
+      >
+        <ion-input v-model="description"
+          type="text"
+          :placeholder="t('transaction.transferModal.description')"
+        />
+      </number-input>
+    </template>
   </div>
 </template>
 

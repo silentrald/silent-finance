@@ -18,7 +18,9 @@ count
       );
     },
 
-    createList: async (client, transactionDenominations): PromiseResult<TransactionDenomination[]> => {
+    createList: async (
+      client, transactionId, transactionDenominations
+    ): PromiseResult<TransactionDenomination[]> => {
       if (!client.isTransaction()) {
         return Result.Error({
           code: "REPO_REQUIRE_TRANSACTION",
@@ -36,7 +38,7 @@ RETURNING *;`.trim();
       const inserted: TransactionDenomination[] = [];
       for (const td of transactionDenominations) {
         const result = await client.query<TransactionDenomination>(query, [
-          td.transactionId, td.denominationId, td.count,
+          transactionId, td.denominationId, td.count,
         ]);
         if (result.isError()) return result.toError();
         inserted.push(result.getValue()[0])

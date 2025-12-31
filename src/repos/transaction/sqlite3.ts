@@ -60,7 +60,7 @@ INSERT INTO ${Tables.TRANSACTION}(
   ?,
   ?, ?
 )
-RETURNING *;
+RETURNING ${FIELDS};
 `, [
         transaction.type, transaction.amount, transaction.description || null,
         transaction.categoryId,

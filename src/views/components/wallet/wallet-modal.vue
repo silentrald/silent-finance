@@ -12,89 +12,53 @@ import {
   IonToolbar,
   modalController,
 } from "@ionic/vue";
-import { inject, ref, watch } from "vue";
+import { AmountCount } from "@/dtos/denomination";
 import ColorInput from "../input/color-input.vue";
 import { CreateWallet } from "@/entities/wallet";
 import { CreateWalletDenomination } from "@/entities/wallet-denomination";
-import { Denomination } from "@/entities/denomination";
-import DenominationUseCase from "@/use-cases/denomination/types";
+import DenominationInput from "../denomination/denomination-input.vue";
 import { HexColor } from "@/types";
 import { ModalAction } from "@/modules/modal";
-import { UseCases } from "@/use-cases/consts";
+import { ref } from "vue";
 import useCurrencyStore from "@/stores/currency";
 import useLocale from "@/composables/locale";
-import useToast from "@/composables/toast";
 
-const { t, m } = useLocale();
-const toast = useToast();
+const { t } = useLocale();
 
 const currencyStore = useCurrencyStore();
 
 const name = ref("");
 const amount = ref("");
-const color = ref("#ffffff");
+const color = ref("#ffffff" as HexColor);
 const currencyId = ref("");
 const hasDenomination = ref(false);
-
-const {
-  denominations, walletDenominations, total,
-  updateCount,
-} = (() => {
-  const denominationUseCase = inject(UseCases.DENOMINATION) as DenominationUseCase;
-
-  const cachedId = ref("");
-  const denominations = ref([] as Denomination[]);
+const denominationData = ref({
+  amountCount: {},
+  total: 0,
+} as {
   // id: count
-  const walletDenominations = ref({} as Record<number, CreateWalletDenomination>);
-  const total = ref(0);
-
-  const loadDenominations = async () => {
-    walletDenominations.value = {};
-    total.value = 0;
-
-    if (!hasDenomination.value || cachedId.value === currencyId.value) {
-      return;
-    }
-
-    const denominationsResult = await denominationUseCase
-      .getDenominationsByCurrencyId(currencyId.value);
-    if (denominationsResult.isError()) {
-      await toast.error({ error: denominationsResult.getError()! });
-      return;
-    }
-
-    cachedId.value = currencyId.value;
-    denominations.value = denominationsResult.getValue();
-  };
-
-  watch(() => currencyId.value, loadDenominations);
-  watch(() => hasDenomination.value, loadDenominations);
-
-  return {
-    denominations, walletDenominations, total,
-
-    updateCount: (denomination: Denomination, count: number) => {
-      count = Math.max(0, count);
-
-      total.value += denomination.amount
-        * (count - (walletDenominations.value[denomination.id!]?.count ?? 0));
-      walletDenominations.value[denomination.id!] = {
-        denominationId: denomination.id!,
-        count,
-      };
-    },
-  };
-})();
+  amountCount: Record<number, AmountCount>;
+  total: number;
+})
 
 const confirm = () => {
+  let denominations: CreateWalletDenomination[] | null = null;
+  if (hasDenomination.value) {
+    denominations = [];
+    for (const key in denominationData.value.amountCount) {
+      denominations.push({
+        denominationId: +key,
+        count: denominationData.value.amountCount[key].count,
+      })
+    }
+  }
+
   const wallet: CreateWallet = {
     name: name.value,
-    amount: +amount.value,
+    amount: +amount.value, // Gets recalc'ed when denominations has value
     color: color.value as HexColor,
     currencyId: currencyId.value,
-    denominations: hasDenomination.value
-      ? Object.values(walletDenominations.value)
-      : null,
+    denominations,
   };
   modalController.dismiss(wallet, ModalAction.CONFIRM);
 };
@@ -154,17 +118,9 @@ const close = () => modalController.dismiss(null, ModalAction.CLOSE);
   </ion-item>
 
   <template v-if="hasDenomination">
-    <!-- TODO: Try to add a "add denomination button" so it would load all denominations currently -->
-    <ion-item v-for="denomination in denominations"
-      :key="denomination.id"
-    >
-      <ion-input type="number"
-        :label="m(denomination.amount)"
-        value="0"
-        @ion-change="updateCount(denomination, +($event.detail.value ?? 0))"
-      />
-    </ion-item>
-    <div v-show="currencyId">Total: {{ m(total) }}</div>
+    <denomination-input v-model="denominationData"
+      :currency-id="currencyId"
+    />
   </template>
   <template v-else>
     <ion-item>

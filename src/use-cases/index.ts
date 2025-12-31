@@ -1,5 +1,6 @@
 import { App } from "vue";
 import { DatabaseService } from "@/modules/database/type";
+import { PromiseResult } from "@/types/result";
 import { UseCases } from "./consts";
 
 import createCategoryRepoSQLite3 from "@/repos/category/sqlite3";
@@ -8,15 +9,26 @@ import createCurrencyRepoSQLite3 from "@/repos/currency/sqlite3";
 import createCurrencyUseCaseV1 from "./currency/v1";
 import createDenominationRepoSQLite3 from "@/repos/denomination/sqlite3";
 import createDenominationUseCaseV1 from "./denomination/v1";
+import createTransactionDenominationRepoSQLite3 from "@/repos/transaction-denomination/sqlite3";
 import createTransactionRepoSQLite3 from "@/repos/transaction/sqlite3";
 import createTransactionUseCaseV1 from "./transaction/v1";
 import createWalletDenominationRepoSQLite3 from "@/repos/wallet-denomination/sqlite3";
 import createWalletRepoSQLite3 from "@/repos/wallet/sqlite3";
 import createWalletUseCaseV1 from "./wallet/v1";
 
+import logger from "@/modules/logger";
+
 import useCategoryStore from "@/stores/category";
 import useCurrencyStore from "@/stores/currency";
 import useWalletStore from "@/stores/wallet";
+
+
+async function handleLoad(callback: () => PromiseResult<void>) {
+  const result = await callback();
+  if (result.isError()) {
+    logger.error("Could not load store", result.getError());
+  }
+}
 
 export async function setupUseCases({
   app, databaseService,
@@ -31,6 +43,7 @@ export async function setupUseCases({
   const transactionRepo = createTransactionRepoSQLite3();
   const walletRepo = createWalletRepoSQLite3();
   const walletDenominationRepo = createWalletDenominationRepoSQLite3();
+  const transactionDenominationRepo = createTransactionDenominationRepoSQLite3();
 
   app.provide(UseCases.CATEGORY, createCategoryUseCaseV1({
     databaseService, categoryRepo,
@@ -44,6 +57,9 @@ export async function setupUseCases({
   }));
   app.provide(UseCases.TRANSACTION, createTransactionUseCaseV1({
     databaseService, transactionRepo, walletRepo,
+    denominationRepo,
+    transactionDenominationRepo,
+    walletDenominationRepo,
   }));
   app.provide(UseCases.WALLET, createWalletUseCaseV1({
     databaseService, walletRepo,
@@ -53,10 +69,14 @@ export async function setupUseCases({
   const categoryStore = useCategoryStore();
   const currencyStore = useCurrencyStore();
   const walletStore = useWalletStore();
-  await Promise.all([
-    categoryStore.loadCategories(),
-    currencyStore.loadCurrencies(),
-    walletStore.loadWallets(),
-  ]);
+
+  const loads = [
+    categoryStore.loadCategories,
+    currencyStore.loadCurrencies,
+    walletStore.loadWallets,
+  ];
+  for (const l of loads) {
+    await handleLoad(l);
+  }
 }
 

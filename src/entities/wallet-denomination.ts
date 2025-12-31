@@ -12,16 +12,6 @@ export interface CreateWalletDenomination {
   count: number;
 }
 
-export const createWalletDenominationSchema: JSONSchemaType<CreateWalletDenomination> = {
-  type: "object",
-  properties: {
-    denominationId: { type: "integer" },
-    count: { type: "integer" },
-  },
-  required: [ "denominationId", "count" ],
-  additionalProperties: false,
-};
-
 const validate = compileValidator<WalletDenomination>({
   type: "object",
   properties: {
@@ -37,6 +27,15 @@ export function validateWalletDenomination(walletDenomination: WalletDenominatio
   return validate(walletDenomination);
 }
 
+export const createWalletDenominationSchema: JSONSchemaType<CreateWalletDenomination> = {
+  type: "object",
+  properties: {
+    denominationId: { type: "integer" },
+    count: { type: "integer" },
+  },
+  required: [ "denominationId", "count" ],
+  additionalProperties: false,
+};
 const validateCreate = compileValidator(createWalletDenominationSchema);
 
 export function validateCreateWalletDenomination(

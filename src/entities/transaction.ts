@@ -1,7 +1,7 @@
+import { CreateTransactionDenomination, createTransactionDenominationSchema } from "./transaction-denomination";
 import { Result } from "@/types/result";
 import { TransactionType } from "@/enums/transaction";
 import { compileValidator } from "@/modules/ajv";
-import { validateWallet } from "./wallet";
 
 export interface Transaction {
   id: number;
@@ -23,6 +23,9 @@ export interface CreateTransaction {
   categoryId: number;
   walletSourceId: number;
   walletDestinationId?: number;
+  // null - hasDenomination = false
+  // array or empty [] - hasDenomination = true
+  denominations?: CreateTransactionDenomination[] | null;
 }
 
 const validateWallets = (transaction: Transaction | CreateTransaction): Result<void> => {
@@ -80,12 +83,16 @@ const validateCreate = compileValidator<CreateTransaction>({
   type: "object",
   properties: {
     type: { type: "string", minLength: 1, maxLength: 1 },
-    amount: { type: "integer", minimum: 1 },
+    amount: { type: "integer", minimum: 0 },
     description: { type: "string", nullable: true, maxLength: 100 },
     timestamp: { type: "string", nullable: true },
     categoryId: { type: "integer" },
     walletSourceId: { type: "integer" },
     walletDestinationId: { type: "integer", nullable: true },
+    denominations: {
+      type: "array", nullable: true,
+      items: createTransactionDenominationSchema,
+    },
   },
   required: [ "type", "amount", "categoryId", "walletSourceId" ],
   additionalProperties: false,
@@ -95,5 +102,5 @@ export function validateCreateTransaction(transaction: CreateTransaction) {
   const result = validateCreate(transaction);
   if (result.isError()) return result.toError();
 
-  return validateWallet(transaction);
+  return validateWallets(transaction);
 }

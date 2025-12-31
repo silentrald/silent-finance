@@ -63,6 +63,8 @@ const en: LocaleSchema = {
   errors: {
     REPO_NOT_FOUND: "Could not find record in {table}. Keys {fields}",
 
+    USE_CASE_DENOMINATION_NEGATIVE_COUNT: "Denomation for {amount} amount cannot have a negative value.",
+
     NO_DESTINATION_WALLET: "Could not find any wallet to transfer to.",
   },
 };

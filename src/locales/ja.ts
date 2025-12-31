@@ -64,6 +64,8 @@ const jp: LocaleSchema = {
   errors: {
     REPO_NOT_FOUND: "{table} にレコードが見つかりませんでした。キー {fields}",
 
+    USE_CASE_DENOMINATION_NEGATIVE_COUNT: "Denomation for {amount} amount cannot have a negative value.",
+
     NO_DESTINATION_WALLET: "転送先のウォレットが見つかりませんでした。",
   },
 };

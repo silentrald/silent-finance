@@ -33,6 +33,9 @@ interface ErrorInterface {
 
   REPO_REQUIRE_TRANSACTION: { table: string };
 
+  // Use Cases
+  USE_CASE_DENOMINATION_NEGATIVE_COUNT: { amount: number; };
+
   // Generic
   NOT_FOUND: { entity: string };
 

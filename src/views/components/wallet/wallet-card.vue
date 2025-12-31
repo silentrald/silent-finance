@@ -28,7 +28,7 @@ const denominations = ref(null as AmountCount[] | null);
 watch(() => props.wallet, () => wallet.value = props.wallet);
 
 watch(() => showDenominations.value, async () => {
-  if (!showDenominations.value || denominations.value) {
+  if (!showDenominations.value) {
     return;
   }
 

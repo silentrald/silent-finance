@@ -21,7 +21,12 @@ export default {
       return;
     }
 
-    console.log(TAG, "[error]", ...args);
+    const last = args.at(-1);
+    if (last && (last as any).error) {
+      console.error(TAG, "[error]", ...args, last.error);
+    } else {
+      console.error(TAG, "[error]", ...args);
+    }
   },
 
   warn(...args: any[]) {
@@ -29,7 +34,7 @@ export default {
       return;
     }
 
-    console.log(TAG, "[warn]", ...args);
+    console.warn(TAG, "[warn]", ...args);
   },
 
   info(...args: any[]) {
@@ -37,7 +42,7 @@ export default {
       return;
     }
 
-    console.log(TAG, "[info]", ...args);
+    console.info(TAG, "[info]", ...args);
   },
 
   debug(...args: any[]) {

@@ -49,7 +49,7 @@ VALUES (
   ?, ?, ?,
   ?, ?
 )
-RETURNING *;
+RETURNING ${FIELDS};
         `.trim(),
       [
         wallet.name, wallet.amount, wallet.color,

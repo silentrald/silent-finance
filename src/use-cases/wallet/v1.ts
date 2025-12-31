@@ -58,6 +58,7 @@ export default function createWalletUseCaseV1({
                   data: { entity: "walletDenomination" },
                 });
               }
+
               wd.count = Math.max(0, wd.count);
               wallet.amount += wd.count * d.amount;
             }
