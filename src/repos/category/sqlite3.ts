@@ -13,12 +13,14 @@ export default function createCategoryRepoSQLite3(): CategoryRepo {
 
     create: async (client, category): PromiseResult<Category> => {
       const queryResult = await client.query<Category>(`
-INSERT INTO ${Tables.CATEGORY}(name, color, icon)
-VALUES (?, ?, ?)
+INSERT INTO ${Tables.CATEGORY}(name, color, icon, type)
+VALUES (?, ?, ?, ?)
 RETURNING *;
         `.trim(),
-      [ category.name, category.color, category.icon ?? null ]
-      );
+      [
+        category.name, category.color,
+        category.icon ?? null, category.type ?? null,
+      ]);
       if (queryResult.isError()) return queryResult.toError();
 
       return Result.Ok(queryResult.getValue()[0]);
