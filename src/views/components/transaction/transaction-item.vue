@@ -49,7 +49,7 @@ const formatAmount = (transaction: Transaction) => {
       @click="showDescription = !showDescription"
     >
       <div class="transaction-icon">
-        <img :src="categoryStore.getCategory(transaction.categoryId).icon" />
+        <img :src="categoryStore.getCategory(transaction.categoryId).icon || '/images/help-outline.png'" />
       </div>
 
       <div class="transaction-name">
