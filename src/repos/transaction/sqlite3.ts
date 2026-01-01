@@ -2,10 +2,12 @@ import { PromiseResult, Result } from "@/types/result";
 import { Tables } from "@/db/consts";
 import { Transaction } from "@/entities/transaction";
 import { TransactionRepo } from "./type";
+import { paginationToQuery } from "@/modules/database/sqlite3-helper";
 
 export default function createTransactionRepoSQLite3(): TransactionRepo {
   const FIELDS = `
-  id, type, amount, description, timestamp,
+  id, type, amount, description,
+  datetime(timestamp, 'localtime') as timestamp,
   category_id as "categoryId",
   wallet_source_id as "walletSourceId",
   wallet_destination_id as "walletDestinationId"
@@ -32,7 +34,7 @@ export default function createTransactionRepoSQLite3(): TransactionRepo {
       return Result.Ok(transactions[0]);
     },
 
-    getByWalletId: async (client, walletId): PromiseResult<Transaction[]> => {
+    getByWalletId: async (client, walletId, pagination): PromiseResult<Transaction[]> => {
       if (!walletId) {
         return Result.Error({
           code: "REPO_MISSING_ID",
@@ -45,7 +47,8 @@ SELECT ${FIELDS}
 FROM ${Tables.TRANSACTION}
 WHERE wallet_source_id = ?
   OR wallet_destination_id = ?
-ORDER BY timestamp DESC;
+ORDER BY timestamp DESC
+${paginationToQuery(pagination)};
 `.trim(), [ walletId, walletId ]);
     },
 

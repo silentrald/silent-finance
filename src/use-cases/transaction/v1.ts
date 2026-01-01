@@ -293,13 +293,13 @@ export default function createTransactionUseCaseV1({
   }
 
   return {
-    getTransactionsByWallet: async (walletId): PromiseResult<Transaction[]> => {
+    getTransactionsByWallet: async (walletId, pagination): PromiseResult<Transaction[]> => {
       const clientResult = await databaseService.getClient();
       if (clientResult.isError()) return clientResult.toError();
       const client = clientResult.getValue();
 
       try {
-        return transactionRepo.getByWalletId(client, walletId);
+        return transactionRepo.getByWalletId(client, walletId, pagination);
       } finally {
         await client.close();
       }

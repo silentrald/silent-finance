@@ -11,3 +11,8 @@ export interface ValidatorError {
 
 export type HexColor = `#${string}`;
 
+export interface Pagination {
+  page: number; // Which page to load, 1 index instead of 0
+  items: number; // How many items for a single page
+}
+
