@@ -392,7 +392,7 @@ const onScrollBottom = async (event: InfiniteScrollCustomEvent) => {
             </ion-item-options>
           </ion-item-sliding>
         </div>
-        <ion-infinite-scroll :disabled="loadedAllTransactions"
+        <ion-infinite-scroll v-if="!loadedAllTransactions"
           @ion-infinite="onScrollBottom"
         >
           <ion-infinite-scroll-content />
