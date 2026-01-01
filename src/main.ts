@@ -31,9 +31,10 @@ import "vue-color/style.css";
 import "swiper/css";
 import "@ionic/vue/css/ionic-swiper.css";
 
+import { IonicVue, isPlatform } from "@ionic/vue";
 import App from "./App.vue";
 import { AppLocale } from "./types";
-import { IonicVue } from "@ionic/vue";
+import { EdgeToEdge } from "@capawesome/capacitor-android-edge-to-edge-support";
 import { createApp } from "vue";
 import { createPinia } from "pinia";
 import createSQLite3DatabaseService from "./modules/database/sqlite3";
@@ -68,6 +69,10 @@ window.addEventListener("DOMContentLoaded", async () => {
   const result = await locale.init(app, localePrefs);
   if (result.isError()) {
     logger.error("Could not initialize locales", result.getError());
+  }
+
+  if (isPlatform("android")) {
+    await EdgeToEdge.enable();
   }
 
   await router.isReady();
