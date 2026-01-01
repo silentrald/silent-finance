@@ -2,8 +2,12 @@
 import { CreateTransaction, Transaction } from "@/entities/transaction";
 import { CreateWallet, Wallet } from "@/entities/wallet";
 import {
+  InfiniteScrollCustomEvent,
   IonButton,
+  IonContent,
   IonIcon,
+  IonInfiniteScroll,
+  IonInfiniteScrollContent,
   IonItem,
   IonItemOption,
   IonItemOptions,
@@ -36,8 +40,10 @@ const walletStore = useWalletStore();
 // Wallet/Transaction Hook
 const {
   transactions,
+  loadedAllTransactions,
 
-  loadTransactions,
+  setCurrentWallet,
+  loadNextTransactions,
 
   createWallet,
   removeWallet,
@@ -47,9 +53,13 @@ const {
   createTransferTransaction,
   removeTransaction,
 } = (() => {
+  const MAX_ITEM = 10;
   const transactionUseCase = inject(UseCases.TRANSACTION) as TransactionUseCase;
 
+  const currentWallet = ref(0);
   const transactions = ref([] as Transaction[]);
+  const page = ref(0);
+  const loadedAll = ref(false);
 
   const removeTransactionFromList = (transactionId: number) => {
     const index = transactions.value.findIndex(t => t.id === transactionId);
@@ -59,7 +69,15 @@ const {
   };
 
   return {
-    transactions,
+    transactions, loadedAllTransactions: loadedAll,
+
+    setCurrentWallet: async (walletId: number) => {
+      currentWallet.value = walletId;
+
+      transactions.value = [];
+      page.value = 0;
+      loadedAll.value = false;
+    },
 
     createWallet: async () => {
       const modalResult = await showModal<CreateWallet>(WalletModal);
@@ -103,14 +121,28 @@ const {
 
     // Transaction Logic
 
-    loadTransactions: async (walletId: number) => {
-      const transactionResult = await transactionUseCase.getTransactionsByWallet(walletId);
+    loadNextTransactions: async () => {
+      if (loadedAll.value) {
+        return;
+      }
+
+      const transactionResult = await transactionUseCase.getTransactionsByWallet(
+        currentWallet.value,
+        { page: ++page.value, items: MAX_ITEM }
+      );
       if (transactionResult.isError()) {
         await toast.error({ error: transactionResult.getError()! });
         return;
       }
 
-      transactions.value = transactionResult.getValue();
+      const newTransactions = transactionResult.getValue();
+      if (newTransactions.length !== MAX_ITEM) {
+        loadedAll.value = true;
+      }
+
+      if (newTransactions.length > 0) {
+        transactions.value = transactions.value.concat(transactionResult.getValue());
+      }
     },
 
     removeTransaction: async (transactionId: number) => {
@@ -225,7 +257,8 @@ const {
 
 onMounted(async () => {
   if (walletStore.getCurrentWallet()) {
-    await loadTransactions(walletStore.getCurrentWallet()!.id!);
+    setCurrentWallet(walletStore.getCurrentWallet()!.id!);
+    await loadNextTransactions();
   }
 });
 
@@ -238,7 +271,7 @@ const onSlideChanged = async (event: any) => {
 
   if (index === walletStore.getWallets().length) {
     walletStore.setCurrentWallet(null);
-    transactions.value = [];
+    setCurrentWallet(0);
     return;
   }
 
@@ -246,114 +279,128 @@ const onSlideChanged = async (event: any) => {
   if (wallet.id === walletStore.getCurrentWallet()?.id) {
     return;
   }
+
   walletStore.setCurrentWallet(wallet);
-  await loadTransactions(wallet.id!);
+  setCurrentWallet(wallet.id!);
+  await loadNextTransactions();
+}
+
+const onScrollBottom = async (event: InfiniteScrollCustomEvent) => {
+  await loadNextTransactions();
+  event.target.complete();
 }
 </script>
 
 <template>
   <ion-page>
-    <div id="container" class="ion-padding">
-      <div id="wallet-container">
-        <swiper
-          :slidesPerView="1.25"
-          :spaceBetween="10"
-          :centeredSlides="true"
-          @slide-change="onSlideChanged"
-        >
-          <swiper-slide v-for="wallet in walletStore.getWallets()"
-            :key="wallet.id"
+    <ion-content>
+      <div id="container" class="ion-padding">
+        <div id="wallet-container">
+          <swiper
+            :slidesPerView="1.25"
+            :spaceBetween="10"
+            :centeredSlides="true"
+            @slide-change="onSlideChanged"
           >
-            <wallet-card :wallet="wallet"
-              @remove="() => removeWallet(wallet)"
-            />
-          </swiper-slide>
+            <swiper-slide v-for="wallet in walletStore.getWallets()"
+              :key="wallet.id"
+            >
+              <wallet-card :wallet="wallet"
+                @remove="() => removeWallet(wallet)"
+              />
+            </swiper-slide>
 
-          <swiper-slide>
-            <ion-button id="add-wallet-button"
-              fill="clear"
-              @click="createWallet"
-            >+</ion-button>
-          </swiper-slide>
-        </swiper>
-      </div>
-
-      <div id="transaction-buttons">
-        <div class="button-container">
-          <ion-button id="create-expense-button"
-            expand="full"
-            shape="round"
-            @click="createExpenseTransaction"
-          >
-            <ion-icon :icon="arrowDown"
-              slot="icon-only"
-              size="large"
-            />
-          </ion-button>
-
-          <div>{{ t("enums.transactionType.E") }}</div>
+            <swiper-slide>
+              <ion-button id="add-wallet-button"
+                fill="clear"
+                @click="createWallet"
+              >+</ion-button>
+            </swiper-slide>
+          </swiper>
         </div>
 
-        <div class="button-container">
-          <ion-button id="create-income-button"
-            expand="full"
-            shape="round"
-            @click="createIncomeTransaction"
-          >
-            <ion-icon :icon="arrowUp"
-              slot="icon-only"
-              size="large"
-            />
-          </ion-button>
+        <div id="transaction-buttons">
+          <div class="button-container">
+            <ion-button id="create-expense-button"
+              expand="full"
+              shape="round"
+              @click="createExpenseTransaction"
+            >
+              <ion-icon :icon="arrowDown"
+                slot="icon-only"
+                size="large"
+              />
+            </ion-button>
 
-          <div>{{ t("enums.transactionType.I") }}</div>
-        </div>
-
-        <div class="button-container">
-          <ion-button id="create-transfer-button"
-            expand="full"
-            shape="round"
-            @click="createTransferTransaction"
-          >
-            <ion-icon :icon="swapVertical"
-              slot="icon-only"
-              size="large"
-            />
-          </ion-button>
-
-          <div>{{ t("enums.transactionType.T") }}</div>
-        </div>
-      </div>
-
-      <div id="transaction-container">
-        <div id="transaction-title">
-          {{ t("transaction.title") }}
-        </div>
-        <div v-for="(transaction, index) in transactions"
-          :key="transaction.id"
-        >
-          <div v-if="
-            index === 0
-            || formatDate(transactions[index - 1].timestamp!, 'YYYY-MM-DD') !== formatDate(transaction.timestamp!, 'YYYY-MM-DD')"
-            class="date-divider"
-          >
-            {{ formatDate(transaction.timestamp!, "MMMM D") }}
+            <div>{{ t("enums.transactionType.E") }}</div>
           </div>
 
-          <ion-item-sliding class="transaction-slide">
-            <ion-item>
-              <transaction-item :transaction="transaction" />
-            </ion-item>
+          <div class="button-container">
+            <ion-button id="create-income-button"
+              expand="full"
+              shape="round"
+              @click="createIncomeTransaction"
+            >
+              <ion-icon :icon="arrowUp"
+                slot="icon-only"
+                size="large"
+              />
+            </ion-button>
 
-            <ion-item-options side="end">
-              <ion-item-option color="danger" @click="() => removeTransaction(transaction.id!)">
-                <ion-icon slot="icon-only" :icon="trash"/>
-              </ion-item-option>
-            </ion-item-options>
-          </ion-item-sliding>
+            <div>{{ t("enums.transactionType.I") }}</div>
+          </div>
+
+          <div class="button-container">
+            <ion-button id="create-transfer-button"
+              expand="full"
+              shape="round"
+              @click="createTransferTransaction"
+            >
+              <ion-icon :icon="swapVertical"
+                slot="icon-only"
+                size="large"
+              />
+            </ion-button>
+
+            <div>{{ t("enums.transactionType.T") }}</div>
+          </div>
+        </div>
+
+        <div id="transaction-container">
+          <div id="transaction-title">
+            {{ t("transaction.title") }}
+          </div>
+          <div v-for="(transaction, index) in transactions"
+            :key="transaction.id"
+          >
+            <div v-if="
+              index === 0
+              || formatDate(transactions[index - 1].timestamp!, 'YYYY-MM-DD') !== formatDate(transaction.timestamp!, 'YYYY-MM-DD')"
+              class="date-divider"
+            >
+              {{ formatDate(transaction.timestamp!, "MMMM D") }}
+            </div>
+
+            <ion-item-sliding class="transaction-slide">
+              <ion-item>
+                <transaction-item :transaction="transaction" />
+              </ion-item>
+
+              <ion-item-options side="end">
+                <ion-item-option color="danger" @click="() => removeTransaction(transaction.id!)">
+                  <ion-icon slot="icon-only" :icon="trash"/>
+                </ion-item-option>
+              </ion-item-options>
+            </ion-item-sliding>
+          </div>
+          <ion-infinite-scroll :disabled="loadedAllTransactions"
+            @ion-infinite="onScrollBottom"
+          >
+            <ion-infinite-scroll-content />
+          </ion-infinite-scroll>
         </div>
       </div>
-    </div>
+    </ion-content>
   </ion-page>
 </template>
 
