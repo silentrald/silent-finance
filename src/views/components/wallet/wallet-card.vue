@@ -5,6 +5,7 @@ import { AmountCount } from "@/dtos/denomination";
 import DenominationUseCase from "@/use-cases/denomination/types";
 import { UseCases } from "@/use-cases/consts";
 import { Wallet } from "@/entities/wallet";
+import { calculateForegroundColor } from "@/modules/color";
 import { trash } from "ionicons/icons";
 import useLocale from "@/composables/locale";
 import useToast from "@/composables/toast";
@@ -46,6 +47,7 @@ watch(() => showDenominations.value, async () => {
   <div class="wallet-card ion-padding"
     :style="{
       backgroundColor: wallet.color,
+      color: calculateForegroundColor(wallet.color),
     }"
     @click="showDenominations = !showDenominations"
   >
@@ -91,7 +93,6 @@ watch(() => showDenominations.value, async () => {
   display: grid;
 
   border-radius: 4px;
-  color: black;
 
   aspect-ratio: 1.6;
   min-width: 300px;

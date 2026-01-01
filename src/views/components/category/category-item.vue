@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { IonButton, IonIcon } from "@ionic/vue";
 import { Category } from "@/entities/category";
+import { calculateForegroundColor } from "@/modules/color";
 import { closeOutline } from "ionicons/icons";
 import { ref } from "vue";
 import useLocale from "@/composables/locale";
@@ -21,6 +22,7 @@ const category = ref(categoryProps);
   <div class="category-item"
     :style="{
       backgroundColor: category.color,
+      color: calculateForegroundColor(category.color),
     }"
   >
     <img class="category-icon"
@@ -62,7 +64,6 @@ const category = ref(categoryProps);
   }
 
   .category-name {
-    color: black;
     font-weight: 700;
     text-overflow: ellipsis;
   }

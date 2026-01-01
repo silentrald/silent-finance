@@ -3,6 +3,7 @@ import { IonIcon } from "@ionic/vue";
 import { Transaction } from "@/entities/transaction";
 import { TransactionType } from "@/enums/transaction";
 import { arrowForward } from "ionicons/icons";
+import { calculateForegroundColor } from "@/modules/color";
 import { formatDate } from "@/modules/date";
 import { ref } from "vue";
 import useCategoryStore from "@/stores/category";
@@ -42,7 +43,8 @@ const formatAmount = (transaction: Transaction) => {
   <div class="transaction-item">
     <div class="transaction-content"
       :style="{
-        backgroundColor: categoryStore.getCategory(transaction.categoryId).color
+        backgroundColor: categoryStore.getCategory(transaction.categoryId).color,
+        color: calculateForegroundColor(categoryStore.getCategory(transaction.categoryId).color),
       }"
       @click="showDescription = !showDescription"
     >
