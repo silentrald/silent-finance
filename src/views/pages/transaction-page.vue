@@ -293,7 +293,7 @@ const onScrollBottom = async (event: InfiniteScrollCustomEvent) => {
 
 <template>
   <ion-page>
-    <ion-content class="ion-padding has-header">
+    <ion-content class="ion-padding">
       <div id="wallet-container">
         <swiper
           :slidesPerView="1.25"

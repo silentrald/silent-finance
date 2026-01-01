@@ -6,7 +6,8 @@ import { paginationToQuery } from "@/modules/database/sqlite3-helper";
 
 export default function createTransactionRepoSQLite3(): TransactionRepo {
   const FIELDS = `
-  id, type, amount, description, timestamp,
+  id, type, amount, description,
+  datetime(timestamp, 'localtime') as timestamp,
   category_id as "categoryId",
   wallet_source_id as "walletSourceId",
   wallet_destination_id as "walletDestinationId"
