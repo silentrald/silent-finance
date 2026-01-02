@@ -291,6 +291,7 @@ const onSlideChanged = async (event: any) => {
 
   const wallet = walletStore.getWallets()[index];
   setCurrentWallet(wallet.id);
+  await loadNextTransactions();
 }
 
 const onScrollBottom = async (event: InfiniteScrollCustomEvent) => {
