@@ -17,7 +17,7 @@ import {
 import { ModalAction, showBottomModal, showModal } from "@/modules/modal";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { arrowDown, arrowUp, swapVertical, trash } from "ionicons/icons";
-import { inject, onMounted, ref } from "vue";
+import { inject, ref, watch } from "vue";
 import ExpenseModal from "../components/transaction/expense-modal.vue";
 import IncomeModal from "../components/transaction/income-modal.vue";
 import SimpleModal from "../components/simple-modal.vue";
@@ -39,6 +39,7 @@ const walletStore = useWalletStore();
 
 // Wallet/Transaction Hook
 const {
+  getCurrentWalletId,
   transactions,
   loadedAllTransactions,
 
@@ -56,7 +57,7 @@ const {
   const MAX_ITEM = 10;
   const transactionUseCase = inject(UseCases.TRANSACTION) as TransactionUseCase;
 
-  const currentWallet = ref(0);
+  const currentWalletId = ref(0);
   const transactions = ref([] as Transaction[]);
   const page = ref(0);
   const loadedAll = ref(false);
@@ -69,10 +70,14 @@ const {
   };
 
   return {
+    getCurrentWalletId: () => currentWalletId.value,
     transactions, loadedAllTransactions: loadedAll,
 
     setCurrentWallet: async (walletId: number) => {
-      currentWallet.value = walletId;
+      if (walletId === currentWalletId.value) {
+        return;
+      }
+      currentWalletId.value = walletId;
 
       transactions.value = [];
       page.value = 0;
@@ -127,7 +132,7 @@ const {
       }
 
       const transactionResult = await transactionUseCase.getTransactionsByWallet(
-        currentWallet.value,
+        currentWalletId.value,
         { page: ++page.value, items: MAX_ITEM }
       );
       if (transactionResult.isError()) {
@@ -161,12 +166,12 @@ const {
     },
 
     createExpenseTransaction: async () => {
-      if (walletStore.getCurrentWallet() === null) {
+      if (currentWalletId.value === 0) {
         return;
       }
 
       const modalResult = await showBottomModal<CreateTransaction>(ExpenseModal, {
-        walletId: walletStore.getCurrentWallet()!.id!,
+        walletId: currentWalletId.value,
       });
       if (modalResult.isError()) {
         await toast.error({ error: modalResult.getError()! });
@@ -190,12 +195,12 @@ const {
     },
 
     createIncomeTransaction: async () => {
-      if (walletStore.getCurrentWallet() === null) {
+      if (currentWalletId.value === 0) {
         return;
       }
 
       const modalResult = await showBottomModal<CreateTransaction>(IncomeModal, {
-        walletId: walletStore.getCurrentWallet()!.id!,
+        walletId: currentWalletId.value,
       });
       if (modalResult.isError()) {
         await toast.error({ error: modalResult.getError()! });
@@ -219,7 +224,7 @@ const {
     },
 
     createTransferTransaction: async () => {
-      if (walletStore.getCurrentWallet() === null) {
+      if (currentWalletId.value === 0) {
         return;
       }
 
@@ -229,7 +234,7 @@ const {
       }
 
       const modalResult = await showBottomModal<CreateTransaction>(TransferModal, {
-        walletId: walletStore.getCurrentWallet()!.id!,
+        walletId: currentWalletId.value,
       });
       if (modalResult.isError()) {
         await toast.error({ error: modalResult.getError()! });
@@ -255,11 +260,21 @@ const {
   };
 })();
 
-onMounted(async () => {
-  if (walletStore.getCurrentWallet()) {
-    setCurrentWallet(walletStore.getCurrentWallet()!.id!);
-    await loadNextTransactions();
+// NOTE: watch walletStore.getWallets() instead of current wallet,
+//   no need to track the current wallet in the store
+watch(() => walletStore.getWallets(), async (newData, oldData) => {
+  if (!newData || newData.length === 0) {
+    return;
   }
+
+  if (oldData?.length === 0) {
+    setCurrentWallet(newData[0].id);
+  } else {
+    setCurrentWallet(newData.at(-1)!.id);
+  }
+  await loadNextTransactions();
+}, {
+  immediate: true,
 });
 
 const onSlideChanged = async (event: any) => {
@@ -270,19 +285,12 @@ const onSlideChanged = async (event: any) => {
   }
 
   if (index === walletStore.getWallets().length) {
-    walletStore.setCurrentWallet(null);
     setCurrentWallet(0);
     return;
   }
 
   const wallet = walletStore.getWallets()[index];
-  if (wallet.id === walletStore.getCurrentWallet()?.id) {
-    return;
-  }
-
-  walletStore.setCurrentWallet(wallet);
-  setCurrentWallet(wallet.id!);
-  await loadNextTransactions();
+  setCurrentWallet(wallet.id);
 }
 
 const onScrollBottom = async (event: InfiniteScrollCustomEvent) => {
@@ -382,7 +390,9 @@ const onScrollBottom = async (event: InfiniteScrollCustomEvent) => {
 
           <ion-item-sliding class="transaction-slide">
             <ion-item>
-              <transaction-item :transaction="transaction" />
+              <transaction-item :transaction="transaction"
+                :wallet-id="getCurrentWalletId()"
+              />
             </ion-item>
 
             <ion-item-options side="end">

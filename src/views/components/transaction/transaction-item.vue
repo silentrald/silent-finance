@@ -12,6 +12,7 @@ import useWalletStore from "@/stores/wallet";
 
 const props = defineProps<{
   transaction: Transaction;
+  walletId: number;
 }>();
 
 const { m } = useLocale();
@@ -29,7 +30,7 @@ const formatAmount = (transaction: Transaction) => {
     transaction.type === TransactionType.EXPENSE
     || (
       transaction.type === TransactionType.TRANSFER
-      && walletStore.getCurrentWallet()!.id === transaction.walletSourceId
+      && props.walletId === transaction.walletSourceId
     )
   ) {
     symbol = "-";
