@@ -12,6 +12,7 @@ import useWalletStore from "@/stores/wallet";
 
 const props = defineProps<{
   transaction: Transaction;
+  walletId: number;
 }>();
 
 const { m } = useLocale();
@@ -29,7 +30,7 @@ const formatAmount = (transaction: Transaction) => {
     transaction.type === TransactionType.EXPENSE
     || (
       transaction.type === TransactionType.TRANSFER
-      && walletStore.getCurrentWallet()!.id === transaction.walletSourceId
+      && props.walletId === transaction.walletSourceId
     )
   ) {
     symbol = "-";
@@ -49,7 +50,7 @@ const formatAmount = (transaction: Transaction) => {
       @click="showDescription = !showDescription"
     >
       <div class="transaction-icon">
-        <img :src="categoryStore.getCategory(transaction.categoryId).icon" />
+        <img :src="categoryStore.getCategory(transaction.categoryId).icon || '/images/help-outline.png'" />
       </div>
 
       <div class="transaction-name">
