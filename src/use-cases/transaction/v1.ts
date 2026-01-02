@@ -38,7 +38,7 @@ export default function createTransactionUseCaseV1({
     currencyId: string
   ): PromiseResult<number> => {
     if (!transaction.denominations) {
-      return Result.Ok();
+      return Result.Ok(transaction.amount);
     }
 
     let amount = 0;
@@ -270,7 +270,7 @@ export default function createTransactionUseCaseV1({
 
       if (destinationWallet.hasDenomination) {
         const destinationDenominationsResult = await handleWalletDenominations(
-          client, sourceWallet.id, REMOVE, transactionDenominationsResult.getValue()
+          client, destinationWallet.id, REMOVE, transactionDenominationsResult.getValue()
         );
         if (destinationDenominationsResult.isError())
           return destinationDenominationsResult.toError();
@@ -471,7 +471,7 @@ export default function createTransactionUseCaseV1({
           if (destinationWalletResult.isError()) return destinationWalletResult.toError();
           if (destinationWallet.hasDenomination) {
             const destinationDenominationsResult = await handleWalletDenominations(
-              client, sourceWallet.id, REMOVE, transaction.denominations
+              client, destinationWallet.id, ADD, transaction.denominations
             );
             if (destinationDenominationsResult.isError())
               return destinationDenominationsResult.toError();

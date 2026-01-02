@@ -64,6 +64,7 @@ const confirmModal = () => {
     categoryId: +categoryId.value,
     walletSourceId: walletId,
     walletDestinationId: +destinationWalletId.value,
+    denominations,
   };
   modalController.dismiss(transaction, ModalAction.CONFIRM);
 };

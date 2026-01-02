@@ -260,14 +260,12 @@ const {
   };
 })();
 
-// NOTE: watch walletStore.getWallets() instead of current wallet,
-//   no need to track the current wallet in the store
 watch(() => walletStore.getWallets(), async (newData, oldData) => {
   if (!newData || newData.length === 0) {
     return;
   }
 
-  if (oldData?.length === 0) {
+  if (!oldData) {
     setCurrentWallet(newData[0].id);
   } else {
     setCurrentWallet(newData.at(-1)!.id);
