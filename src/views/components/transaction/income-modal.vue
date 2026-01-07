@@ -1,18 +1,16 @@
 <script setup lang="ts">
-import {
-  IonButton,
-  IonInput,
-  IonSelect,
-  IonSelectOption,
-  modalController,
-} from "@ionic/vue";
 import { AmountCount } from "@/dtos/denomination";
 import { CreateTransaction } from "@/entities/transaction";
 import { CreateTransactionDenomination } from "@/entities/transaction-denomination";
 import DenominationInput from "../input/denomination-input.vue";
 import { ModalAction } from "@/modules/modal";
+import MyForm from "../input/my-form.vue";
 import NumpadInput from "../input/numpad-input.vue";
+import SelectInput from "../input/select-input.vue";
+import SelectOption from "../input/select-option.vue";
+import TextInput from "../input/text-input.vue";
 import { TransactionType } from "@/enums/transaction";
+import { modalController } from "@ionic/vue";
 import { ref } from "vue";
 import useCategoryStore from "@/stores/category";
 import useLocale from "@/composables/locale";
@@ -43,7 +41,7 @@ const hasDenomination = () => walletStore.getWalletById(walletId).hasDenominatio
 
 // === Events === //
 
-const confirmModal = () => {
+const onConfirm = () => {
   let denominations: CreateTransactionDenomination[] | null = null;
   if (hasDenomination()) {
     denominations = [];
@@ -66,45 +64,55 @@ const confirmModal = () => {
   };
   modalController.dismiss(transaction, ModalAction.CONFIRM);
 };
+
+const onClose = () => {
+  modalController.dismiss(null, ModalAction.CLOSE);
+}
 </script>
 
 <template>
-  <div class="ion-padding">
-    <ion-select required
+  <my-form class="ion-padding"
+    :hide-buttons="!hasDenomination()"
+    @confirm="onConfirm"
+    @cancel="onClose"
+    @close="onClose"
+  >
+    <select-input v-model="categoryId"
+      name="category"
+      required
       :label="t('transaction.incomeModal.category')"
       :placeholder="t('transaction.incomeModal.category')"
-      @ion-change="categoryId = $event.detail.value"
     >
-      <ion-select-option v-for="category in categoryStore.getIncomeCategories()"
+      <select-option v-for="category in categoryStore.getIncomeCategories()"
         :key="category.id"
-        :value="category.id"
+        :value="category.id.toString()"
       >
         {{ category.name }}
-      </ion-select-option>
-    </ion-select>
+      </select-option>
+    </select-input>
 
     <template v-if="hasDenomination()">
-      <ion-input v-model="description"
-        type="text"
+      <text-input v-model="description"
+        name="description"
         :placeholder="t('transaction.expenseModal.description')"
       />
       <denomination-input v-model="denominationData"
+        name="denomination"
         :currency-id="getCurrencyId()"
         support-negative
       />
-      <ion-button @click="confirmModal">Confirm</ion-button>
     </template>
     <template v-else>
       <numpad-input v-model="amount"
-        @confirm="confirmModal"
+        @confirm="onConfirm"
       >
-        <ion-input v-model="description"
-          type="text"
-          :placeholder="t('transaction.incomeModal.description')"
+        <text-input v-model="description"
+          name="description"
+          :placeholder="t('transaction.expenseModal.description')"
         />
       </numpad-input>
     </template>
-  </div>
+  </my-form>
 </template>
 
 <style>

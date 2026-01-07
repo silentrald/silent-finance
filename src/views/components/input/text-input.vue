@@ -4,7 +4,7 @@ import { inject, onMounted, onUnmounted, ref } from "vue";
 import useLocale from "@/composables/locale";
 
 const props = defineProps<{
-  label: string;
+  label?: string;
   name: string;
   modelValue: string;
   required?: boolean;
@@ -41,7 +41,7 @@ const getLabel = () => {
 const validate = (value: string): string => {
   if (!value) {
     return props.required
-      ? t("inputs.required", { field: props.label })
+      ? t("inputs.required", { field: props.label || props.placeholder || "" })
       : "";
   }
 

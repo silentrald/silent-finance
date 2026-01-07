@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { IonInput, IonItem } from "@ionic/vue";
-import { inject, onMounted, ref, watch } from "vue";
+import { inject, onMounted, onUnmounted, ref, watch } from "vue";
 import { AmountCount } from "@/dtos/denomination";
 import { Denomination } from "@/entities/denomination";
 import DenominationUseCase from "@/use-cases/denomination/types";
@@ -9,6 +9,7 @@ import useLocale from "@/composables/locale";
 import useToast from "@/composables/toast";
 
 const props = defineProps<{
+  name: string;
   currencyId: string;
   supportNegative?: boolean;
 }>();
@@ -21,15 +22,27 @@ const model = defineModel<{
 
 const { m } = useLocale();
 const toast = useToast();
+const setValidation = inject("setValidation") as (key: string, value: boolean) => void;
+const removeValidation = inject("removeValidation") as (key: string) => void;
 
 const denominationUseCase = inject(UseCases.DENOMINATION) as DenominationUseCase;
 
 const denominations = ref([] as Denomination[]);
 
+onMounted(() => {
+  setValidation?.(props.name, false);
+});
+
+onUnmounted(() => {
+  removeValidation?.(props.name);
+});
+
 const loadDenominations = async () => {
   if (!props.currencyId) {
     return;
   }
+
+  setValidation?.(props.name, false);
 
   // Pre load the denominations
   const denominationsResult = await denominationUseCase
@@ -49,6 +62,7 @@ const loadDenominations = async () => {
 const updateCount = (denomination: Denomination, count: number) => {
   model.value!.total += denomination.amount
     * (count - (model.value!.amountCount[denomination.id]?.count ?? 0));
+  setValidation?.(props.name, model.value!.total > 0);
 
   if (count === 0) {
     delete model.value!.amountCount[denomination.id];

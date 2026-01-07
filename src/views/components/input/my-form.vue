@@ -11,11 +11,14 @@ import { provide, ref } from "vue";
 import { close } from "ionicons/icons";
 import useLocale from "@/composables/locale";
 
-const props = defineProps<{
-  title: string;
+const props = withDefaults(defineProps<{
+  title?: string;
   confirmLabel?: string;
   cancelLabel?: string;
-}>();
+  hideButtons?: boolean;
+}>(), {
+  hideButtons: false,
+});
 
 const emit = defineEmits<{
   confirm: [];
@@ -49,7 +52,7 @@ const onConfirm = () => {
   <slot name="header">
     <ion-header>
       <ion-toolbar>
-        <ion-title>{{ props.title }}</ion-title>
+        <ion-title v-if="props.title">{{ props.title }}</ion-title>
         <ion-buttons slot="end">
           <ion-button @click="emit('close')">
             <ion-icon :icon="close" />
@@ -62,7 +65,7 @@ const onConfirm = () => {
   <slot />
 
   <slot name="footer">
-    <ion-toolbar>
+    <ion-toolbar v-if="!props.hideButtons">
       <ion-buttons slot="end">
         <ion-button @click="emit('cancel')">
           {{ props.cancelLabel || t("general.cancel") }}
