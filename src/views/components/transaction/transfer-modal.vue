@@ -59,7 +59,7 @@ const confirmModal = () => {
 
   const transaction: CreateTransaction = {
     type: TransactionType.EXPENSE,
-    amount: amount.value,
+    amount: hasDenomination() ? null : amount.value,
     description: description.value,
     categoryId: +categoryId.value,
     walletSourceId: walletId,

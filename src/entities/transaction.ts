@@ -17,7 +17,7 @@ export interface Transaction {
 
 export interface CreateTransaction {
   type: TransactionType;
-  amount: number;
+  amount?: number | null;
   description?: string;
   timestamp?: string; // Custom type?
   categoryId: number;
@@ -83,7 +83,7 @@ const validateCreate = compileValidator<CreateTransaction>({
   type: "object",
   properties: {
     type: { type: "string", minLength: 1, maxLength: 1 },
-    amount: { type: "integer", minimum: 0 },
+    amount: { type: "integer", minimum: 1, nullable: true },
     description: { type: "string", nullable: true, maxLength: 100 },
     timestamp: { type: "string", nullable: true },
     categoryId: { type: "integer" },
@@ -94,13 +94,24 @@ const validateCreate = compileValidator<CreateTransaction>({
       items: createTransactionDenominationSchema,
     },
   },
-  required: [ "type", "amount", "categoryId", "walletSourceId" ],
+  required: [ "type", "categoryId", "walletSourceId" ],
   additionalProperties: false,
 });
 
 export function validateCreateTransaction(transaction: CreateTransaction) {
   const result = validateCreate(transaction);
   if (result.isError()) return result.toError();
+
+  if (transaction.amount === null && !transaction.denominations) {
+    return Result.Error({
+      code: "ENTITY_INVALID",
+      data: [ {
+        property: "amount",
+        code: "required",
+        message: "Amount is required",
+      } ],
+    });
+  }
 
   return validateWallets(transaction);
 }
