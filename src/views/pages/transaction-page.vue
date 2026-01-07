@@ -265,7 +265,7 @@ watch(() => walletStore.getWallets(), async (newData, oldData) => {
     return;
   }
 
-  if (!oldData) {
+  if (!oldData || oldData.length === 0) {
     setCurrentWallet(newData[0].id);
   } else {
     setCurrentWallet(newData.at(-1)!.id);
