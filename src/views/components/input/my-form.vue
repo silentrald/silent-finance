@@ -40,10 +40,8 @@ provide("removeValidation", (key: string) => {
 
 const onConfirm = () => {
   if (valid.value) {
-    return;
+    emit("confirm");
   }
-
-  emit("confirm");
 }
 </script>
 
