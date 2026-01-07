@@ -63,5 +63,10 @@ export default interface LocaleSchema {
     transactionType: Record<TransactionType, string>;
   };
 
+  inputs: {
+    required: string;
+    invalidNumber: string;
+  };
+
   errors: Partial<Record<ErrorCodes, string>>;
 }

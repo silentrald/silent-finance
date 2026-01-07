@@ -61,6 +61,11 @@ const jp: LocaleSchema = {
     },
   },
 
+  inputs: {
+    required: "{field} は必須です。",
+    invalidNumber: "{field} は数値ではありません。",
+  },
+
   errors: {
     REPO_NOT_FOUND: "{table} にレコードが見つかりませんでした。キー {fields}",
 

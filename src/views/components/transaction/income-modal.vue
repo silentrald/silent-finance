@@ -9,9 +9,9 @@ import {
 import { AmountCount } from "@/dtos/denomination";
 import { CreateTransaction } from "@/entities/transaction";
 import { CreateTransactionDenomination } from "@/entities/transaction-denomination";
-import DenominationInput from "../denomination/denomination-input.vue";
+import DenominationInput from "../input/denomination-input.vue";
 import { ModalAction } from "@/modules/modal";
-import NumberInput from "../input/number-input.vue";
+import NumpadInput from "../input/numpad-input.vue";
 import { TransactionType } from "@/enums/transaction";
 import { ref } from "vue";
 import useCategoryStore from "@/stores/category";
@@ -95,14 +95,14 @@ const confirmModal = () => {
       <ion-button @click="confirmModal">Confirm</ion-button>
     </template>
     <template v-else>
-      <number-input v-model="amount"
+      <numpad-input v-model="amount"
         @confirm="confirmModal"
       >
         <ion-input v-model="description"
           type="text"
           :placeholder="t('transaction.incomeModal.description')"
         />
-      </number-input>
+      </numpad-input>
     </template>
   </div>
 </template>

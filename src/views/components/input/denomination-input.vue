@@ -72,14 +72,20 @@ watch(() => props.currencyId, loadDenominations);
   >
     <ion-input type="number"
       :min="supportNegative ? undefined : 0"
-      :label="m(denomination.amount)"
+      :label="`${currencyId} ${m(denomination.amount)}`"
       value="0"
       @ion-change="updateCount(denomination, +($event.detail.value ?? 0))"
     />
   </ion-item>
-  <div v-show="currencyId">Total: {{ m(model!.total) }}</div>
+  <div v-show="currencyId"
+    class="denomination-total ion-padding"
+  >
+    Total: {{ currencyId }} {{ m(model!.total) }}
+  </div>
 </template>
 
 <style scoped>
-
+.denomination-total {
+  text-align: right;
+}
 </style>

@@ -1,24 +1,21 @@
 <script setup lang="ts">
 import {
-  IonButton,
-  IonButtons,
   IonCheckbox,
-  IonHeader,
-  IonInput,
   IonItem,
-  IonSelect,
-  IonSelectOption,
-  IonTitle,
-  IonToolbar,
   modalController,
 } from "@ionic/vue";
 import { AmountCount } from "@/dtos/denomination";
 import ColorInput from "../input/color-input.vue";
 import { CreateWallet } from "@/entities/wallet";
 import { CreateWalletDenomination } from "@/entities/wallet-denomination";
-import DenominationInput from "../denomination/denomination-input.vue";
+import DenominationInput from "../input/denomination-input.vue";
 import { HexColor } from "@/types";
 import { ModalAction } from "@/modules/modal";
+import MyForm from "../input/my-form.vue";
+import NumberInput from "../input/number-input.vue";
+import SelectInput from "../input/select-input.vue";
+import SelectOption from "../input/select-option.vue";
+import TextInput from "../input/text-input.vue";
 import { ref } from "vue";
 import useCurrencyStore from "@/stores/currency";
 import useLocale from "@/composables/locale";
@@ -28,7 +25,7 @@ const { t } = useLocale();
 const currencyStore = useCurrencyStore();
 
 const name = ref("");
-const amount = ref("");
+const amount = ref(0);
 const color = ref("#ffffff" as HexColor);
 const currencyId = ref("");
 const hasDenomination = ref(false);
@@ -67,70 +64,59 @@ const close = () => modalController.dismiss(null, ModalAction.CLOSE);
 </script>
 
 <template>
-  <ion-header>
-    <ion-toolbar>
-      <ion-buttons slot="start">
-        <ion-button color="medium" @click="close">{{ t("general.close") }}</ion-button>
-      </ion-buttons>
-      <ion-title>{{ t("transaction.walletModal.title") }}</ion-title>
-      <ion-buttons slot="end">
-        <ion-button @click="confirm" :strong="true">{{ t("general.confirm") }}</ion-button>
-      </ion-buttons>
-    </ion-toolbar>
-  </ion-header>
-
-  <ion-item>
-    <ion-input v-model="name"
-      type="text"
-      label-placement="stacked"
+  <my-form :title="t('transaction.walletModal.title')"
+    @confirm="confirm"
+    @cancel="close"
+    @close="close"
+  >
+    <text-input v-model="name"
+      name="name"
+      required
       :label="t('transaction.walletModal.name')"
       :placeholder="t('transaction.walletModal.name')"
+      :validate="() => ''"
     />
-  </ion-item>
 
-  <ion-item>
     <color-input v-model="color"
+      required
       :label="t('transaction.walletModal.color')"
     />
-  </ion-item>
 
-  <ion-item>
-    <ion-select
+    <select-input v-model="currencyId"
+      name="currency"
       label="Currency"
       placeholder="Currency"
-      @ion-change="currencyId = $event.detail.value"
+      required
     >
-      <ion-select-option v-for="currency in currencyStore.getCurrencies()"
+      <select-option v-for="currency in currencyStore.getCurrencies()"
         :key="currency.id"
         :value="currency.id"
       >
         {{ currency.id }} ({{ currency.unicode }})
-      </ion-select-option>
-    </ion-select>
-  </ion-item>
+      </select-option>
+    </select-input>
 
-  <ion-item>
-    <ion-checkbox v-model="hasDenomination"
-      label-placement="start"
-    >
-      Has Denomination?
-    </ion-checkbox>
-  </ion-item>
-
-  <template v-if="hasDenomination">
-    <denomination-input v-model="denominationData"
-      :currency-id="currencyId"
-    />
-  </template>
-  <template v-else>
     <ion-item>
-      <ion-input v-model="amount"
-        type="number"
-        label-placement="stacked"
+      <ion-checkbox v-model="hasDenomination"
+        label-placement="start"
+      >
+        Has Denomination?
+      </ion-checkbox>
+    </ion-item>
+
+    <template v-if="hasDenomination">
+      <denomination-input v-model="denominationData"
+        :currency-id="currencyId"
+      />
+    </template>
+    <template v-else>
+      <number-input v-model="amount"
+        name="amount"
+        required
         :label="t('transaction.walletModal.amount')"
         :placeholder="t('transaction.walletModal.amount')"
       />
-    </ion-item>
-  </template>
+    </template>
+  </my-form>
 </template>
 
