@@ -1,13 +1,17 @@
 <script setup lang="ts">
+import { inject, ref } from "vue";
+import { AmountCount } from "@/dtos/denomination";
+import DenominationUseCase from "@/use-cases/denomination/types";
 import { IonIcon } from "@ionic/vue";
 import { Transaction } from "@/entities/transaction";
 import { TransactionType } from "@/enums/transaction";
+import { UseCases } from "@/use-cases/consts";
 import { arrowForward } from "ionicons/icons";
 import { calculateForegroundColor } from "@/modules/color";
 import { formatDate } from "@/modules/date";
-import { ref } from "vue";
 import useCategoryStore from "@/stores/category";
 import useLocale from "@/composables/locale";
+import useToast from "@/composables/toast";
 import useWalletStore from "@/stores/wallet";
 
 const props = defineProps<{
@@ -16,12 +20,15 @@ const props = defineProps<{
 }>();
 
 const { m } = useLocale();
+const toast = useToast();
 
 const categoryStore = useCategoryStore();
 const walletStore = useWalletStore();
+const denominationUseCase = inject(UseCases.DENOMINATION) as DenominationUseCase;
 
 const transaction = ref(props.transaction);
-const showDescription = ref(false);
+const showInfo = ref(false);
+const denominations = ref(null as AmountCount[] | null);
 
 const formatAmount = (transaction: Transaction) => {
   let symbol = "+";
@@ -38,6 +45,28 @@ const formatAmount = (transaction: Transaction) => {
 
   return `${symbol}${m(transaction.amount)}`;
 };
+
+const getCurrencyId = () => walletStore.getWalletById(transaction.value.walletSourceId).currencyId;
+const hasDenomination = () => walletStore.getWalletById(transaction.value.walletSourceId).hasDenomination;
+
+const toggleInfo = async () => {
+  showInfo.value = !showInfo.value;
+
+  if (
+    showInfo.value
+    && !denominations.value
+    && hasDenomination()
+  ) {
+    const result = await denominationUseCase
+      .getAmountCountOfTransaction(transaction.value.id);
+    if (result.isError()) {
+      await toast.error({ error: result.getError()! });
+      return;
+    }
+
+    denominations.value = result.getValue();
+  }
+}
 </script>
 
 <template>
@@ -47,7 +76,7 @@ const formatAmount = (transaction: Transaction) => {
         backgroundColor: categoryStore.getCategory(transaction.categoryId).color,
         color: calculateForegroundColor(categoryStore.getCategory(transaction.categoryId).color),
       }"
-      @click="showDescription = !showDescription"
+      @click="toggleInfo"
     >
       <div class="transaction-icon">
         <img :src="categoryStore.getCategory(transaction.categoryId).icon || '/images/help-outline.png'" />
@@ -73,9 +102,31 @@ const formatAmount = (transaction: Transaction) => {
       </div>
     </div>
 
-    <div v-if="showDescription && transaction.description" class="transaction-description">
-      {{ transaction.description }}
-    </div>
+    <template v-if="showInfo">
+      <div v-if="transaction.description" class="transaction-description">
+        {{ transaction.description }}
+      </div>
+
+      <table v-if="denominations" class="transaction-denomination">
+        <tbody>
+          <tr>
+            <th class="transaction-denomination-amount">Amount</th>
+            <th class="transaction-denomination-count">Count</th>
+          </tr>
+
+          <tr v-for="denomination in denominations"
+            :key="denomination.amount"
+          >
+            <td class="transaction-denomination-amount">
+              {{ getCurrencyId() }} {{ m(denomination.amount) }}
+            </td>
+            <td class="transaction-denomination-count">
+              {{ denomination.count }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </template>
   </div>
 </template>
 
@@ -143,5 +194,16 @@ const formatAmount = (transaction: Transaction) => {
     border-radius: 4px;
   }
 
+  .transaction-denomination {
+    width: 100%;
+
+    .transaction-denomination-amount {
+      text-align: left;
+    }
+
+    .transaction-denomination-count {
+      text-align: right;
+    }
+  }
 }
 </style>

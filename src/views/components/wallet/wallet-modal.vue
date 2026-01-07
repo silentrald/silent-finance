@@ -106,6 +106,7 @@ const close = () => modalController.dismiss(null, ModalAction.CLOSE);
 
     <template v-if="hasDenomination">
       <denomination-input v-model="denominationData"
+        name="denomination"
         :currency-id="currencyId"
       />
     </template>

@@ -38,7 +38,7 @@ export default function createTransactionUseCaseV1({
     currencyId: string
   ): PromiseResult<number> => {
     if (!transaction.denominations) {
-      return Result.Ok(transaction.amount);
+      return Result.Ok(transaction.amount || 0);
     }
 
     let amount = 0;
