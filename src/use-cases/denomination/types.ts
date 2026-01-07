@@ -6,5 +6,5 @@ export default interface DenominationUseCase {
   getDenominationsByCurrencyId(currencyId: string): PromiseResult<Denomination[]>;
 
   getAmountCountOfWallet(walletId: number): PromiseResult<AmountCount[]>;
-  // getAmountCountOfTransaction(transactionId: number): PromiseResult<AmountCount[]>;
+  getAmountCountOfTransaction(transactionId: number): PromiseResult<AmountCount[]>;
 }

@@ -4,6 +4,8 @@ import logger from "@/modules/logger";
 import { toastController } from "@ionic/vue";
 import { useI18n } from "vue-i18n";
 
+const DEFAULT_DURATION = 5000;
+
 export default function useToast() {
   const { t } = useI18n();
 
@@ -17,7 +19,7 @@ export default function useToast() {
     }): Promise<void> => {
       try {
         const toast = await toastController.create({
-          message, duration,
+          message, duration: duration || DEFAULT_DURATION,
         });
 
         await toast.present();
@@ -47,7 +49,7 @@ export default function useToast() {
           buttons: [
             { text: "X" },
           ],
-          duration: 5000,
+          duration: DEFAULT_DURATION,
         });
         await toast.present();
       } catch (error: any) {
@@ -68,6 +70,7 @@ export default function useToast() {
           buttons: [
             { text: "X" },
           ],
+          duration: DEFAULT_DURATION,
         });
         await toast.present();
       } catch (error: any) {

@@ -54,6 +54,7 @@ export async function setupUseCases({
   app.provide(UseCases.DENOMINATION, createDenominationUseCaseV1({
     databaseService, denominationRepo,
     walletRepo, walletDenominationRepo,
+    transactionRepo, transactionDenominationRepo,
   }));
   app.provide(UseCases.TRANSACTION, createTransactionUseCaseV1({
     databaseService, transactionRepo, walletRepo,

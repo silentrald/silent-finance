@@ -4,20 +4,18 @@ import { inject, onMounted, onUnmounted, ref } from "vue";
 import useLocale from "@/composables/locale";
 
 const props = defineProps<{
-  label: string;
+  label?: string;
   name: string;
-  modelValue: number;
+  modelValue: string;
   required?: boolean;
-  minimum?: number;
-  maximum?: number;
   placeholder?: string;
   // return the error text to be shown if invalid
   //   else, return an empty string ""
-  validate?: (value: number) => string;
+  validate?: (value: string) => string;
 }>();
 
 const emit = defineEmits<{
-  "update:modelValue": [ number ];
+  "update:modelValue": [ string ];
 }>();
 
 const { t } = useLocale();
@@ -40,10 +38,10 @@ const getLabel = () => {
   return props.required ? props.label + "*" : props.label;
 }
 
-const validate = (value: number | undefined): string => {
-  if (value === undefined) {
+const validate = (value: string): string => {
+  if (!value) {
     return props.required
-      ? t("inputs.required", { field: props.label })
+      ? t("inputs.required", { field: props.label || props.placeholder || "" })
       : "";
   }
 
@@ -51,9 +49,8 @@ const validate = (value: number | undefined): string => {
 }
 
 const onInput = (event: any) => {
-  const value = event.detail.value === ""
-    ? undefined : +event.detail.value;
-  emit("update:modelValue", value || 0);
+  const value = event.detail.value || "" as string;
+  emit("update:modelValue", value);
 
   errorText.value = "";
   input.value.$el.classList.remove("ion-valid", "ion-invalid");
@@ -79,12 +76,10 @@ const onBlur = () => {
   <ion-item>
     <ion-input ref="input"
       label-placement="stacked"
-      type="number"
+      type="text"
       :name="props.name"
       :label="getLabel()"
       :placeholder="props.placeholder"
-      :min="props.minimum"
-      :max="props.maximum"
       :error-text="isTouched ? errorText : ''"
       @ion-input="onInput"
       @ion-blur="onBlur"

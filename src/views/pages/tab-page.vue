@@ -7,20 +7,37 @@ import {
   IonTabBar,
   IonTabButton,
   IonTabs,
+  isPlatform,
 } from "@ionic/vue";
 import {
   pricetag,
   settings,
   wallet,
 } from "ionicons/icons";
+import { ref } from "vue";
 import useLocale from "@/composables/locale";
 
 const { t } = useLocale();
+
+const topMargin = ref("0");
+
+const onBeforeTabChange = (params: { tab: string }) => {
+  // Custom handling for safe area
+  if (!isPlatform("android")) {
+    return;
+  }
+
+  if (params.tab === "home") {
+    topMargin.value = "24px";
+  } else {
+    topMargin.value = "0";
+  }
+}
 </script>
 
 <template>
-  <ion-page>
-    <ion-tabs>
+  <ion-page id="main-page">
+    <ion-tabs @ionTabsWillChange="onBeforeTabChange">
       <ion-router-outlet></ion-router-outlet>
       <ion-tab-bar slot="bottom">
         <ion-tab-button tab="home" href="/transaction">
@@ -41,3 +58,9 @@ const { t } = useLocale();
     </ion-tabs>
   </ion-page>
 </template>
+
+<style>
+#main-page {
+  margin-top: v-bind("topMargin");
+}
+</style>

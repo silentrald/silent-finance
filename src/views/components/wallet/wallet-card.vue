@@ -49,7 +49,7 @@ watch(() => showDenominations.value, async () => {
       backgroundColor: wallet.color,
       color: calculateForegroundColor(wallet.color),
     }"
-    @click="showDenominations = !showDenominations"
+    @click="showDenominations = wallet.hasDenomination && !showDenominations"
   >
     <div class="wallet-name">{{ wallet.name }}</div>
     <div class="wallet-amount">

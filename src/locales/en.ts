@@ -60,6 +60,11 @@ const en: LocaleSchema = {
     },
   },
 
+  inputs: {
+    required: "{field} is required.",
+    invalidNumber: "{field} is not a number.",
+  },
+
   errors: {
     REPO_NOT_FOUND: "Could not find record in {table}. Keys {fields}",
 
