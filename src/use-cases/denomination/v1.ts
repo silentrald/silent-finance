@@ -42,37 +42,39 @@ export default function createDenominationUseCaseV1({
       const client = clientResult.getValue();
 
       try {
-        const walletResult = await walletRepo.getById(client, walletId);
-        if (walletResult.isError()) return walletResult.toError();
-        const wallet = walletResult.getValue();
+        return await client.transaction(async () => {
+          const walletResult = await walletRepo.getById(client, walletId);
+          if (walletResult.isError()) return walletResult.toError();
+          const wallet = walletResult.getValue();
 
-        const denominationsResult = await denominationRepo
-          .getByCurrencyId(client, wallet.currencyId);
-        if (denominationsResult.isError()) return denominationsResult.toError();
-        const denominations = denominationsResult.getValue();
+          const denominationsResult = await denominationRepo
+            .getByCurrencyId(client, wallet.currencyId);
+          if (denominationsResult.isError()) return denominationsResult.toError();
+          const denominations = denominationsResult.getValue();
 
-        const walletDenominationResult = await walletDenominationRepo
-          .getByWalletId(client, walletId);
-        if (walletDenominationResult.isError())
-          return walletDenominationResult.toError();
-        const walletDenominations = walletDenominationResult.getValue();
+          const walletDenominationResult = await walletDenominationRepo
+            .getByWalletId(client, walletId);
+          if (walletDenominationResult.isError())
+            return walletDenominationResult.toError();
+          const walletDenominations = walletDenominationResult.getValue();
 
-        const output: AmountCount[] = [];
+          const output: AmountCount[] = [];
 
-        for (const wd of walletDenominations) {
-          const d = denominations.find(d => d.id === wd.denominationId);
-          if (!d) {
-            continue;
+          for (const wd of walletDenominations) {
+            const d = denominations.find(d => d.id === wd.denominationId);
+            if (!d) {
+              continue;
+            }
+
+            output.push({
+              id: d.id,
+              amount: d.amount,
+              count: wd.count,
+            });
           }
 
-          output.push({
-            id: d.id,
-            amount: d.amount,
-            count: wd.count,
-          });
-        }
-
-        return Result.Ok(output);
+          return Result.Ok(output);
+        });
       } finally {
         await client.close();
       }
@@ -85,42 +87,44 @@ export default function createDenominationUseCaseV1({
       const client = clientResult.getValue();
 
       try {
-        const transactionResult = await transactionRepo.getById(client, transactionId);
-        if (transactionResult.isError()) return transactionResult.toError();
-        const transaction = transactionResult.getValue();
-        const walletId = transaction.walletSourceId;
+        return await client.transaction(async () => {
+          const transactionResult = await transactionRepo.getById(client, transactionId);
+          if (transactionResult.isError()) return transactionResult.toError();
+          const transaction = transactionResult.getValue();
+          const walletId = transaction.walletSourceId;
 
-        const walletResult = await walletRepo.getById(client, walletId);
-        if (walletResult.isError()) return walletResult.toError();
-        const wallet = walletResult.getValue();
+          const walletResult = await walletRepo.getById(client, walletId);
+          if (walletResult.isError()) return walletResult.toError();
+          const wallet = walletResult.getValue();
 
-        const denominationsResult = await denominationRepo
-          .getByCurrencyId(client, wallet.currencyId);
-        if (denominationsResult.isError()) return denominationsResult.toError();
-        const denominations = denominationsResult.getValue();
+          const denominationsResult = await denominationRepo
+            .getByCurrencyId(client, wallet.currencyId);
+          if (denominationsResult.isError()) return denominationsResult.toError();
+          const denominations = denominationsResult.getValue();
 
-        const transactionDenominationResult = await transactionDenominationRepo
-          .getByTransactionId(client, transactionId);
-        if (transactionDenominationResult.isError())
-          return transactionDenominationResult.toError();
-        const transactionDenominations = transactionDenominationResult.getValue();
+          const transactionDenominationResult = await transactionDenominationRepo
+            .getByTransactionId(client, transactionId);
+          if (transactionDenominationResult.isError())
+            return transactionDenominationResult.toError();
+          const transactionDenominations = transactionDenominationResult.getValue();
 
-        const output: AmountCount[] = [];
+          const output: AmountCount[] = [];
 
-        for (const td of transactionDenominations) {
-          const d = denominations.find(d => d.id === td.denominationId);
-          if (!d) {
-            continue;
+          for (const td of transactionDenominations) {
+            const d = denominations.find(d => d.id === td.denominationId);
+            if (!d) {
+              continue;
+            }
+
+            output.push({
+              id: d.id,
+              amount: d.amount,
+              count: td.count,
+            });
           }
 
-          output.push({
-            id: d.id,
-            amount: d.amount,
-            count: td.count,
-          });
-        }
-
-        return Result.Ok(output);
+          return Result.Ok(output);
+        });
       } finally {
         await client.close();
       }

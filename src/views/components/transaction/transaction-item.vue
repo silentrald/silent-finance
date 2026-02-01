@@ -53,17 +53,27 @@ const toggleInfo = async () => {
   showInfo.value = !showInfo.value;
 
   if (
-    showInfo.value
-    && !denominations.value
-    && hasDenomination()
+    !showInfo.value
+    || denominations.value
+    || !hasDenomination()
   ) {
-    const result = await denominationUseCase
-      .getAmountCountOfTransaction(transaction.value.id);
-    if (result.isError()) {
-      await toast.error({ error: result.getError()! });
-      return;
-    }
+    return;
+  }
 
+  const result = await denominationUseCase
+    .getAmountCountOfTransaction(transaction.value.id);
+  if (result.isError()) {
+    await toast.error({ error: result.getError()! });
+    return;
+  }
+
+  if (
+    props.transaction.type === TransactionType.TRANSFER
+    && props.transaction.walletDestinationId === props.walletId
+  ) {
+    denominations.value = result.getValue()
+      .map(d => ({ ...d, count: d.count * -1 }));
+  } else {
     denominations.value = result.getValue();
   }
 }
