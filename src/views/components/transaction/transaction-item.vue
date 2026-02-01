@@ -43,7 +43,7 @@ const formatAmount = (transaction: Transaction) => {
     symbol = "-";
   }
 
-  return `${symbol}${m(transaction.amount)}`;
+  return `${symbol}${m(Math.abs(transaction.amount))}`;
 };
 
 const getCurrencyId = () => walletStore.getWalletById(transaction.value.walletSourceId).currencyId;
