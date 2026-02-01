@@ -33,6 +33,7 @@ import "@ionic/vue/css/ionic-swiper.css";
 
 import App from "./App.vue";
 import { AppLocale } from "./types";
+import { DB_VERSION } from "./const";
 import { IonicVue } from "@ionic/vue";
 import { createApp } from "vue";
 import { createPinia } from "pinia";
@@ -48,7 +49,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   const databaseService = createSQLite3DatabaseService({
     databaseName: "silent_finance",
-    version: 1,
+    version: DB_VERSION,
     encryptionSecret: "no-encryption",
   });
   await databaseService.init();
