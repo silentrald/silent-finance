@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { inject, onMounted, ref } from "vue";
 import { AmountCount } from "@/dtos/denomination";
 import { CreateTransaction } from "@/entities/transaction";
 import { CreateTransactionDenomination } from "@/entities/transaction-denomination";
 import DenominationInput from "../input/denomination-input.vue";
+import DenominationUseCase from "@/use-cases/denomination/types";
 import { ModalAction } from "@/modules/modal";
 import MyForm from "../input/my-form.vue";
 import NumpadInput from "../input/numpad-input.vue";
@@ -10,10 +12,11 @@ import SelectInput from "../input/select-input.vue";
 import SelectOption from "../input/select-option.vue";
 import TextInput from "../input/text-input.vue";
 import { TransactionType } from "@/enums/transaction";
+import { UseCases } from "@/use-cases/consts";
 import { modalController } from "@ionic/vue";
-import { ref } from "vue";
 import useCategoryStore from "@/stores/category";
 import useLocale from "@/composables/locale";
+import useToast from "@/composables/toast";
 import useWalletStore from "@/stores/wallet";
 
 const { walletId } = defineProps<{
@@ -21,20 +24,37 @@ const { walletId } = defineProps<{
 }>();
 
 const { t } = useLocale();
+const toast = useToast();
 const categoryStore = useCategoryStore();
 const walletStore = useWalletStore();
+const denominationUseCase = inject(UseCases.DENOMINATION) as DenominationUseCase;
 
 const amount = ref(0);
 const description = ref("");
 const categoryId = ref("");
+const amountCounts = ref([] as AmountCount[]);
 const denominationData = ref({
   amountCount: {},
   total: 0,
 } as {
-  // id: count
+  // denomination id: count
   amountCount: Record<number, AmountCount>;
   total: number;
-})
+});
+
+onMounted(async () => {
+  if (!walletStore.getWalletById(walletId).hasDenomination) {
+    return;
+  }
+
+  const result = await denominationUseCase.getAmountCountOfWallet(walletId);
+  if (result.isError()) {
+    await toast.error({ error: result.getError()! });
+    return;
+  }
+
+  amountCounts.value = result.getValue();
+});
 
 const getCurrencyId = () => walletStore.getWalletById(walletId).currencyId;
 const hasDenomination = () => walletStore.getWalletById(walletId).hasDenomination;
@@ -71,25 +91,27 @@ const onClose = () => {
 </script>
 
 <template>
-  <my-form class="ion-padding"
+  <my-form title="Add Expense"
     :hide-buttons="!hasDenomination()"
     @confirm="onConfirm"
     @cancel="onClose"
     @close="onClose"
   >
-    <select-input v-model="categoryId"
-      name="category"
-      required
-      :label="t('transaction.expenseModal.category')"
-      :placeholder="t('transaction.expenseModal.category')"
-    >
-      <select-option v-for="category in categoryStore.getExpenseCategories()"
-        :key="category.id"
-        :value="category.id.toString()"
+    <template #before-content>
+      <select-input v-model="categoryId"
+        name="category"
+        required
+        :label="t('transaction.expenseModal.category')"
+        :placeholder="t('transaction.expenseModal.category')"
       >
-        {{ category.name }}
-      </select-option>
-    </select-input>
+        <select-option v-for="category in categoryStore.getExpenseCategories()"
+          :key="category.id"
+          :value="category.id.toString()"
+        >
+          {{ category.name }}
+        </select-option>
+      </select-input>
+    </template>
 
     <template v-if="hasDenomination()">
       <text-input v-model="description"
@@ -99,7 +121,8 @@ const onClose = () => {
       <denomination-input v-model="denominationData"
         name="denomination"
         :currency-id="getCurrencyId()"
-        support-negative
+        :amount-counts="amountCounts"
+        negative
       />
     </template>
     <template v-else>

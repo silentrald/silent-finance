@@ -33,7 +33,7 @@ const denominationData = ref({
   amountCount: {},
   total: 0,
 } as {
-  // id: count
+  // denomination id: count
   amountCount: Record<number, AmountCount>;
   total: number;
 })

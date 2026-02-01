@@ -172,6 +172,7 @@ const {
 
       const modalResult = await showBottomModal<CreateTransaction>(ExpenseModal, {
         walletId: currentWalletId.value,
+        //
       });
       if (modalResult.isError()) {
         await toast.error({ error: modalResult.getError()! });

@@ -4,11 +4,23 @@ import { compileValidator } from "@/modules/ajv";
 export interface TransactionDenomination {
   transactionId: number;
   denominationId: number;
+  /**
+   * Signs
+   * Expense - negative
+   * Income - positive
+   * Transfer - negative; add on source_wallet, remove on destination_wallet
+   */
   count: number;
 }
 
 export interface CreateTransactionDenomination {
   denominationId: number;
+  /**
+   * Signs
+   * Expense - negative
+   * Income - positive
+   * Transfer - negative; add on source_wallet, remove on destination_wallet
+   */
   count: number;
 }
 

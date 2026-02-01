@@ -66,6 +66,7 @@ export default function createDenominationUseCaseV1({
           }
 
           output.push({
+            id: d.id,
             amount: d.amount,
             count: wd.count,
           });
@@ -113,6 +114,7 @@ export default function createDenominationUseCaseV1({
           }
 
           output.push({
+            id: d.id,
             amount: d.amount,
             count: td.count,
           });

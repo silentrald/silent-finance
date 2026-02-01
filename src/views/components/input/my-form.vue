@@ -62,7 +62,11 @@ const onConfirm = () => {
     </ion-header>
   </slot>
 
+  <slot name="before-content" />
+
   <slot />
+
+  <slot name="after-content" />
 
   <slot name="footer">
     <ion-toolbar v-if="!props.hideButtons">

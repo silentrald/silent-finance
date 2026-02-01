@@ -10,11 +10,6 @@ import TransactionUseCase from "./types";
 import { Wallet } from "@/entities/wallet";
 import { WalletDenominationRepo } from "@/repos/wallet-denomination/types";
 import { WalletRepo } from "@/repos/wallet/type";
-import logger from "@/modules/logger";
-
-const ADD = 1;
-const REMOVE = -1;
-
 
 export default function createTransactionUseCaseV1({
   databaseService,
@@ -79,10 +74,12 @@ export default function createTransactionUseCaseV1({
     );
   }
 
+  const negateDenominationCount = (transactionDenominations: CreateTransactionDenomination[]) =>
+    transactionDenominations.map(td => ({ ...td, count: td.count * -1 }));
+
   const handleWalletDenominations = async (
     client: DatabaseClient,
     walletId: number,
-    add: number, // Add/Remove denominations
     denominations?: TransactionDenomination[] | CreateTransactionDenomination[] | null
   ): PromiseResult<void> => {
     if (!denominations) {
@@ -102,43 +99,16 @@ export default function createTransactionUseCaseV1({
       );
 
       if (!walletDenomination) {
-        const count = add * td.count;
-        if (count < 0) {
-          return Result.Error({
-            code: "USE_CASE_DENOMINATION_NEGATIVE_COUNT",
-            data: {
-              // Might need a formatter
-              amount: (await denominationRepo.getById(client, td.denominationId))
-                .orElse(error => {
-                  logger.warn("Could not get currency amount for id ", td.denominationId, error);
-                  return {
-                    id: 0,
-                    currencyId: "",
-                    amount: 0,
-                  };
-                }).amount / 100,
-            },
-          });
-        }
-
         // Insert new denomination value
         walletDenominationRepo.create(client, {
           walletId: walletId,
           denominationId: td.denominationId,
-          count,
+          count: td.count,
         });
         continue;
       }
 
-      walletDenomination.count += add * td.count;
-
-      if (walletDenomination.count > 0) {
-        // Update existing wallet denomination
-        const updateResult = await walletDenominationRepo
-          .update(client, walletDenomination);
-        if (updateResult.isError()) return updateResult.toError();
-        continue;
-      }
+      walletDenomination.count += td.count;
 
       // Remove denomination
       if (walletDenomination.count === 0) {
@@ -149,22 +119,10 @@ export default function createTransactionUseCaseV1({
         continue;
       }
 
-      // Count can't be negative
-      return Result.Error({
-        code: "USE_CASE_DENOMINATION_NEGATIVE_COUNT",
-        data: {
-          // Might need a formatter
-          amount: (await denominationRepo.getById(client, td.denominationId))
-            .orElse(error => {
-              logger.warn("Could not get currency amount for id ", td.denominationId, error);
-              return {
-                id: 0,
-                currencyId: "",
-                amount: 0,
-              };
-            }).amount / 100,
-        },
-      });
+      // Update existing wallet denomination
+      const updateResult = await walletDenominationRepo
+        .update(client, walletDenomination);
+      if (updateResult.isError()) return updateResult.toError();
     }
 
     return Result.Ok();
@@ -178,7 +136,7 @@ export default function createTransactionUseCaseV1({
     const getWalletResult = await walletRepo.getById(client, transaction.walletSourceId);
     if (getWalletResult.isError()) return getWalletResult.toError();
     const sourceWallet = getWalletResult.getValue();
-    sourceWallet.amount += transaction.amount;
+    sourceWallet.amount -= transaction.amount; // transaction.amount is already negative
 
     if (sourceWallet.hasDenomination) {
       const transactionDenominationsResult = await transactionDenominationRepo
@@ -187,7 +145,7 @@ export default function createTransactionUseCaseV1({
         return transactionDenominationsResult.toError();
 
       const walletDenominationsResult = await handleWalletDenominations(
-        client, sourceWallet.id, ADD, transactionDenominationsResult.getValue()
+        client, sourceWallet.id, transactionDenominationsResult.getValue()
       );
       if (walletDenominationsResult.isError())
         return walletDenominationsResult.toError();
@@ -220,7 +178,7 @@ export default function createTransactionUseCaseV1({
         return transactionDenominationsResult.toError();
 
       const walletDenominationsResult = await handleWalletDenominations(
-        client, sourceWallet.id, REMOVE, transactionDenominationsResult.getValue()
+        client, sourceWallet.id, transactionDenominationsResult.getValue()
       );
       if (walletDenominationsResult.isError())
         return walletDenominationsResult.toError();
@@ -250,8 +208,8 @@ export default function createTransactionUseCaseV1({
     if (getDestinationWalletResult.isError()) return getDestinationWalletResult.toError();
     const destinationWallet = getDestinationWalletResult.getValue();
 
-    sourceWallet.amount += transaction.amount;
-    destinationWallet.amount -= transaction.amount;
+    sourceWallet.amount -= transaction.amount;
+    destinationWallet.amount += transaction.amount;
 
     // Wallet Denomination Updates
     if (sourceWallet.hasDenomination || destinationWallet.hasDenomination) {
@@ -260,9 +218,10 @@ export default function createTransactionUseCaseV1({
       if (transactionDenominationsResult.isError())
         return transactionDenominationsResult.toError();
 
+      const transactionDenominations = transactionDenominationsResult.getValue();
       if (sourceWallet.hasDenomination) {
         const sourceDenominationsResult = await handleWalletDenominations(
-          client, sourceWallet.id, ADD, transactionDenominationsResult.getValue()
+          client, sourceWallet.id, negateDenominationCount(transactionDenominations)
         );
         if (sourceDenominationsResult.isError())
           return sourceDenominationsResult.toError();
@@ -270,7 +229,7 @@ export default function createTransactionUseCaseV1({
 
       if (destinationWallet.hasDenomination) {
         const destinationDenominationsResult = await handleWalletDenominations(
-          client, destinationWallet.id, REMOVE, transactionDenominationsResult.getValue()
+          client, destinationWallet.id, transactionDenominations
         );
         if (destinationDenominationsResult.isError())
           return destinationDenominationsResult.toError();
@@ -325,7 +284,7 @@ export default function createTransactionUseCaseV1({
           if (calculateAmountResult.isError()) return calculateAmountResult.toError();
 
           transaction.amount = calculateAmountResult.getValue();
-          wallet.amount -= transaction.amount;
+          wallet.amount += transaction.amount; // transaction.amount is already negative
 
           const transactionResult = await transactionRepo.create(client, transaction);
           if (transactionResult.isError()) return transactionResult.toError();
@@ -341,7 +300,7 @@ export default function createTransactionUseCaseV1({
             return transactionDenominationsResult.toError();
 
           const walletDenominationsResult = await handleWalletDenominations(
-            client, wallet.id, REMOVE, transaction.denominations
+            client, wallet.id, transaction.denominations
           );
           if (walletDenominationsResult.isError())
             return walletDenominationsResult.toError();
@@ -393,7 +352,7 @@ export default function createTransactionUseCaseV1({
             return transactionDenominationsResult.toError();
 
           const walletDenominationsResult = await handleWalletDenominations(
-            client, wallet.id, ADD, transaction.denominations
+            client, wallet.id, transaction.denominations
           );
           if (walletDenominationsResult.isError())
             return walletDenominationsResult.toError();
@@ -441,8 +400,8 @@ export default function createTransactionUseCaseV1({
           if (calculateAmountResult.isError()) return calculateAmountResult.toError();
           transaction.amount = calculateAmountResult.getValue();
 
-          sourceWallet.amount -= transaction.amount;
-          destinationWallet.amount += transaction.amount;
+          sourceWallet.amount += transaction.amount;
+          destinationWallet.amount -= transaction.amount;
 
           // Transaction Changes
           const transactionResult = await transactionRepo.create(client, transaction);
@@ -460,7 +419,7 @@ export default function createTransactionUseCaseV1({
           if (sourceWalletResult.isError()) return sourceWalletResult.toError();
           if (sourceWallet.hasDenomination) {
             const sourceDenominationsResult = await handleWalletDenominations(
-              client, sourceWallet.id, REMOVE, transaction.denominations
+              client, sourceWallet.id, transaction.denominations!
             );
             if (sourceDenominationsResult.isError())
               return sourceDenominationsResult.toError();
@@ -471,7 +430,7 @@ export default function createTransactionUseCaseV1({
           if (destinationWalletResult.isError()) return destinationWalletResult.toError();
           if (destinationWallet.hasDenomination) {
             const destinationDenominationsResult = await handleWalletDenominations(
-              client, destinationWallet.id, ADD, transaction.denominations
+              client, destinationWallet.id, negateDenominationCount(transaction.denominations!)
             );
             if (destinationDenominationsResult.isError())
               return destinationDenominationsResult.toError();
