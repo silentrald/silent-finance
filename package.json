@@ -1,7 +1,7 @@
 {
-  "name": "silent-finance",
+  "name": "Munnie",
   "private": true,
-  "version": "0.1.0-1",
+  "version": "0.1.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,7 +11,7 @@
     "test:unit": "vitest",
     "test:integration": "vitest --run --dir=./tests/integration",
     "lint": "eslint .",
-    "postinstall": "cp node_modules/sql.js/dist/sql-wasm.wasm public/assets"
+    "postinstall": "mkdir public/assets & cp node_modules/sql.js/dist/sql-wasm.wasm public/assets/sql-wasm.wasm"
   },
   "dependencies": {
     "@capacitor-community/sqlite": "^7.0.2",
