@@ -145,7 +145,7 @@ export default function createTransactionUseCaseV1({
         return transactionDenominationsResult.toError();
 
       const walletDenominationsResult = await handleWalletDenominations(
-        client, sourceWallet.id, transactionDenominationsResult.getValue()
+        client, sourceWallet.id, negateDenominationCount(transactionDenominationsResult.getValue())
       );
       if (walletDenominationsResult.isError())
         return walletDenominationsResult.toError();
@@ -178,7 +178,7 @@ export default function createTransactionUseCaseV1({
         return transactionDenominationsResult.toError();
 
       const walletDenominationsResult = await handleWalletDenominations(
-        client, sourceWallet.id, transactionDenominationsResult.getValue()
+        client, sourceWallet.id, negateDenominationCount(transactionDenominationsResult.getValue())
       );
       if (walletDenominationsResult.isError())
         return walletDenominationsResult.toError();
